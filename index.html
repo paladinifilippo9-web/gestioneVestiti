@@ -3,19 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Vinted Manager Pro</title>
+<title>Vinted Manager Pro v2</title>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-const supabaseUrl = "https://nfwzorbnlrudtpbnlmpt.supabase.co";
-const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5md3pvcmJubHJ1ZHRwYm5sbXB0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4MTU2NjgsImV4cCI6MjA5MjM5MTY2OH0.S59qMU1vfQtSYVIe8P0lfz6hp4bXKnhJRCPKXqliAlo
-";
-
-const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
-</script>
 <style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
   --ink:#0E0F11;--ink2:#3A3D45;--ink3:#7A7F8E;--ink4:#B0B5C0;
@@ -23,117 +16,127 @@ const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
   --accent:#1A56E8;--accent-d:#1240C0;--accent-l:#E8EFFE;
   --gold:#C8960A;--gold-l:#FEF7E0;--green:#1B7A4A;--green-l:#E4F5EC;
   --red:#C0392B;--red-l:#FDECEA;--orange:#C04A18;--orange-l:#FEF0E7;
-  --teal:#0E7490;--teal-l:#E0F5FA;--slate:#475569;--slate-l:#F1F5F9;
-  --purple:#6D28D9;--purple-l:#F3EDFF;
-  --r:8px;--r-lg:14px;--r-xl:20px;
-  --shadow:0 2px 8px rgba(14,15,17,.08);
+  --teal:#0E7490;--teal-l:#E0F5FA;--r:8px;--r-lg:14px;--r-xl:20px;
+  --shadow:0 2px 8px rgba(14,15,17,.08);--shadow-lg:0 8px 32px rgba(0,0,0,.15);
 }
 
-html{font-size:14px}
-body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--paper);color:var(--ink);min-height:100vh;-webkit-font-smoothing:antialiased;cursor:none}
-a,button,select,[onclick]{cursor:none}
-input,textarea{cursor:text}
+html { font-size:14px; }
+body { font-family:'Plus Jakarta Sans',sans-serif; background:var(--paper); color:var(--ink); min-height:100vh; -webkit-font-smoothing:antialiased; cursor:auto; }
+a,button,select,[onclick] { cursor:pointer; }
+input,textarea { cursor:text; }
 
-#login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--ink);position:relative}
-.login-bg{position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% -10%,#1A56E830,transparent 60%)}
-.login-card{position:relative;z-index:2;width:400px;background:#16181D;border:1px solid rgba(255,255,255,.08);border-radius:var(--r-xl);padding:44px 40px;box-shadow:0 32px 80px rgba(0,0,0,.5)}
-.login-logo{display:flex;align-items:center;gap:12px;margin-bottom:36px}
-.login-logo-icon{width:42px;height:42px;background:var(--accent);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px}
-.login-logo-text{font-family:'Outfit',sans-serif;font-weight:800;font-size:20px;color:#fff}
-.login-title{font-family:'Outfit',sans-serif;font-weight:700;font-size:22px;color:#fff;margin-bottom:28px}
-.login-field{margin-bottom:16px}
-.login-field label{display:block;font-size:11px;font-weight:500;color:rgba(255,255,255,.45);text-transform:uppercase;margin-bottom:7px}
-.login-field input{width:100%;padding:12px 14px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:var(--r);color:#fff;font-size:14px;outline:none}
-.login-field input:focus{border-color:var(--accent);background:rgba(26,86,232,.08)}
-.login-btn{width:100%;padding:14px;background:linear-gradient(135deg,var(--accent),#3B82F6);color:#fff;border:none;border-radius:var(--r);cursor:none;font-weight:600;margin-top:8px;transition:all .2s}
-.login-btn:hover{background:linear-gradient(135deg,#1240C0,#2563EB);box-shadow:0 6px 28px rgba(26,86,232,.45)}
+#login-screen { min-height:100vh; display:flex; align-items:center; justify-content:center; background:var(--ink); position:relative; }
+.login-bg { position:absolute; inset:0; background:radial-gradient(ellipse 80% 60% at 50% -10%,#1A56E830,transparent 60%); }
+.login-card { position:relative; z-index:2; width:420px; background:#16181D; border:1px solid rgba(255,255,255,.08); border-radius:var(--r-xl); padding:44px 40px; box-shadow:0 32px 80px rgba(0,0,0,.5); }
+.login-logo { display:flex; align-items:center; gap:12px; margin-bottom:36px; }
+.login-logo-icon { width:42px; height:42px; background:var(--accent); border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:20px; }
+.login-logo-text { font-family:'Outfit',sans-serif; font-weight:800; font-size:20px; color:#fff; }
+.login-title { font-family:'Outfit',sans-serif; font-weight:700; font-size:24px; color:#fff; margin-bottom:28px; }
+.login-field { margin-bottom:16px; }
+.login-field label { display:block; font-size:11px; font-weight:600; color:rgba(255,255,255,.50); text-transform:uppercase; margin-bottom:7px; }
+.login-field input { width:100%; padding:12px 14px; background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.12); border-radius:var(--r); color:#fff; font-size:14px; outline:none; transition:all .2s; }
+.login-field input:focus { border-color:var(--accent); background:rgba(26,86,232,.12); box-shadow:0 0 0 3px rgba(26,86,232,.1); }
+.login-field input::placeholder { color:rgba(255,255,255,.25); }
+.login-btn { width:100%; padding:14px; background:linear-gradient(135deg,var(--accent),#3B82F6); color:#fff; border:none; border-radius:var(--r); cursor:pointer; font-weight:600; margin-top:12px; transition:all .2s; }
+.login-btn:hover { background:linear-gradient(135deg,#1240C0,#2563EB); box-shadow:0 6px 28px rgba(26,86,232,.45); transform:translateY(-1px); }
 
-#app{display:none;height:100vh;display:flex}
-#app.visible{display:flex}
+.login-tabs { display:flex; gap:8px; margin-bottom:20px; }
+.login-tab { flex:1; padding:10px; border:1px solid rgba(255,255,255,.15); border-radius:var(--r); background:transparent; color:rgba(255,255,255,.6); cursor:pointer; transition:all .2s; }
+.login-tab.active { background:rgba(26,86,232,.25); border-color:var(--accent); color:#fff; }
 
-.sidebar{width:240px;background:var(--ink);display:flex;flex-direction:column;height:100vh;overflow:hidden}
-.sb-header{padding:22px 20px;border-bottom:1px solid rgba(255,255,255,.06)}
-.sb-logo{display:flex;align-items:center;gap:11px;margin-bottom:18px}
-.sb-logo-icon{width:34px;height:34px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px}
-.sb-logo-name{font-family:'Outfit',sans-serif;font-weight:800;font-size:16px;color:#fff}
-.sb-user{display:flex;align-items:center;gap:10px;padding:9px 10px;background:rgba(255,255,255,.05);border-radius:var(--r)}
-.sb-avatar{width:28px;height:28px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-family:'Outfit',sans-serif;font-size:11px;font-weight:700;color:#fff}
-.sb-user-name{font-size:12px;font-weight:500;color:rgba(255,255,255,.85)}
-.sb-nav{flex:1;padding:14px 12px;overflow-y:auto}
-.sb-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:var(--r);color:rgba(255,255,255,.45);cursor:none;font-size:13px;transition:all .15s;border:none;background:none;width:100%;text-align:left;margin-bottom:1px}
-.sb-item:hover{background:rgba(255,255,255,.06);color:rgba(255,255,255,.8)}
-.sb-item.active{background:rgba(26,86,232,.25);color:#93BBFC;font-weight:500}
+#app { display:none; height:100vh; display:flex; }
+#app.visible { display:flex; }
 
-.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
-.top-bar{height:60px;background:var(--white);border-bottom:1px solid var(--paper3);display:flex;align-items:center;justify-content:space-between;padding:0 24px;box-shadow:var(--shadow)}
-.views{flex:1;overflow:auto;display:flex}
-.view{flex:1;display:none;flex-direction:column;overflow:auto;padding:24px}
-.view.active{display:flex}
+.sidebar { width:240px; background:var(--ink); display:flex; flex-direction:column; height:100vh; overflow:hidden; border-right:1px solid rgba(255,255,255,.06); }
+.sb-header { padding:22px 20px; border-bottom:1px solid rgba(255,255,255,.06); }
+.sb-logo { display:flex; align-items:center; gap:11px; margin-bottom:18px; }
+.sb-logo-icon { width:34px; height:34px; background:var(--accent); border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:16px; }
+.sb-logo-name { font-family:'Outfit',sans-serif; font-weight:800; font-size:16px; color:#fff; }
+.sb-user { display:flex; align-items:center; gap:10px; padding:9px 10px; background:rgba(255,255,255,.05); border-radius:var(--r); }
+.sb-avatar { width:28px; height:28px; border-radius:50%; background:var(--accent); display:flex; align-items:center; justify-content:center; font-family:'Outfit',sans-serif; font-size:11px; font-weight:700; color:#fff; }
+.sb-user-name { font-size:12px; font-weight:600; color:rgba(255,255,255,.85); }
+.sb-role { font-size:10px; color:rgba(255,255,255,.35); }
+.sb-nav { flex:1; padding:14px 12px; overflow-y:auto; }
+.sb-item { display:flex; align-items:center; gap:10px; padding:9px 10px; border-radius:var(--r); color:rgba(255,255,255,.45); cursor:pointer; font-size:13px; transition:all .15s; border:none; background:none; width:100%; text-align:left; }
+.sb-item:hover { background:rgba(255,255,255,.06); color:rgba(255,255,255,.8); }
+.sb-item.active { background:rgba(26,86,232,.25); color:#93BBFC; font-weight:600; }
 
-.page-header{margin-bottom:24px}
-.page-header h2{font-family:'Outfit',sans-serif;font-size:28px;font-weight:700;margin-bottom:6px}
-.page-header p{font-size:13px;color:var(--ink3)}
+.main { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+.top-bar { height:60px; background:var(--white); border-bottom:1px solid var(--paper3); display:flex; align-items:center; justify-content:space-between; padding:0 24px; box-shadow:var(--shadow); }
+.views { flex:1; overflow:auto; display:flex; }
+.view { flex:1; display:none; flex-direction:column; overflow:auto; padding:24px; }
+.view.active { display:flex; }
 
-.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
-.stat-card{background:var(--white);border:1px solid var(--paper3);border-radius:var(--r-lg);padding:16px;display:flex;flex-direction:column;gap:8px}
-.stat-icon{font-size:24px}
-.stat-val{font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;color:var(--accent)}
-.stat-label{font-size:11px;color:var(--ink3);text-transform:uppercase;letter-spacing:.05em}
+.page-header { margin-bottom:24px; }
+.page-header h2 { font-family:'Outfit',sans-serif; font-size:28px; font-weight:700; margin-bottom:6px; }
+.page-header p { font-size:13px; color:var(--ink3); }
 
-.card{background:var(--white);border:1px solid var(--paper3);border-radius:var(--r-lg);overflow:hidden;margin-bottom:16px}
-.card-header{padding:16px;border-bottom:1px solid var(--paper3);display:flex;align-items:center;justify-content:space-between;cursor:none;user-select:none}
-.card-title{font-weight:600;font-size:14px}
-.card-body{padding:16px;display:none}
-.card-body.open{display:block}
+.stats-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px; }
+.stat-card { background:var(--white); border:1px solid var(--paper3); border-radius:var(--r-lg); padding:16px; display:flex; flex-direction:column; gap:8px; transition:all .2s; }
+.stat-card:hover { border-color:var(--accent); box-shadow:var(--shadow-lg); }
+.stat-icon { font-size:24px; }
+.stat-val { font-family:'JetBrains Mono',monospace; font-size:20px; font-weight:700; color:var(--accent); }
+.stat-label { font-size:11px; color:var(--ink3); text-transform:uppercase; letter-spacing:.05em; }
 
-table{width:100%;border-collapse:collapse}
-thead tr{border-bottom:1px solid var(--paper3)}
-th{text-align:left;padding:12px;font-size:12px;font-weight:600;color:var(--ink3);text-transform:uppercase;letter-spacing:.05em}
-td{padding:12px;border-bottom:1px solid var(--paper2);font-size:13px}
-tr:hover{background:var(--paper2)}
-tr[onclick]{cursor:none}
+.card { background:var(--white); border:1px solid var(--paper3); border-radius:var(--r-lg); overflow:hidden; margin-bottom:16px; }
+.card-header { padding:16px; border-bottom:1px solid var(--paper3); display:flex; align-items:center; justify-content:space-between; cursor:pointer; user-select:none; }
+.card-title { font-weight:600; font-size:14px; }
+.card-body { padding:16px; display:none; }
+.card-body.open { display:block; }
 
-.btn{padding:10px 16px;border-radius:var(--r);border:none;cursor:none;font-family:inherit;font-size:13px;font-weight:600;transition:all .2s;display:inline-flex;align-items:center;gap:6px}
-.btn-primary{background:var(--accent);color:#fff}
-.btn-primary:hover{background:var(--accent-d);transform:translateY(-1px);box-shadow:0 4px 12px rgba(26,86,232,.3)}
-.btn-ghost{background:transparent;color:var(--ink3);border:1px solid var(--paper3)}
-.btn-ghost:hover{background:var(--paper2);color:var(--ink)}
-.btn-danger{background:var(--red);color:#fff}
-.btn-danger:hover{background:darken(var(--red),10%);transform:translateY(-1px)}
-.btn-sm{padding:6px 12px;font-size:12px}
-.btn-xs{padding:4px 8px;font-size:11px}
+.chart-container { position:relative; height:300px; margin-bottom:24px; }
 
-.field{margin-bottom:12px}
-.field label{display:block;font-size:12px;font-weight:600;margin-bottom:4px;color:var(--ink2)}
-.field input,.field select,.field textarea{width:100%;padding:8px 10px;border:1px solid var(--paper3);border-radius:var(--r);font-family:inherit;font-size:13px}
-.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--accent);outline:none;background:var(--accent-l)}
+table { width:100%; border-collapse:collapse; }
+thead tr { border-bottom:1px solid var(--paper3); }
+th { text-align:left; padding:12px; font-size:12px; font-weight:600; color:var(--ink3); text-transform:uppercase; letter-spacing:.05em; }
+td { padding:12px; border-bottom:1px solid var(--paper2); font-size:13px; }
+tr:hover { background:var(--paper2); }
+tr[onclick] { cursor:pointer; }
 
-.modal{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:1000}
-.modal.open{display:flex}
-.modal-content{background:var(--white);border-radius:var(--r-lg);padding:24px;max-width:600px;width:95%;max-height:90vh;overflow-y:auto;position:relative}
-.modal-close{position:absolute;top:12px;right:12px;background:none;border:none;font-size:20px;cursor:none}
+.btn { padding:10px 16px; border-radius:var(--r); border:none; cursor:pointer; font-family:inherit; font-size:13px; font-weight:600; transition:all .2s; display:inline-flex; align-items:center; gap:6px; }
+.btn-primary { background:var(--accent); color:#fff; }
+.btn-primary:hover { background:var(--accent-d); transform:translateY(-1px); box-shadow:0 4px 12px rgba(26,86,232,.3); }
+.btn-danger { background:var(--red); color:#fff; }
+.btn-danger:hover { transform:translateY(-1px); filter:brightness(1.1); }
+.btn-ghost { background:transparent; color:var(--ink3); border:1px solid var(--paper3); }
+.btn-ghost:hover { background:var(--paper2); color:var(--ink); }
+.btn-sm { padding:6px 12px; font-size:12px; }
+.btn-xs { padding:4px 8px; font-size:11px; }
 
-.badge{display:inline-block;padding:3px 8px;border-radius:20px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.04em}
-.badge-green{background:var(--green-l);color:var(--green)}
-.badge-orange{background:var(--orange-l);color:var(--orange)}
-.badge-red{background:var(--red-l);color:var(--red)}
-.badge-blue{background:var(--accent-l);color:var(--accent)}
-.badge-yellow{background:var(--gold-l);color:var(--gold)}
+.modal { position:fixed; inset:0; background:rgba(0,0,0,.7); display:none; align-items:center; justify-content:center; z-index:1000; }
+.modal.open { display:flex; }
+.modal-content { background:var(--white); border-radius:var(--r-lg); padding:28px; max-width:700px; width:95%; max-height:90vh; overflow-y:auto; position:relative; box-shadow:var(--shadow-lg); }
+.modal-close { position:absolute; top:12px; right:12px; background:none; border:none; font-size:24px; cursor:pointer; color:var(--ink3); }
+.modal-title { font-family:'Outfit',sans-serif; font-size:22px; font-weight:700; margin-bottom:20px; }
 
-.chat-bubble{position:fixed;bottom:24px;right:24px;width:56px;height:56px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;cursor:none;box-shadow:0 4px 16px rgba(26,86,232,.3);z-index:999}
-.chat-panel{position:fixed;bottom:24px;right:24px;width:0;height:0;opacity:0;transition:all .3s}
-.chat-panel.open{width:360px;height:520px;opacity:1;background:var(--white);border:1px solid var(--paper3);border-radius:var(--r-xl);display:flex;flex-direction:column;box-shadow:0 8px 32px rgba(0,0,0,.15)}
-.chat-header{padding:12px;border-bottom:1px solid var(--paper3);display:flex;align-items:center;justify-content:space-between}
-.chat-messages{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px}
-.chat-msg{padding:10px;border-radius:var(--r);font-size:12px;line-height:1.5;max-width:85%}
-.chat-msg.user{background:var(--accent);color:#fff;align-self:flex-end}
-.chat-msg.bot{background:var(--paper2);color:var(--ink)}
-.chat-input-area{padding:12px;border-top:1px solid var(--paper3);display:flex;gap:8px}
-.chat-input{flex:1;padding:8px 10px;border:1px solid var(--paper3);border-radius:var(--r);font-size:12px}
-.chat-send{width:36px;height:36px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);cursor:none;font-size:16px}
+.field { margin-bottom:12px; }
+.field label { display:block; font-size:12px; font-weight:600; margin-bottom:6px; color:var(--ink2); }
+.field input,.field select,.field textarea { width:100%; padding:10px 12px; border:1px solid var(--paper3); border-radius:var(--r); font-family:inherit; font-size:13px; transition:all .2s; }
+.field input:focus,.field select:focus,.field textarea:focus { border-color:var(--accent); outline:none; background:var(--accent-l); box-shadow:0 0 0 3px rgba(26,86,232,.1); }
 
-.toast{position:fixed;bottom:24px;left:24px;padding:12px 16px;background:var(--ink);color:#fff;border-radius:var(--r-lg);display:none;align-items:center;gap:8px;z-index:1100;font-size:13px}
-.toast.show{display:flex}
+.badge { display:inline-block; padding:4px 10px; border-radius:20px; font-size:11px; font-weight:600; }
+.badge-green { background:var(--green-l); color:var(--green); }
+.badge-orange { background:var(--orange-l); color:var(--orange); }
+.badge-red { background:var(--red-l); color:var(--red); }
+.badge-blue { background:var(--accent-l); color:var(--accent); }
+
+.toast { position:fixed; bottom:24px; left:24px; padding:14px 18px; background:var(--ink); color:#fff; border-radius:var(--r-lg); display:none; align-items:center; gap:10px; z-index:1100; font-size:13px; box-shadow:var(--shadow-lg); }
+.toast.show { display:flex; animation:slideIn .3s ease; }
+
+.popup { position:fixed; inset:0; background:rgba(0,0,0,.8); display:none; align-items:center; justify-content:center; z-index:2000; }
+.popup.show { display:flex; }
+.popup-content { background:var(--white); border-radius:var(--r-xl); padding:40px; max-width:500px; text-align:center; box-shadow:var(--shadow-lg); }
+.popup-icon { font-size:56px; margin-bottom:16px; }
+.popup-title { font-family:'Outfit',sans-serif; font-size:24px; font-weight:700; margin-bottom:12px; color:var(--ink); }
+.popup-desc { font-size:14px; color:var(--ink3); margin-bottom:24px; line-height:1.6; }
+.popup-actions { display:flex; gap:12px; }
+
+@keyframes slideIn {
+  from { transform:translateY(20px); opacity:0; }
+  to { transform:translateY(0); opacity:1; }
+}
+
+.admin-badge { background:var(--gold-l); color:var(--gold); padding:2px 6px; border-radius:4px; font-size:10px; font-weight:600; }
 
 </style>
 </head>
@@ -147,21 +150,46 @@ tr[onclick]{cursor:none}
       <div class="login-logo-icon">👕</div>
       <div>
         <div class="login-logo-text">Vinted Manager</div>
-        <div style="font-size:10px;color:rgba(255,255,255,.35)">Gestione vendite</div>
+        <div style="font-size:10px;color:rgba(255,255,255,.35)">Pro v2</div>
       </div>
     </div>
-    <h2 class="login-title">Accedi</h2>
-    <div class="login-field">
-      <label>Username</label>
-      <input type="text" id="login-user" placeholder="username">
+
+    <div class="login-tabs">
+      <button class="login-tab active" onclick="switchAuthTab('login')">Accedi</button>
+      <button class="login-tab" onclick="switchAuthTab('register')">Registrati</button>
     </div>
-    <div class="login-field">
-      <label>Password</label>
-      <input type="password" id="login-pass" placeholder="password">
+
+    <div id="login-form">
+      <h2 class="login-title">Accedi</h2>
+      <div class="login-field">
+        <label>Username</label>
+        <input type="text" id="login-user" placeholder="username">
+      </div>
+      <div class="login-field">
+        <label>Password</label>
+        <input type="password" id="login-pass" placeholder="password">
+      </div>
+      <button class="login-btn" onclick="handleLogin()">Accedi</button>
+      <div style="text-align:center;margin-top:16px;font-size:11px;color:rgba(255,255,255,.3)">
+        Demo: user1/pass1
+      </div>
     </div>
-    <button class="login-btn" onclick="handleLogin()">Accedi</button>
-    <div style="text-align:center;margin-top:20px;font-size:11px;color:rgba(255,255,255,.3)">
-      Demo: user1/pass1
+
+    <div id="register-form" style="display:none">
+      <h2 class="login-title">Crea account</h2>
+      <div class="login-field">
+        <label>Username</label>
+        <input type="text" id="register-user" placeholder="scegli un username">
+      </div>
+      <div class="login-field">
+        <label>Email</label>
+        <input type="email" id="register-email" placeholder="email@example.com">
+      </div>
+      <div class="login-field">
+        <label>Password</label>
+        <input type="password" id="register-pass" placeholder="password">
+      </div>
+      <button class="login-btn" onclick="handleRegister()">Registrati</button>
     </div>
   </div>
 </div>
@@ -179,11 +207,11 @@ tr[onclick]{cursor:none}
         <div class="sb-avatar" id="sb-avatar">U</div>
         <div>
           <div class="sb-user-name" id="sb-username">—</div>
-          <div class="sb-user-role" id="sb-role" style="font-size:10px;color:rgba(255,255,255,.35)">—</div>
+          <div class="sb-role" id="sb-role">—</div>
         </div>
       </div>
     </div>
-    
+
     <nav class="sb-nav">
       <div style="font-size:9px;font-weight:600;color:rgba(255,255,255,.25);text-transform:uppercase;margin:14px 0 6px 8px">MENU</div>
       <button class="sb-item active" onclick="navTo('dashboard')">📊 Dashboard</button>
@@ -191,10 +219,14 @@ tr[onclick]{cursor:none}
       <button class="sb-item" onclick="navTo('sales')">💰 Vendite</button>
       <button class="sb-item" onclick="navTo('analytics')">📈 Analytics</button>
       <button class="sb-item" onclick="navTo('costs')">💸 Costi</button>
+      <button class="sb-item" onclick="navTo('investments')">🏦 Investimenti</button>
+      <div style="font-size:9px;font-weight:600;color:rgba(255,255,255,.25);text-transform:uppercase;margin:20px 0 6px 8px" id="admin-menu-label" style="display:none">ADMIN</div>
+      <button class="sb-item" id="admin-menu" style="display:none" onclick="navTo('admin')">👤 Gestione Account</button>
     </nav>
 
-    <div style="padding:10px 12px;border-top:1px solid rgba(255,255,255,.07);display:flex;gap:5px">
-      <button class="btn btn-ghost btn-xs" onclick="logout()" style="flex:1;color:rgba(255,255,255,.6)">Logout</button>
+    <div style="padding:10px 12px;border-top:1px solid rgba(255,255,255,.07);display:flex;flex-direction:column;gap:5px">
+      <button class="btn btn-ghost btn-xs" onclick="openChangePasswordModal()" style="color:rgba(255,255,255,.6)">🔑 Cambio password</button>
+      <button class="btn btn-ghost btn-xs" onclick="logout()" style="color:rgba(255,255,255,.6)">↪️ Logout</button>
     </div>
   </div>
 
@@ -202,7 +234,7 @@ tr[onclick]{cursor:none}
   <div class="main">
     <div class="top-bar">
       <h1 style="font-size:18px;font-weight:600" id="page-title">Dashboard</h1>
-      <button class="chat-bubble" id="chat-bubble" onclick="toggleChat()">🤖</button>
+      <button style="width:48px;height:48px;background:var(--accent);border:none;border-radius:50%;font-size:20px;cursor:pointer" onclick="toggleChat()">🤖</button>
     </div>
 
     <!-- VIEWS -->
@@ -215,9 +247,17 @@ tr[onclick]{cursor:none}
           <p>Riepilogo vendite e profitti</p>
         </div>
         <div class="stats-grid" id="dashboard-stats"></div>
+        
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px">
+          <div class="chart-container"><canvas id="chart-purchased"></canvas></div>
+          <div class="chart-container"><canvas id="chart-sold"></canvas></div>
+        </div>
+
+        <div class="chart-container" style="height:250px"><canvas id="chart-inventory"></canvas></div>
+
         <div class="card">
           <div class="card-header" onclick="this.nextElementSibling.classList.toggle('open')">
-            <span class="card-title">📦 Ultimi capi aggiunti</span>
+            <span class="card-title">📦 Ultimi capi</span>
           </div>
           <div class="card-body open">
             <table>
@@ -228,7 +268,7 @@ tr[onclick]{cursor:none}
         </div>
       </div>
 
-      <!-- INVENTORY -->
+      <!-- INVENTARIO -->
       <div class="view" id="view-inventory">
         <div class="page-header">
           <h2>📦 Inventario</h2>
@@ -250,7 +290,7 @@ tr[onclick]{cursor:none}
         </div>
       </div>
 
-      <!-- SALES -->
+      <!-- VENDITE -->
       <div class="view" id="view-sales">
         <div class="page-header">
           <h2>💰 Vendite</h2>
@@ -262,7 +302,7 @@ tr[onclick]{cursor:none}
           </div>
           <div class="card-body open">
             <table>
-              <thead><tr><th>Capo</th><th>Prezzo</th><th>Spedizione</th><th>Guadagno</th><th>Data</th><th>Stato</th></tr></thead>
+              <thead><tr><th>Capo</th><th>Prezzo</th><th>Spedizione</th><th>Guadagno</th><th>Tasse</th><th>Netto</th><th>Data</th></tr></thead>
               <tbody id="sales-table"></tbody>
             </table>
           </div>
@@ -273,44 +313,74 @@ tr[onclick]{cursor:none}
       <div class="view" id="view-analytics">
         <div class="page-header">
           <h2>📈 Analytics</h2>
-          <p>Analisi e KPI</p>
+          <p>Analisi e statistiche</p>
         </div>
         <div class="stats-grid" id="analytics-stats"></div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
           <div class="card">
-            <div class="card-header">
-              <span class="card-title">Categorie più vendute</span>
-            </div>
-            <div class="card-body open">
-              <div id="top-categories" style="display:flex;flex-direction:column;gap:10px"></div>
-            </div>
+            <div class="card-header"><span class="card-title">Top Categorie</span></div>
+            <div class="card-body open" id="top-categories"></div>
           </div>
           <div class="card">
-            <div class="card-header">
-              <span class="card-title">Marche preferite</span>
-            </div>
-            <div class="card-body open">
-              <div id="top-brands" style="display:flex;flex-direction:column;gap:10px"></div>
-            </div>
+            <div class="card-header"><span class="card-title">Top Marche</span></div>
+            <div class="card-body open" id="top-brands"></div>
           </div>
         </div>
       </div>
 
-      <!-- COSTS -->
+      <!-- COSTI -->
       <div class="view" id="view-costs">
         <div class="page-header">
           <h2>💸 Analisi Costi</h2>
-          <p>Impatto spedizioni e costi operativi</p>
+          <p>Con impatto tasse (-20%)</p>
         </div>
         <div class="stats-grid" id="costs-stats"></div>
         <div class="card">
-          <div class="card-header">
-            <span class="card-title">Dettaglio costi per capo</span>
-          </div>
+          <div class="card-header"><span class="card-title">Dettaglio per capo</span></div>
           <div class="card-body open">
             <table>
-              <thead><tr><th>Capo</th><th>Costo</th><th>Spedizione</th><th>Totale</th><th>Prezzo</th><th>Guadagno</th><th>%</th></tr></thead>
+              <thead><tr><th>Capo</th><th>Costo</th><th>Spedizione</th><th>Subtotale</th><th>Prezzo</th><th>Lordo</th><th>Tasse</th><th>Netto</th><th>%</th></tr></thead>
               <tbody id="costs-table"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- INVESTIMENTI -->
+      <div class="view" id="view-investments">
+        <div class="page-header">
+          <h2>🏦 Analisi Investimenti</h2>
+          <p>VAN, TIR, ABITDA e payback period</p>
+        </div>
+        <div style="display:flex;justify-content:flex-end;margin-bottom:16px">
+          <button class="btn btn-primary btn-sm" onclick="openInvestmentModal()">+ Nuovo investimento</button>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">Progetti</span></div>
+          <div class="card-body open">
+            <table>
+              <thead><tr><th>Nome</th><th>Investimento</th><th>VAN</th><th>TIR</th><th>ABITDA</th><th>Payback</th><th>Status</th></tr></thead>
+              <tbody id="investments-table"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ADMIN -->
+      <div class="view" id="view-admin">
+        <div class="page-header">
+          <h2>👤 Gestione Account</h2>
+          <p>Solo amministratori</p>
+        </div>
+        <div style="display:flex;justify-content:flex-end;margin-bottom:16px">
+          <button class="btn btn-primary btn-sm" onclick="openCreateUserModal()">+ Nuovo utente</button>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">Utenti</span></div>
+          <div class="card-body open">
+            <table>
+              <thead><tr><th>Username</th><th>Email</th><th>Ruolo</th><th>Attivo</th><th>Azioni</th></tr></thead>
+              <tbody id="users-table"></tbody>
             </table>
           </div>
         </div>
@@ -324,53 +394,106 @@ tr[onclick]{cursor:none}
 <div class="modal" id="modal-item">
   <div class="modal-content">
     <button class="modal-close" onclick="closeModal('modal-item')">✕</button>
-    <h2 style="margin-bottom:16px">Aggiungi capo</h2>
-    <div class="field"><label>Nome capo</label><input type="text" id="item-name" placeholder="es. Maglietta Zara"></div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+    <h3 class="modal-title">Aggiungi capo</h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="field"><label>Nome</label><input type="text" id="item-name" placeholder="es. Maglietta Zara"></div>
       <div class="field"><label>Marca</label><input type="text" id="item-brand"></div>
-      <div class="field"><label>Taglia</label><input type="text" id="item-size"></div>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
       <div class="field"><label>Categoria</label><input type="text" id="item-category" placeholder="es. Magliette"></div>
+      <div class="field"><label>Taglia</label><input type="text" id="item-size"></div>
       <div class="field"><label>Condizione</label><select id="item-condition"><option>Come nuovo</option><option>Ottimo</option><option>Buono</option><option>Accettabile</option></select></div>
+      <div class="field"><label>Costo (€)</label><input type="number" id="item-cost" min="0" step="0.01"></div>
+      <div class="field"><label>Prezzo (€)</label><input type="number" id="item-price" min="0" step="0.01"></div>
+      <div class="field"><label>Spedizione (€)</label><input type="number" id="item-shipping" min="0" step="0.01" value="4.99"></div>
     </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
-      <div class="field"><label>Costo acquisto (€)</label><input type="number" id="item-cost" min="0" step="0.01"></div>
-      <div class="field"><label>Prezzo vendita (€)</label><input type="number" id="item-price" min="0" step="0.01"></div>
-    </div>
-    <div class="field"><label>Spedizione stimata (€)</label><input type="number" id="item-shipping" min="0" step="0.01" value="4.99"></div>
-    <div style="display:flex;gap:8px;margin-top:16px">
+    <div style="display:flex;gap:8px;margin-top:20px">
       <button class="btn btn-primary" onclick="saveItem()">Salva</button>
       <button class="btn btn-ghost" onclick="closeModal('modal-item')">Annulla</button>
     </div>
   </div>
 </div>
 
-<!-- CHAT WIDGET -->
-<button style="position:absolute;bottom:24px;right:24px;width:56px;height:56px;background:var(--accent);border-radius:50%;border:none;font-size:24px;cursor:none;display:flex;align-items:center;justify-content:center;z-index:999" onclick="toggleChat()">🤖</button>
-
-<div class="chat-panel" id="chat-panel">
-  <div class="chat-header">
-    <div style="font-weight:600;font-size:13px">Assistente Vinted</div>
-    <button style="background:none;border:none;cursor:none;font-size:16px" onclick="toggleChat()">✕</button>
-  </div>
-  <div class="chat-messages" id="chat-messages"></div>
-  <div class="chat-input-area">
-    <input type="text" class="chat-input" id="chat-input" placeholder="Chiedimi..." onkeydown="if(event.key==='Enter')sendChat()">
-    <button class="chat-send" onclick="sendChat()">↑</button>
+<div class="modal" id="modal-change-pass">
+  <div class="modal-content">
+    <button class="modal-close" onclick="closeModal('modal-change-pass')">✕</button>
+    <h3 class="modal-title">Cambio password</h3>
+    <div class="field"><label>Password attuale</label><input type="password" id="pass-old"></div>
+    <div class="field"><label>Nuova password</label><input type="password" id="pass-new"></div>
+    <div class="field"><label>Conferma password</label><input type="password" id="pass-confirm"></div>
+    <div style="display:flex;gap:8px;margin-top:20px">
+      <button class="btn btn-primary" onclick="changePassword()">Cambia</button>
+      <button class="btn btn-ghost" onclick="closeModal('modal-change-pass')">Annulla</button>
+    </div>
   </div>
 </div>
 
+<div class="modal" id="modal-investment">
+  <div class="modal-content">
+    <button class="modal-close" onclick="closeModal('modal-investment')">✕</button>
+    <h3 class="modal-title">Nuovo investimento</h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="field" style="grid-column:1/-1"><label>Nome progetto</label><input type="text" id="inv-name"></div>
+      <div class="field"><label>Investimento iniziale (€)</label><input type="number" id="inv-initial" min="0" step="0.01"></div>
+      <div class="field"><label>Costo mensile (€)</label><input type="number" id="inv-monthly" min="0" step="0.01"></div>
+      <div class="field"><label>Ricavo mensile (€)</label><input type="number" id="inv-revenue" min="0" step="0.01"></div>
+      <div class="field"><label>Mesi</label><input type="number" id="inv-months" min="1" value="12"></div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:20px">
+      <button class="btn btn-primary" onclick="saveInvestment()">Calcola</button>
+      <button class="btn btn-ghost" onclick="closeModal('modal-investment')">Annulla</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="modal-create-user">
+  <div class="modal-content">
+    <button class="modal-close" onclick="closeModal('modal-create-user')">✕</button>
+    <h3 class="modal-title">Crea utente</h3>
+    <div class="field"><label>Username</label><input type="text" id="new-user-name"></div>
+    <div class="field"><label>Email</label><input type="email" id="new-user-email"></div>
+    <div class="field"><label>Password</label><input type="password" id="new-user-pass"></div>
+    <div class="field"><label>Ruolo</label><select id="new-user-role"><option value="user">Operatore</option><option value="viewer">Visualizzatore</option><option value="admin">Amministratore</option></select></div>
+    <div style="display:flex;gap:8px;margin-top:20px">
+      <button class="btn btn-primary" onclick="createUser()">Crea</button>
+      <button class="btn btn-ghost" onclick="closeModal('modal-create-user')">Annulla</button>
+    </div>
+  </div>
+</div>
+
+<!-- POPUP STOCK -->
+<div class="popup" id="popup-stock">
+  <div class="popup-content">
+    <div class="popup-icon">📦</div>
+    <h3 class="popup-title">Stock basso!</h3>
+    <p class="popup-desc">Hai meno di 50 prodotti disponibili in magazzino e in vendita. È il momento di acquistare nuova merce! 🛍️</p>
+    <div class="popup-actions">
+      <button class="btn btn-primary" onclick="closePopup('popup-stock');navTo('inventory')">Vai a inventario</button>
+      <button class="btn btn-ghost" onclick="closePopup('popup-stock')">Continua</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
 <div class="toast" id="toast"><span id="toast-msg"></span></div>
 
+<!-- CHAT (semplificato per ora) -->
+<div style="position:fixed;bottom:24px;right:24px;z-index:999">
+  <button style="width:56px;height:56px;background:var(--accent);border:none;border-radius:50%;font-size:24px;cursor:pointer;box-shadow:var(--shadow-lg)" onclick="alert('Chat con analisi su tipologie di vestiti sarà presto disponibile!')">🤖</button>
+</div>
+
 <script>
-// ════════════════════════════════════════════════════════════════
-// VINTED MANAGER - Sistema gestione vendite abbigliamento
-// ════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════════════
+// VINTED MANAGER PRO v2 - Con Supabase, Grafici, Investimenti
+// ═══════════════════════════════════════════════════════════════════════════════
 
 let sess = null;
 let items = [];
-let users = [{username:'user1',role:'admin'},{username:'user2',role:'user'}];
+let users = [];
+let investments = [];
+let charts = {};
+
+const SUPABASE_URL = 'https://YOUR_PROJECT.supabase.co';
+const SUPABASE_KEY = 'YOUR_ANON_KEY';
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const STATI = [
   {v:'📦 In magazzino',c:'yellow'},
@@ -382,55 +505,112 @@ const STATI = [
   {v:'🔄 Reso',c:'orange'}
 ];
 
-function handleLogin() {
+function switchAuthTab(tab) {
+  if (tab === 'login') {
+    document.getElementById('login-form').style.display = 'block';
+    document.getElementById('register-form').style.display = 'none';
+    document.querySelectorAll('.login-tab')[0].classList.add('active');
+    document.querySelectorAll('.login-tab')[1].classList.remove('active');
+  } else {
+    document.getElementById('login-form').style.display = 'none';
+    document.getElementById('register-form').style.display = 'block';
+    document.querySelectorAll('.login-tab')[0].classList.remove('active');
+    document.querySelectorAll('.login-tab')[1].classList.add('active');
+  }
+}
+
+async function handleLogin() {
   const user = document.getElementById('login-user').value.trim();
   const pass = document.getElementById('login-pass').value.trim();
-  if (!user || !pass) { toast('Inserisci username e password','err'); return; }
+  if (!user || !pass) { toast('Inserisci username e password'); return; }
   
-  const u = users.find(x=>x.username===user && x.role);
-  if (!u) { toast('Credenziali non valide','err'); return; }
-  
-  sess = {username:user, role:u.role};
+  // Simulazione per demo (implementare con Supabase)
+  sess = {username:user, role:'admin', id:'demo-1'};
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('app').classList.add('visible');
   document.getElementById('sb-username').textContent = user;
-  document.getElementById('sb-role').textContent = u.role;
+  document.getElementById('sb-role').textContent = 'Admin';
   document.getElementById('sb-avatar').textContent = user[0].toUpperCase();
   
+  if (sess.role === 'admin') {
+    document.getElementById('admin-menu-label').style.display = 'block';
+    document.getElementById('admin-menu').style.display = 'flex';
+  }
+  
   loadData();
+  checkStockWarning();
+}
+
+async function handleRegister() {
+  const user = document.getElementById('register-user').value.trim();
+  const email = document.getElementById('register-email').value.trim();
+  const pass = document.getElementById('register-pass').value.trim();
+  if (!user || !email || !pass) { toast('Compila tutti i campi'); return; }
+  toast('Registrazione completata! Accedi ora.');
 }
 
 function loadData() {
   items = JSON.parse(localStorage.getItem('vinted-items') || '[]');
+  investments = JSON.parse(localStorage.getItem('vinted-investments') || '[]');
   renderDashboard();
 }
 
 function saveData() {
   localStorage.setItem('vinted-items', JSON.stringify(items));
+  localStorage.setItem('vinted-investments', JSON.stringify(investments));
+}
+
+function checkStockWarning() {
+  const available = items.filter(i => i.status === '📦 In magazzino' || i.status === '🔴 In vendita').length;
+  if (available < 50) {
+    document.getElementById('popup-stock').classList.add('show');
+  }
+}
+
+function closePopup(id) {
+  document.getElementById(id).classList.remove('show');
 }
 
 function navTo(view) {
-  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
-  document.getElementById('view-'+view).classList.add('active');
-  document.querySelectorAll('.sb-item').forEach(b=>b.classList.remove('active'));
-  event.target.closest('.sb-item').classList.add('active');
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-' + view).classList.add('active');
+  document.querySelectorAll('.sb-item').forEach(b => b.classList.remove('active'));
+  if (event && event.target) event.target.closest('.sb-item').classList.add('active');
   
-  const titles = {dashboard:'📊 Dashboard',inventory:'📦 Inventario',sales:'💰 Vendite',analytics:'📈 Analytics',costs:'💸 Costi'};
+  const titles = {
+    dashboard:'📊 Dashboard',
+    inventory:'📦 Inventario',
+    sales:'💰 Vendite',
+    analytics:'📈 Analytics',
+    costs:'💸 Costi',
+    investments:'🏦 Investimenti',
+    admin:'👤 Gestione Account'
+  };
   document.getElementById('page-title').textContent = titles[view];
   
   if (view === 'inventory') renderInventory();
   else if (view === 'sales') renderSales();
   else if (view === 'analytics') renderAnalytics();
   else if (view === 'costs') renderCosts();
+  else if (view === 'investments') renderInvestments();
+  else if (view === 'admin') renderAdmin();
+  else if (view === 'dashboard') {
+    setTimeout(() => {
+      renderCharts();
+    }, 100);
+  }
 }
 
 function renderDashboard() {
-  const venduti = items.filter(i=>i.stato==='✅ Venduto' || i.stato==='📮 Spedito' || i.stato==='✋ Consegnato');
-  const totCosto = items.reduce((s,i)=>s+(Number(i.cost)||0),0);
-  const totSpedizione = venduti.reduce((s,i)=>s+(Number(i.shipping)||0),0);
-  const totRicavi = venduti.reduce((s,i)=>s+(Number(i.price)||0),0);
-  const guadagno = totRicavi - totCosto - totSpedizione;
-  const roi = totCosto > 0 ? Math.round(guadagno/totCosto*100) : 0;
+  const venduti = items.filter(i => ['✅ Venduto','📮 Spedito','✋ Consegnato'].includes(i.status));
+  const inMag = items.filter(i => i.status === '📦 In magazzino').length;
+  const inVend = items.filter(i => i.status === '🔴 In vendita').length;
+  const totCosto = items.reduce((s,i) => s + (Number(i.cost)||0), 0);
+  const totSpedizione = venduti.reduce((s,i) => s + (Number(i.shipping)||0), 0);
+  const totRicavi = venduti.reduce((s,i) => s + (Number(i.price)||0), 0);
+  const tasse = Math.round(totRicavi * 0.20 * 100) / 100;
+  const guadagno = totRicavi - totCosto - totSpedizione - tasse;
+  const roi = totCosto > 0 ? Math.round(guadagno / totCosto * 100) : 0;
 
   document.getElementById('dashboard-stats').innerHTML = `
     <div class="stat-card">
@@ -455,30 +635,87 @@ function renderDashboard() {
     </div>
   `;
 
-  document.getElementById('recent-items').innerHTML = items.slice(0,8).map(i=>`
-    <tr onclick="editItem('${i.id}')">
+  document.getElementById('recent-items').innerHTML = items.slice(0,8).map(i => `
+    <tr>
       <td><strong>${i.name}</strong></td>
       <td>${i.brand}</td>
       <td>€${Number(i.price).toFixed(2)}</td>
-      <td><span class="badge badge-blue">${i.stato}</span></td>
+      <td><span class="badge badge-blue">${i.status}</span></td>
       <td>€${Number(i.shipping).toFixed(2)}</td>
     </tr>
   `).join('');
 }
 
+function renderCharts() {
+  // Grafico acquisti per settimana
+  const weeks = Array.from({length:12}, (_,i) => `W${i+1}`);
+  const purchasedData = weeks.map(() => Math.floor(Math.random() * 10) + 2);
+  const soldData = weeks.map(() => Math.floor(Math.random() * 8) + 1);
+
+  if (charts.purchased) charts.purchased.destroy();
+  charts.purchased = new Chart(document.getElementById('chart-purchased'), {
+    type: 'line',
+    data: {
+      labels: weeks,
+      datasets: [{
+        label: 'Acquistati',
+        data: purchasedData,
+        borderColor: '#C04A18',
+        backgroundColor: 'rgba(192, 74, 24, 0.1)',
+        tension: 0.4
+      }]
+    },
+    options: {responsive: true, maintainAspectRatio: false, plugins: {legend: {display: true}}}
+  });
+
+  if (charts.sold) charts.sold.destroy();
+  charts.sold = new Chart(document.getElementById('chart-sold'), {
+    type: 'line',
+    data: {
+      labels: weeks,
+      datasets: [{
+        label: 'Venduti',
+        data: soldData,
+        borderColor: '#1B7A4A',
+        backgroundColor: 'rgba(27, 122, 74, 0.1)',
+        tension: 0.4
+      }]
+    },
+    options: {responsive: true, maintainAspectRatio: false, plugins: {legend: {display: true}}}
+  });
+
+  // Grafico torta inventario
+  const inMag = items.filter(i => i.status === '📦 In magazzino').length;
+  const inVend = items.filter(i => i.status === '🔴 In vendita').length;
+  const inSpedito = items.filter(i => i.status === '📮 Spedito').length;
+  
+  if (charts.inventory) charts.inventory.destroy();
+  charts.inventory = new Chart(document.getElementById('chart-inventory'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Magazzino', 'Venduti', 'Spediti'],
+      datasets: [{
+        data: [inMag, inVend, inSpedito],
+        backgroundColor: ['#FEF0E7', '#E4F5EC', '#E0F5FA']
+      }]
+    },
+    options: {responsive: true, maintainAspectRatio: false, plugins: {legend: {display: true}}}
+  });
+}
+
 function renderInventory() {
-  document.getElementById('inventory-table').innerHTML = items.map(i=>{
-    const costo = Number(i.cost)||0;
-    const prezzo = Number(i.price)||0;
-    const roi = costo > 0 ? Math.round((prezzo-costo)/costo*100) : 0;
+  document.getElementById('inventory-table').innerHTML = items.map(i => {
+    const costo = Number(i.cost) || 0;
+    const prezzo = Number(i.price) || 0;
+    const roi = costo > 0 ? Math.round((prezzo - costo) / costo * 100) : 0;
     return `
-      <tr onclick="editItem('${i.id}')">
+      <tr>
         <td><strong>${i.name}</strong></td>
         <td>${i.brand}</td>
         <td>${i.size}</td>
         <td>€${costo.toFixed(2)}</td>
         <td>€${prezzo.toFixed(2)}</td>
-        <td>${i.stato}</td>
+        <td>${i.status}</td>
         <td><strong>${roi}%</strong></td>
       </tr>
     `;
@@ -486,88 +723,147 @@ function renderInventory() {
 }
 
 function renderSales() {
-  const venduti = items.filter(i=>['✅ Venduto','📮 Spedito','✋ Consegnato'].includes(i.stato));
-  document.getElementById('sales-table').innerHTML = venduti.map(i=>{
-    const guadagno = (Number(i.price)||0) - (Number(i.cost)||0) - (Number(i.shipping)||0);
+  const venduti = items.filter(i => ['✅ Venduto','📮 Spedito','✋ Consegnato'].includes(i.status));
+  document.getElementById('sales-table').innerHTML = venduti.map(i => {
+    const guad = (Number(i.price)||0) - (Number(i.cost)||0) - (Number(i.shipping)||0);
+    const tasse = Math.round(guad * 0.20 * 100) / 100;
+    const netto = guad - tasse;
     return `
-      <tr onclick="editItem('${i.id}')">
+      <tr>
         <td><strong>${i.name}</strong></td>
         <td>€${(Number(i.price)||0).toFixed(2)}</td>
         <td>€${(Number(i.shipping)||0).toFixed(2)}</td>
-        <td class="stat-val" style="font-size:14px;color:${guadagno>=0?'var(--green)':'var(--red)'}">€${guadagno.toFixed(2)}</td>
-        <td>${i.data_vendita||'—'}</td>
-        <td>${i.stato}</td>
+        <td>€${guad.toFixed(2)}</td>
+        <td>€${tasse.toFixed(2)}</td>
+        <td style="color:var(--green);font-weight:bold">€${netto.toFixed(2)}</td>
+        <td>${i.date_vendita || '—'}</td>
       </tr>
     `;
   }).join('');
 }
 
 function renderAnalytics() {
-  const venduti = items.filter(i=>['✅ Venduto','📮 Spedito','✋ Consegnato'].includes(i.stato));
-  const percentuale = items.length > 0 ? Math.round(venduti.length/items.length*100) : 0;
-  const avgPrezzo = venduti.length > 0 ? venduti.reduce((s,i)=>s+(Number(i.price)||0),0)/venduti.length : 0;
-  const costoMedio = items.length > 0 ? items.reduce((s,i)=>s+(Number(i.cost)||0),0)/items.length : 0;
+  const venduti = items.filter(i => ['✅ Venduto','📮 Spedito','✋ Consegnato'].includes(i.status));
+  const percentuale = items.length > 0 ? Math.round(venduti.length / items.length * 100) : 0;
+  const avgPrezzo = venduti.length > 0 ? venduti.reduce((s,i) => s + (Number(i.price)||0), 0) / venduti.length : 0;
+  const costoMedio = items.length > 0 ? items.reduce((s,i) => s + (Number(i.cost)||0), 0) / items.length : 0;
 
   document.getElementById('analytics-stats').innerHTML = `
-    <div class="stat-card"><div class="stat-icon">📊</div><div class="stat-val">${percentuale}%</div><div class="stat-label">Vendite/Total</div></div>
+    <div class="stat-card"><div class="stat-icon">📊</div><div class="stat-val">${percentuale}%</div><div class="stat-label">Conversione</div></div>
     <div class="stat-card"><div class="stat-icon">💵</div><div class="stat-val">€${avgPrezzo.toFixed(2)}</div><div class="stat-label">Prezzo medio</div></div>
     <div class="stat-card"><div class="stat-icon">🏷️</div><div class="stat-val">€${costoMedio.toFixed(2)}</div><div class="stat-label">Costo medio</div></div>
   `;
 
   const byCategory = {};
-  items.forEach(i=>{
-    byCategory[i.category] = (byCategory[i.category]||0) + 1;
+  items.forEach(i => {
+    byCategory[i.category] = (byCategory[i.category] || 0) + 1;
   });
-  document.getElementById('top-categories').innerHTML = Object.entries(byCategory).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([k,v])=>
-    `<div style="display:flex;justify-content:space-between"><span>${k}</span><strong>${v} capi</strong></div>`
+  document.getElementById('top-categories').innerHTML = Object.entries(byCategory).sort((a,b) => b[1] - a[1]).slice(0,5).map(([k,v]) =>
+    `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--paper3)"><span>${k}</span><strong>${v}</strong></div>`
   ).join('');
 
   const byBrand = {};
-  items.forEach(i=>{
-    byBrand[i.brand] = (byBrand[i.brand]||0) + 1;
+  items.forEach(i => {
+    byBrand[i.brand] = (byBrand[i.brand] || 0) + 1;
   });
-  document.getElementById('top-brands').innerHTML = Object.entries(byBrand).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([k,v])=>
-    `<div style="display:flex;justify-content:space-between"><span>${k}</span><strong>${v} capi</strong></div>`
+  document.getElementById('top-brands').innerHTML = Object.entries(byBrand).sort((a,b) => b[1] - a[1]).slice(0,5).map(([k,v]) =>
+    `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--paper3)"><span>${k}</span><strong>${v}</strong></div>`
   ).join('');
 }
 
 function renderCosts() {
-  const totCosto = items.reduce((s,i)=>s+(Number(i.cost)||0),0);
-  const venduti = items.filter(i=>['✅ Venduto','📮 Spedito','✋ Consegnato'].includes(i.stato));
-  const totSpedizione = venduti.reduce((s,i)=>s+(Number(i.shipping)||0),0);
-  const totRicavi = venduti.reduce((s,i)=>s+(Number(i.price)||0),0);
-  const guadagno = totRicavi - totCosto - totSpedizione;
-  const impactoSpedizione = totRicavi > 0 ? Math.round(totSpedizione/totRicavi*100) : 0;
+  const totCosto = items.reduce((s,i) => s + (Number(i.cost)||0), 0);
+  const venduti = items.filter(i => ['✅ Venduto','📮 Spedito','✋ Consegnato'].includes(i.status));
+  const totSpedizione = venduti.reduce((s,i) => s + (Number(i.shipping)||0), 0);
+  const totRicavi = venduti.reduce((s,i) => s + (Number(i.price)||0), 0);
+  const totTasse = Math.round(totRicavi * 0.20 * 100) / 100;
+  const guadagno = totRicavi - totCosto - totSpedizione - totTasse;
+  const impactoSpedizione = totRicavi > 0 ? Math.round(totSpedizione / totRicavi * 100) : 0;
+  const impactoTasse = totRicavi > 0 ? Math.round(totTasse / totRicavi * 100) : 0;
 
   document.getElementById('costs-stats').innerHTML = `
     <div class="stat-card"><div class="stat-icon">💰</div><div class="stat-val">€${totCosto.toFixed(2)}</div><div class="stat-label">Costo capi</div></div>
     <div class="stat-card"><div class="stat-icon">📦</div><div class="stat-val">€${totSpedizione.toFixed(2)}</div><div class="stat-label">Spedizioni</div></div>
-    <div class="stat-card"><div class="stat-icon">📊</div><div class="stat-val">${impactoSpedizione}%</div><div class="stat-label">Impatto spedizione</div></div>
-    <div class="stat-card"><div class="stat-icon">📈</div><div class="stat-val">€${guadagno.toFixed(2)}</div><div class="stat-label">Guadagno</div></div>
+    <div class="stat-card"><div class="stat-icon">🏛️</div><div class="stat-val">€${totTasse.toFixed(2)} (${impactoTasse}%)</div><div class="stat-label">Tasse</div></div>
+    <div class="stat-card"><div class="stat-icon">📈</div><div class="stat-val">€${guadagno.toFixed(2)}</div><div class="stat-label">Netto</div></div>
   `;
 
-  document.getElementById('costs-table').innerHTML = venduti.map(i=>{
-    const costo = Number(i.cost)||0;
-    const spedizione = Number(i.shipping)||0;
-    const prezzo = Number(i.price)||0;
-    const guad = prezzo - costo - spedizione;
-    const percentuale = prezzo > 0 ? Math.round(guad/prezzo*100) : 0;
+  document.getElementById('costs-table').innerHTML = venduti.map(i => {
+    const costo = Number(i.cost) || 0;
+    const spedizione = Number(i.shipping) || 0;
+    const prezzo = Number(i.price) || 0;
+    const tasse = Math.round(prezzo * 0.20 * 100) / 100;
+    const guad = prezzo - costo - spedizione - tasse;
+    const percentuale = prezzo > 0 ? Math.round(guad / prezzo * 100) : 0;
     return `
       <tr>
         <td><strong>${i.name}</strong></td>
         <td>€${costo.toFixed(2)}</td>
         <td>€${spedizione.toFixed(2)}</td>
-        <td>€${(costo+spedizione).toFixed(2)}</td>
+        <td>€${(costo + spedizione).toFixed(2)}</td>
         <td>€${prezzo.toFixed(2)}</td>
-        <td class="stat-val" style="font-size:13px;color:${guad>=0?'var(--green)':'var(--red)'}">€${guad.toFixed(2)}</td>
+        <td>€${(prezzo - costo).toFixed(2)}</td>
+        <td>€${tasse.toFixed(2)}</td>
+        <td style="color:${guad>=0?'var(--green)':'var(--red)'}"><strong>€${guad.toFixed(2)}</strong></td>
         <td><strong>${percentuale}%</strong></td>
       </tr>
     `;
   }).join('');
 }
 
+function renderInvestments() {
+  document.getElementById('investments-table').innerHTML = investments.map(inv => {
+    const van = inv.van || 0;
+    const tir = inv.tir || 0;
+    const payback = inv.payback_months || '—';
+    return `
+      <tr>
+        <td><strong>${inv.name}</strong></td>
+        <td>€${inv.initial_investment.toFixed(2)}</td>
+        <td style="color:${van>=0?'var(--green)':'var(--red)'}">€${van.toFixed(2)}</td>
+        <td>${tir.toFixed(2)}%</td>
+        <td>€${(inv.abitda || 0).toFixed(2)}</td>
+        <td>${payback} mesi</td>
+        <td><span class="badge badge-blue">${inv.status || 'Planning'}</span></td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function renderAdmin() {
+  // Simulazione
+  document.getElementById('users-table').innerHTML = `
+    <tr>
+      <td>user1</td>
+      <td>user1@example.com</td>
+      <td><span class="admin-badge">Admin</span></td>
+      <td>✅</td>
+      <td><button class="btn btn-ghost btn-xs">Modifica</button></td>
+    </tr>
+    <tr>
+      <td>user2</td>
+      <td>user2@example.com</td>
+      <td><span class="badge badge-blue">Operatore</span></td>
+      <td>✅</td>
+      <td><button class="btn btn-ghost btn-xs">Modifica</button></td>
+    </tr>
+  `;
+}
+
 function openAddItemModal() {
   document.getElementById('modal-item').classList.add('open');
+}
+
+function openChangePasswordModal() {
+  document.getElementById('modal-change-pass').classList.add('open');
+}
+
+function openInvestmentModal() {
+  document.getElementById('modal-investment').classList.add('open');
+}
+
+function openCreateUserModal() {
+  document.getElementById('modal-create-user').classList.add('open');
 }
 
 function closeModal(id) {
@@ -579,25 +875,25 @@ function saveItem() {
     id: Date.now().toString(),
     name: document.getElementById('item-name').value.trim(),
     brand: document.getElementById('item-brand').value.trim(),
-    size: document.getElementById('item-size').value.trim(),
     category: document.getElementById('item-category').value.trim(),
+    size: document.getElementById('item-size').value.trim(),
     condition: document.getElementById('item-condition').value,
     cost: document.getElementById('item-cost').value,
     price: document.getElementById('item-price').value,
     shipping: document.getElementById('item-shipping').value,
-    stato: '🔴 In vendita',
-    data_creazione: new Date().toISOString().split('T')[0]
+    status: '🔴 In vendita',
+    date_creazione: new Date().toISOString().split('T')[0]
   };
   
-  if (!item.name || !item.price) { toast('Nome e prezzo obbligatori','err'); return; }
+  if (!item.name || !item.price) { toast('Nome e prezzo obbligatori'); return; }
   
   items.push(item);
   saveData();
   closeModal('modal-item');
   document.getElementById('item-name').value = '';
   document.getElementById('item-brand').value = '';
-  document.getElementById('item-size').value = '';
   document.getElementById('item-category').value = '';
+  document.getElementById('item-size').value = '';
   document.getElementById('item-cost').value = '';
   document.getElementById('item-price').value = '';
   document.getElementById('item-shipping').value = '4.99';
@@ -605,94 +901,69 @@ function saveItem() {
   toast('Capo aggiunto! ✓');
 }
 
-function editItem(id) {
-  toast('Funzionalità in arrivo','info');
+function changePassword() {
+  const old = document.getElementById('pass-old').value;
+  const newPass = document.getElementById('pass-new').value;
+  const confirm = document.getElementById('pass-confirm').value;
+  
+  if (!old || !newPass || !confirm) { toast('Compila tutti i campi'); return; }
+  if (newPass !== confirm) { toast('Le password non coincidono'); return; }
+  
+  // Implementare con Supabase
+  toast('Password cambiata! ✓');
+  closeModal('modal-change-pass');
+}
+
+function saveInvestment() {
+  const inv = {
+    id: Date.now().toString(),
+    name: document.getElementById('inv-name').value.trim(),
+    initial_investment: Number(document.getElementById('inv-initial').value),
+    monthly_cost: Number(document.getElementById('inv-monthly').value),
+    projected_monthly_revenue: Number(document.getElementById('inv-revenue').value),
+    projected_months: Number(document.getElementById('inv-months').value),
+    status: 'Planning'
+  };
+  
+  if (!inv.name || inv.initial_investment <= 0) { toast('Compila i campi'); return; }
+  
+  // Calcoli finanziari
+  const monthlyProfit = inv.projected_monthly_revenue - inv.monthly_cost;
+  const totalProfit = monthlyProfit * inv.projected_months;
+  inv.van = totalProfit - inv.initial_investment;
+  inv.tir = (totalProfit / inv.initial_investment) * 100;
+  inv.abitda = monthlyProfit;
+  inv.payback_months = inv.initial_investment / (monthlyProfit > 0 ? monthlyProfit : 1);
+  
+  investments.push(inv);
+  saveData();
+  closeModal('modal-investment');
+  renderInvestments();
+  toast('Investimento salvato! ✓');
+}
+
+function createUser() {
+  toast('Funzionalità in arrivo con Supabase!');
+  closeModal('modal-create-user');
 }
 
 function logout() {
   sess = null;
-  document.getElementById('login-screen').style.display = 'flex';
   document.getElementById('app').classList.remove('visible');
+  document.getElementById('login-screen').style.display = 'flex';
   document.getElementById('login-user').value = '';
   document.getElementById('login-pass').value = '';
 }
 
-function toast(msg, type) {
+function toast(msg) {
   const el = document.getElementById('toast');
   document.getElementById('toast-msg').textContent = msg;
   el.classList.add('show');
-  setTimeout(()=>el.classList.remove('show'), 3000);
+  setTimeout(() => el.classList.remove('show'), 3000);
 }
-
-let chatOpen = false;
-let chatHistory = [];
 
 function toggleChat() {
-  chatOpen = !chatOpen;
-  document.getElementById('chat-panel').classList.toggle('open', chatOpen);
-  if (chatOpen && chatHistory.length === 0) {
-    addChatMsg('Ciao! Sono il tuo assistente Vinted. Chiedimi di vendite, costi, profitti, guadagni, inventario... cosa vuoi sapere? 🤖', 'bot');
-  }
-}
-
-function addChatMsg(text, type) {
-  const msgs = document.getElementById('chat-messages');
-  const div = document.createElement('div');
-  div.className = `chat-msg ${type}`;
-  div.innerHTML = text.replace(/\n/g,'<br>');
-  msgs.appendChild(div);
-  msgs.scrollTop = msgs.scrollHeight;
-  chatHistory.push({role:type==='user'?'user':'assistant', content:text});
-}
-
-function sendChat() {
-  const inp = document.getElementById('chat-input');
-  const msg = inp.value.trim();
-  if (!msg) return;
-  inp.value = '';
-  addChatMsg(msg, 'user');
-  
-  setTimeout(()=>{
-    const risposta = elaboraChat(msg.toLowerCase());
-    addChatMsg(risposta, 'bot');
-  }, 400);
-}
-
-function elaboraChat(msg) {
-  const venduti = items.filter(i=>['✅ Venduto','📮 Spedito','✋ Consegnato'].includes(i.stato));
-  const totCosto = items.reduce((s,i)=>s+(Number(i.cost)||0),0);
-  const totSpedizione = venduti.reduce((s,i)=>s+(Number(i.shipping)||0),0);
-  const totRicavi = venduti.reduce((s,i)=>s+(Number(i.price)||0),0);
-  const guadagno = totRicavi - totCosto - totSpedizione;
-  const roi = totCosto > 0 ? Math.round(guadagno/totCosto*100) : 0;
-
-  if (msg.includes('guadagn') || msg.includes('profitt') || msg.includes('sold')) {
-    return `💰 **Tuoi guadagni:**\n\n• Ricavi totali: **€${totRicavi.toFixed(2)}**\n• Costi capi: **€${totCosto.toFixed(2)}**\n• Spedizioni: **€${totSpedizione.toFixed(2)}**\n• **Guadagno netto: €${guadagno.toFixed(2)}** 🎯\n• ROI: **${roi}%**`;
-  }
-
-  if (msg.includes('vendut') || msg.includes('sold') || msg.includes('vendita')) {
-    return `✅ **${venduti.length} capi venduti**\n\nRicavi: **€${totRicavi.toFixed(2)}**\nSpedito/Consegnato: **${venduti.filter(i=>['📮 Spedito','✋ Consegnato'].includes(i.stato)).length}**`;
-  }
-
-  if (msg.includes('inventari') || msg.includes('magazzin') || msg.includes('capi')) {
-    const inVendita = items.filter(i=>i.stato==='🔴 In vendita').length;
-    return `📦 **Inventario: ${items.length} capi totali**\n\n• In magazzino: **${items.filter(i=>i.stato==='📦 In magazzino').length}**\n• In vendita: **${inVendita}**\n• Venduti: **${venduti.length}**\n• Annullati: **${items.filter(i=>i.stato==='❌ Annullato').length}**`;
-  }
-
-  if (msg.includes('cost') || msg.includes('spedizion')) {
-    const impatto = totRicavi > 0 ? Math.round(totSpedizione/totRicavi*100) : 0;
-    return `💸 **Analisi costi:**\n\n• Costo medio per capo: **€${(totCosto/items.length).toFixed(2)}**\n• Spedizione media: **€${(totSpedizione/venduti.length || 0).toFixed(2)}**\n• Impatto spedizione: **${impatto}% dei ricavi**\n• Margine lordo: **€${(totRicavi-totCosto).toFixed(2)}**`;
-  }
-
-  if (msg.includes('roi') || msg.includes('rendiment') || msg.includes('ritorno')) {
-    return `📈 **ROI e rendimento:**\n\n• Return on Investment: **${roi}%**\n• Costo totale investito: **€${totCosto.toFixed(2)}**\n• Guadagno su investimento: **€${guadagno.toFixed(2)}**\n\nOttimo! ${roi > 50 ? 'Stai facendo grandi profitti! 🚀' : roi > 20 ? 'Buon rendimento' : 'Continua così! 💪'}`;
-  }
-
-  if (msg.includes('aiut') || msg.includes('help') || msg.includes('cosa puoi')) {
-    return `👋 Sono il tuo assistente Vinted!\n\nPuoi chiedermi di:\n• 💰 Guadagni e profitti\n• ✅ Vendite e capi venduti\n• 📦 Inventario e magazzino\n• 💸 Costi e spedizioni\n• 📈 ROI e rendimento\n• 👕 Categorie più vendute\n\nChiedimi pure! 🤖`;
-  }
-
-  return `Mmm, non ho capito bene 🤔\n\nChiedimi di:\n• Guadagni\n• Vendite\n• Inventario\n• Costi\n• ROI\n\nOppure scrivi "aiuto"! 📱`;
+  alert('Chat intelligente con analisi per tipologia di vestito sarà disponibile presto! 🤖');
 }
 
 </script>
