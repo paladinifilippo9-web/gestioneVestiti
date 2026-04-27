@@ -220,6 +220,34 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .toast.warn{background:var(--orange)}
 @keyframes slideUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 
+/* ── Products popup ── */
+.stat{cursor:pointer;transition:all .15s}
+.stat:hover{transform:translateY(-2px);box-shadow:0 4px 16px rgba(0,0,0,.1)}
+.stat.green:hover{opacity:.92}
+.popup-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;align-items:center;justify-content:center;padding:18px}
+.popup-overlay.visible{display:flex}
+.popup-box{background:var(--surface);border-radius:var(--radius-lg);max-width:480px;width:100%;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 8px 40px rgba(0,0,0,.25);overflow:hidden}
+.popup-head{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.popup-title{font-family:'DM Serif Display',serif;font-size:18px}
+.popup-close{background:none;border:none;font-size:20px;cursor:pointer;color:var(--text3);padding:2px 6px;border-radius:4px}
+.popup-close:hover{background:var(--surface2);color:var(--text)}
+.popup-body{overflow-y:auto;flex:1}
+.popup-item{display:flex;align-items:center;gap:10px;padding:10px 20px;border-bottom:1px solid var(--border)}
+.popup-item:last-child{border-bottom:none}
+.popup-item-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.popup-item-dot.empty,.popup-item-dot.critical_daily,.popup-item-dot.critical_occasional{background:var(--red)}
+.popup-item-dot.halfway{background:#D4B400}
+.popup-item-dot.ok{background:var(--green)}
+
+/* ── Better offers ── */
+.offer-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;padding:16px 20px}
+.offer-card{display:flex;flex-direction:column;gap:6px;padding:14px 16px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-lg);text-decoration:none;color:var(--text);transition:all .15s}
+.offer-card:hover{border-color:var(--green);background:var(--green-light);transform:translateY(-2px);box-shadow:var(--shadow)}
+.offer-card-icon{font-size:26px}
+.offer-card-name{font-size:13px;font-weight:600;color:var(--text)}
+.offer-card-desc{font-size:11px;color:var(--text3)}
+.offer-card-tag{display:inline-flex;align-items:center;font-size:10px;padding:2px 8px;border-radius:99px;background:var(--green-light);color:var(--green);font-weight:600;margin-top:2px;width:fit-content}
+
 /* ── Chart simple ── */
 .chart-bars{display:flex;align-items:flex-end;gap:8px;height:120px;padding:0 0 8px}
 .chart-bar-wrap{display:flex;flex-direction:column;align-items:center;flex:1;gap:4px;height:100%}
@@ -291,10 +319,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
   <div id="page-dashboard" class="page active">
     <div id="alerts-wrap" class="alerts"></div>
     <div class="stats">
-      <div class="stat"><div class="stat-label">In dispensa</div><div class="stat-val" id="d-total">—</div></div>
-      <div class="stat"><div class="stat-label">Da comprare</div><div class="stat-val" id="d-tobuy">—</div></div>
-      <div class="stat"><div class="stat-label">Esauriti</div><div class="stat-val" id="d-empty">—</div></div>
-      <div class="stat green"><div class="stat-label">Prodotti ok</div><div class="stat-val" id="d-ok">—</div></div>
+      <div class="stat" onclick="openPopup('all')" title="Vedi tutti i prodotti"><div class="stat-label">In dispensa</div><div class="stat-val" id="d-total">—</div></div>
+      <div class="stat" onclick="openPopup('tobuy')" title="Vedi da comprare"><div class="stat-label">Da comprare</div><div class="stat-val" id="d-tobuy">—</div></div>
+      <div class="stat" onclick="openPopup('empty')" title="Vedi esauriti"><div class="stat-label">Esauriti</div><div class="stat-val" id="d-empty">—</div></div>
+      <div class="stat green" onclick="openPopup('ok')" title="Vedi prodotti ok"><div class="stat-label">Prodotti ok</div><div class="stat-val" id="d-ok">—</div></div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
       <div class="card">
@@ -551,62 +579,103 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 
   <!-- ══ PAGE: OFFERTE IPERCOOP ══ -->
   <div id="page-offers" class="page">
-    <div class="card" style="margin-bottom:16px">
+
+    <!-- Store header card -->
+    <div class="card" style="margin-bottom:16px;overflow:visible">
+      <div style="background:linear-gradient(135deg,#1A4A14 0%,#2D5A27 60%,#3A7232 100%);padding:24px 24px 20px;border-radius:var(--radius-lg) var(--radius-lg) 0 0;position:relative;overflow:hidden">
+        <div style="position:absolute;right:-20px;top:-20px;font-size:100px;opacity:.08;line-height:1">🏪</div>
+        <div style="font-family:'DM Serif Display',serif;font-size:26px;color:#fff;margin-bottom:4px">Ipercoop Baragalla</div>
+        <div style="font-size:13px;color:rgba(255,255,255,.7);margin-bottom:14px">Via O. Tenni, 39/B — Reggio Emilia</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <span style="display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.15);color:#fff;font-size:12px;padding:4px 10px;border-radius:99px">📅 Lun–Sab 08:30–20:30</span>
+          <span style="display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.15);color:#fff;font-size:12px;padding:4px 10px;border-radius:99px">☀️ Dom 09:00–20:00</span>
+          <a href="tel:+390522288311" style="display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.15);color:#fff;font-size:12px;padding:4px 10px;border-radius:99px;text-decoration:none">📞 0522 288311</a>
+          <a href="https://maps.google.com/?q=Ipercoop+Baragalla+Reggio+Emilia" target="_blank" style="display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.15);color:#fff;font-size:12px;padding:4px 10px;border-radius:99px;text-decoration:none">📍 Naviga</a>
+        </div>
+      </div>
+      <div style="display:flex;gap:0;border-bottom:1px solid var(--border)">
+        <div style="flex:1;padding:12px 16px;text-align:center;border-right:1px solid var(--border)"><div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em">Parcheggio</div><div style="font-size:13px;font-weight:600;margin-top:2px">🅿️ Coperto</div></div>
+        <div style="flex:1;padding:12px 16px;text-align:center;border-right:1px solid var(--border)"><div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em">Parafarmacia</div><div style="font-size:13px;font-weight:600;margin-top:2px">💊 Sì</div></div>
+        <div style="flex:1;padding:12px 16px;text-align:center;border-right:1px solid var(--border)"><div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em">Self-scan</div><div style="font-size:13px;font-weight:600;margin-top:2px">📱 Sì</div></div>
+        <div style="flex:1;padding:12px 16px;text-align:center"><div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em">CoopVoce</div><div style="font-size:13px;font-weight:600;margin-top:2px">📡 Sì</div></div>
+      </div>
+    </div>
+
+    <!-- Volantini / offerte links -->
+    <div style="font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px">Volantini &amp; Offerte online</div>
+    <div class="offer-grid" style="margin-bottom:16px">
+      <a class="offer-card" href="https://www.promozioni24.it/volantino/ipercoop/ipercoop-baragalla" target="_blank">
+        <div class="offer-card-icon">🗓</div>
+        <div class="offer-card-name">Volantino Baragalla</div>
+        <div class="offer-card-desc">promozioni24.it — offerte settimanali aggiornate</div>
+        <span class="offer-card-tag">⭐ Consigliato</span>
+      </a>
+      <a class="offer-card" href="https://www.e-coop.it/scegli-il-tuo-negozio/negozi-e-promozioni/5091" target="_blank">
+        <div class="offer-card-icon">🛍</div>
+        <div class="offer-card-name">Sito Ufficiale Coop</div>
+        <div class="offer-card-desc">e-coop.it — negozio #5091, promozioni ufficiali</div>
+        <span class="offer-card-tag">🏪 Ufficiale</span>
+      </a>
+      <a class="offer-card" href="https://www.promoqui.it/reggio-emilia/volantino/ipercoop" target="_blank">
+        <div class="offer-card-icon">🔖</div>
+        <div class="offer-card-name">PromoQui</div>
+        <div class="offer-card-desc">Volantino digitale sfogliabile — Reggio Emilia</div>
+        <span class="offer-card-tag">📱 Sfogliabile</span>
+      </a>
+      <a class="offer-card" href="https://www.volantinofacile.it/ipercoop/volantino-ipercoop/reggio-emilia" target="_blank">
+        <div class="offer-card-icon">📰</div>
+        <div class="offer-card-name">VolantinoFacile</div>
+        <div class="offer-card-desc">Confronta tutte le offerte della zona</div>
+        <span class="offer-card-tag">🔍 Confronto</span>
+      </a>
+      <a class="offer-card" href="https://www.miaposta.it/volantini/ipercoop/reggio-emilia" target="_blank">
+        <div class="offer-card-icon">📮</div>
+        <div class="offer-card-name">MiaPosta</div>
+        <div class="offer-card-desc">Offerte e volantini locali Reggio Emilia</div>
+        <span class="offer-card-tag">📍 Locale</span>
+      </a>
+      <a class="offer-card" href="https://app.satispay.com/download" target="_blank">
+        <div class="offer-card-icon">💳</div>
+        <div class="offer-card-name">Satispay Coop</div>
+        <div class="offer-card-desc">Paga con Satispay e ottieni cashback in negozio</div>
+        <span class="offer-card-tag">💰 Cashback</span>
+      </a>
+    </div>
+
+    <!-- Iframe volantino -->
+    <div class="card">
       <div class="card-header">
-        <div>
-          <div class="card-title">🏪 Ipercoop Baragalla — Offerte</div>
-          <div class="card-sub">Via O. Tenni, 39/B · Reggio Emilia · Tel. 0522 288311</div>
+        <div class="card-title">📄 Volantino in anteprima</div>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-sm" onclick="document.getElementById('offer-iframe').src=document.getElementById('offer-iframe').src">↻ Ricarica</button>
+          <a class="btn btn-sm btn-primary" href="https://www.promozioni24.it/volantino/ipercoop/ipercoop-baragalla" target="_blank">↗ Apri sito</a>
         </div>
       </div>
-      <div class="offer-links">
-        <a class="offer-link" href="https://www.promozioni24.it/volantino/ipercoop/ipercoop-baragalla" target="_blank">
-          <span class="link-icon">🗓</span>
-          <div><div>Volantino Ipercoop Baragalla</div><div class="link-label">promozioni24.it — aggiornato settimanalmente</div></div>
-        </a>
-        <a class="offer-link" href="https://www.e-coop.it/scegli-il-tuo-negozio/negozi-e-promozioni/5091" target="_blank">
-          <span class="link-icon">🛍</span>
-          <div><div>Sito ufficiale Coop</div><div class="link-label">e-coop.it — offerte e promozioni</div></div>
-        </a>
-        <a class="offer-link" href="https://www.volantinofacile.it/ipercoop/volantino-ipercoop/reggio-emilia" target="_blank">
-          <span class="link-icon">📰</span>
-          <div><div>VolantinoFacile</div><div class="link-label">Confronta offerte Reggio Emilia</div></div>
-        </a>
-        <a class="offer-link" href="https://www.promoqui.it/reggio-emilia/volantino/ipercoop" target="_blank">
-          <span class="link-icon">🔖</span>
-          <div><div>PromoQui</div><div class="link-label">Volantino digitale sfogliabile</div></div>
-        </a>
+      <div class="iframe-wrap" style="height:650px">
+        <iframe id="offer-iframe"
+          src="https://www.promozioni24.it/volantino/ipercoop/ipercoop-baragalla"
+          title="Volantino Ipercoop Baragalla" loading="lazy"
+          sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-top-navigation"></iframe>
       </div>
-      <!-- Iframe del volantino -->
-      <div style="padding:0 20px 4px;font-size:13px;font-weight:600;color:var(--text2)">Volantino in anteprima:</div>
-      <div class="iframe-wrap">
-        <iframe src="https://www.promozioni24.it/volantino/ipercoop/ipercoop-baragalla"
-          title="Volantino Ipercoop Baragalla"
-          loading="lazy"
-          sandbox="allow-scripts allow-same-origin allow-popups allow-forms"></iframe>
-      </div>
-      <div class="store-info">
-        <div class="info-block">
-          <div class="info-label">Orari</div>
-          <div class="info-val">Lun–Sab: 08:30–20:30<br>Dom: 09:00–20:00</div>
-        </div>
-        <div class="info-block">
-          <div class="info-label">Indirizzo</div>
-          <div class="info-val">Via O. Tenni, 39/B<br>42123 Reggio Emilia (RE)</div>
-        </div>
-        <div class="info-block">
-          <div class="info-label">Telefono</div>
-          <div class="info-val"><a href="tel:+390522288311" style="color:var(--green);text-decoration:none">0522 288311</a></div>
-        </div>
-        <div class="info-block">
-          <div class="info-label">Servizi</div>
-          <div class="info-val">Parcheggio coperto · Parafarmacia · CoopVoce · Self-scanning</div>
-        </div>
+      <div style="padding:10px 20px;font-size:12px;color:var(--text3);text-align:center">
+        Se il volantino non carica, usa il pulsante "Apri sito" ↗ per vederlo direttamente
       </div>
     </div>
   </div>
 
   </div><!-- /content -->
 </div><!-- /main -->
+
+<!-- Products popup -->
+<div class="popup-overlay" id="products-popup" onclick="if(event.target===this)closePopup()">
+  <div class="popup-box">
+    <div class="popup-head">
+      <div class="popup-title" id="popup-title">Prodotti</div>
+      <button class="popup-close" onclick="closePopup()">✕</button>
+    </div>
+    <div class="popup-body" id="popup-body"></div>
+  </div>
+</div>
 
 <!-- Consume modal -->
 <div class="overlay" id="consume-overlay" onclick="if(event.target===this)closeConsumeModal()">
@@ -806,11 +875,24 @@ function renderDashboard(){
 }
 
 function alertCard(level,icon,title,items){
+  const itemsHtml=items.map(i=>{
+    const isEmpty=parseFloat(i.current_qty)===0;
+    const pct=i.pct_remaining!==null?Math.min(100,parseFloat(i.pct_remaining)):null;
+    return `<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid rgba(0,0,0,.06)">
+      <span style="font-size:14px">${CAT_ICONS[i.category]||'🛒'}</span>
+      <div style="flex:1">
+        <span style="font-size:13px;font-weight:500">${esc(i.name)}</span>
+        ${i.ideal_qty?`<span style="font-size:11px;color:var(--text3);margin-left:6px">/ ${fmt(i.ideal_qty)} ${esc(i.unit)}</span>`:''}
+      </div>
+      ${pct!==null?`<div style="width:44px;height:4px;background:rgba(0,0,0,.1);border-radius:99px;overflow:hidden"><div style="width:${pct}%;height:100%;background:${isEmpty?'var(--red)':pct<=25?'var(--red)':'#D4B400'};border-radius:99px"></div></div>`:''}
+      <span style="font-size:13px;font-weight:700;min-width:50px;text-align:right;color:${isEmpty?'var(--red)':'inherit'}">${isEmpty?'<span style="font-size:16px">🚫</span>':fmt(i.current_qty)+' '+esc(i.unit)}</span>
+    </div>`;
+  }).join('');
   return `<div class="alert-card ${level}">
     <div class="alert-icon">${icon}</div>
-    <div class="alert-body">
-      <div class="alert-title">${title}</div>
-      <div class="alert-items">${items.map(i=>`${esc(i.name)} — ${fmt(i.current_qty)} ${esc(i.unit)}`).join('<br>')}</div>
+    <div class="alert-body" style="width:100%">
+      <div class="alert-title" style="margin-bottom:6px">${title} <span style="font-weight:400;font-size:12px">(${items.length})</span></div>
+      <div class="alert-items">${itemsHtml}</div>
     </div></div>`;
 }
 
@@ -1056,51 +1138,95 @@ async function runOCR(){
 }
 
 function parseReceiptText(text){
-  const lines=text.split('\n').map(l=>l.trim()).filter(l=>l.length>2);
+  const lines=text.split('\n').map(l=>l.trim()).filter(l=>l.length>1);
   const rows=[];
-  // Pattern: NOME (spazi) PREZZO (es: PASTA BARILLA     1.59)
-  const priceRe=/(\d+[.,]\d{2})\s*(?:€|E|A)?$/;
-  // Parole da ignorare (intestazione scontrino)
-  const skip=/totale|subtotal|iva|sconto|punti|tessera|resto|contante|carta|codice|fiscale|scontrino|numero|data|ora|cassa|operatore|benven|grazie|arriveder|indirizzo|telefon|partita|www|http|coop|ipercoop|supermercato/i;
+  const seen=new Set();
+
+  // Parole da saltare (header/footer scontrino)
+  const skip=/^(totale|subtotale|sub.totale|iva|sconto|punti|tessera|resto|contante|carta|bancomat|visa|mastercard|codice|fiscale|scontrino|numero|data|ora|cassa|operatore|benvenuto|grazie|arrivederci|indirizzo|telefono|partita|www\.|http|coop\b|ipercoop|supermercato|esercizio|cliente|documento|importo|pagamento|rif\.|pos|terminal|transaz|approvato|€|euro|operazione|credito|debito|saldo|disponib)/i;
+
+  // Pattern prezzo: numero con 2 decimali, opzionalmente preceduto/seguito da €
+  // Gestisce: 1.59 / 1,59 / €1,59 / 1.59€ / 1.59 A (A=aliquota IVA)
+  const priceRe=/(?:^|[\s\t])(\d{1,3}[.,]\d{2})\s*[AaBbCcEe€*]?\s*$/;
+  // Pattern alternativo: NOME    QTY x PREZZO
+  const qtyPriceRe=/(\d+)\s*[xX*]\s*(\d+[.,]\d{2})/;
 
   lines.forEach(line=>{
-    if(skip.test(line))return;
-    const m=line.match(priceRe);
-    if(m){
-      let name=line.slice(0,line.lastIndexOf(m[0])).trim().replace(/\s+/g,' ');
-      // Pulizia: rimuovi caratteri non prodotto all'inizio
-      name=name.replace(/^[\d\s*\-_.]+/,'').trim();
+    if(skip.test(line.trim()))return;
+    if(line.length<3||line.length>120)return;
+
+    // Prova pattern QTY x PREZZO (es: "2 x 1,29")
+    const qm=line.match(qtyPriceRe);
+    const pm=line.match(priceRe);
+
+    if(qm||pm){
+      let name='', qty=1, price=0;
+      if(qm){
+        qty=parseInt(qm[1])||1;
+        price=parseFloat(qm[2].replace(',','.'))||0;
+        // Nome = tutto prima del pattern qty x price
+        name=line.slice(0,line.search(qtyPriceRe)).trim();
+      } else if(pm){
+        price=parseFloat(pm[1].replace(',','.'))||0;
+        // Nome = tutto prima del prezzo
+        const priceIdx=line.lastIndexOf(pm[1]);
+        name=line.slice(0,priceIdx).trim();
+      }
+
+      // Pulizia nome: rimuovi codici iniziali (es "001234 PASTA"), asterischi, punti
+      name=name.replace(/^\*+/,'').replace(/^[\d]{4,}\s*/,'').replace(/\s+/g,' ').trim();
+      // Rimuovi caratteri spuri finali
+      name=name.replace(/[\s\-_.,:;*]+$/,'').trim();
+
       if(name.length<2)return;
-      const price=parseFloat(m[1].replace(',','.'));
-      if(price<=0||price>500)return; // filtra prezzi assurdi
-      rows.push({name:titleCase(name),qty:1,price,category:guessCategory(name)});
+      if(price<0||price>999)return; // filtra prezzi assurdi
+      // Evita duplicati (stesso nome+prezzo)
+      const key=name.toLowerCase()+'|'+price;
+      if(seen.has(key))return;
+      seen.add(key);
+
+      rows.push({name:cleanName(name),qty,price,category:guessCategory(name)});
     }
   });
-  // Se nessun prodotto trovato, prova pattern diverso (solo righe con testo significativo)
+
+  // Fallback: se OCR non ha trovato niente con prezzi, prendi tutte le righe con testo prodotto
   if(!rows.length){
     lines.forEach(line=>{
       if(skip.test(line))return;
-      if(line.length>3&&line.length<60&&/[a-zA-Z]{3,}/.test(line)){
-        rows.push({name:titleCase(line.replace(/\s+/g,' ').trim()),qty:1,price:0,category:'Altro'});
+      // Riga con almeno 3 lettere, lunghezza ragionevole, non solo numeri
+      if(line.length>=3&&line.length<=60&&/[a-zA-ZàèìòùÀÈÌÒÙ]{3,}/.test(line)&&!/^\d+$/.test(line)){
+        const name=line.replace(/\s+/g,' ').replace(/^[\d\s*_.]+/,'').trim();
+        if(name.length<2)return;
+        const key=name.toLowerCase();
+        if(seen.has(key))return;
+        seen.add(key);
+        rows.push({name:cleanName(name),qty:1,price:0,category:guessCategory(name)});
       }
     });
   }
   return rows;
 }
 
+function cleanName(s){
+  // Capitalizza prima lettera, resto minuscolo, ma mantieni sigle (es "DOP","BIO")
+  s=s.trim();
+  if(!s)return s;
+  return s.charAt(0).toUpperCase()+s.slice(1).toLowerCase()
+    .replace(/\b(dop|igp|bio|doc|docg|uht|kg|gr|ml|lt|cl)\b/gi,m=>m.toUpperCase());
+}
+
 function guessCategory(name){
   const n=name.toLowerCase();
-  if(/latte|yogurt|formaggio|parmigian|mozzarella|burro|panna|ricotta|uov/.test(n)) return 'Latticini';
-  if(/pasta|riso|pane|focaccia|grissini|farina|gallette|cereali|pizza/.test(n)) return 'Pane e pasta';
-  if(/pollo|carne|manzo|maiale|tacchino|salume|prosciutto|salsicc|pesce|tonno|salmone/.test(n)) return 'Carne e pesce';
-  if(/acqua|succo|bibita|vino|birra|aranciata|cola|tè|caffè/.test(n)) return 'Bevande';
-  if(/mela|pera|arancia|banana|frutta|verdura|pomodor|insalata|zucchina|carota|patata|cipolla/.test(n)) return 'Frutta e verdura';
-  if(/biscott|cioccolat|gelato|snack|patatine|caramelle|dolce|torta/.test(n)) return 'Dolci e snack';
-  if(/shampoo|sapone|dentifricio|igiene|deodorant|carta igienica/.test(n)) return 'Igiene';
-  if(/detersivo|bucato|stoviglie|pulizia|spugna|lavastoviglie/.test(n)) return 'Pulizia';
+  if(/latte|yogurt|formaggio|parmigian|grana|mozzarella|burro|panna|ricotta|uov|pecorino|mascarpone/.test(n)) return 'Latticini';
+  if(/pasta|riso|pane|focaccia|grissini|farina|gallette|cereali|pizza|crackers|brioche|lasagne|gnocchi|polenta/.test(n)) return 'Pane e pasta';
+  if(/pollo|carne|manzo|maiale|tacchino|salume|prosciutto|salsicc|pesce|tonno|salmone|merluzzo|bresaola|mortadella|pancetta|speck|wurstel/.test(n)) return 'Carne e pesce';
+  if(/acqua|succo|bibita|vino|birra|aranciata|cola|tè|caffè|gassosa|sprite|fanta|limonata/.test(n)) return 'Bevande';
+  if(/mela|pera|arancia|banana|frutta|verdura|pomodor|insalata|zucchina|carota|patata|cipolla|aglio|broccoli|spinaci|limone|funghi/.test(n)) return 'Frutta e verdura';
+  if(/biscott|cioccolat|gelato|snack|patatine|caramelle|dolce|torta|wafer|nutella|miele|marmellata|barretta/.test(n)) return 'Dolci e snack';
+  if(/shampoo|sapone|dentifricio|deodorant|bagnoschiuma|rasoio|crema|pannolin|assorbent/.test(n)) return 'Igiene';
+  if(/detersivo|bucato|stoviglie|pulizia|spugna|lavastoviglie|ammorbident|candeggina|scottex/.test(n)) return 'Pulizia';
   return 'Altro';
 }
-function titleCase(s){return s.charAt(0).toUpperCase()+s.slice(1).toLowerCase();}
 
 function renderOCRTable(){
   const tbody=document.getElementById('ocr-tbody');
@@ -1122,30 +1248,46 @@ function toggleRaw(){
 function cancelOCR(){document.getElementById('ocr-result-wrap').style.display='none';ocrRows=[];}
 
 async function confirmOCR(){
-  const valid=ocrRows.filter(r=>r.name.trim());
+  const valid=ocrRows.filter(r=>r.name&&r.name.trim().length>0);
   if(!valid.length){toast('Nessun prodotto da salvare','warn');return;}
-  let saved=0;
-  // Crea sessione spesa
-  const total=valid.reduce((s,r)=>s+r.price*r.qty,0);
-  const sessId=genId();
+  const ocrBtn=document.getElementById('ocr-btn');
+  ocrBtn.disabled=true;
+  const bar=document.getElementById('ocr-loading');
+  const ltxt=document.getElementById('ocr-loading-text');
+  bar.classList.add('visible');
+  const total=valid.reduce((s,r)=>s+(parseFloat(r.price)||0)*(parseInt(r.qty)||1),0);
+  // Sessione spesa (non blocca se fallisce)
+  let sessId=null;
   try{
+    sessId=genId();
     await sb('/rest/v1/spending_sessions','POST',{id:sessId,label:'Scontrino OCR',total,store:'Ipercoop Baragalla',spent_at:new Date().toISOString()});
-    for(const r of valid){
-      await sb('/rest/v1/spending_items','POST',{id:genId(),session_id:sessId,name:r.name,category:r.category,qty:r.qty,unit:'pz',price:r.price});
-      // Aggiorna dispensa
+  }catch(e){sessId=null;}
+  // Salva ogni prodotto indipendentemente
+  let saved=0,errors=0;
+  for(let i=0;i<valid.length;i++){
+    const r=valid[i];
+    ltxt.textContent='Salvataggio '+(i+1)+'/'+valid.length+': '+r.name;
+    try{
+      if(sessId){
+        try{await sb('/rest/v1/spending_items','POST',{id:genId(),session_id:sessId,name:r.name,category:CATS.includes(r.category)?r.category:'Altro',qty:parseInt(r.qty)||1,unit:'pz',price:parseFloat(r.price)||0});}catch(e){}
+      }
       const existing=stockData.find(s=>s.name.toLowerCase()===r.name.toLowerCase());
       if(existing){
-        const newQty=parseFloat(existing.current_qty)+r.qty;
+        const newQty=parseFloat(existing.current_qty)+(parseInt(r.qty)||1);
         await sb('/rest/v1/pantry_stock?id=eq.'+encodeURIComponent(existing.id),'PATCH',{current_qty:newQty},{'Prefer':'return=minimal'});
       }else{
-        await sb('/rest/v1/pantry_stock','POST',{id:genId(),name:r.name,category:CATS.includes(r.category)?r.category:'Altro',current_qty:r.qty,unit:'pz',frequency:'occasional'});
+        await sb('/rest/v1/pantry_stock','POST',{id:genId(),name:r.name.trim(),category:CATS.includes(r.category)?r.category:'Altro',current_qty:parseInt(r.qty)||1,unit:'pz',frequency:'occasional'});
       }
       saved++;
-    }
-    await refreshAll();
-    toast('✓ '+saved+' prodotti salvati — €'+eur(total),'ok');
-    clearScanImg();
-  }catch(e){toast('Errore: '+e.message);}
+    }catch(e){errors++;console.error('Errore prodotto',r.name,e);}
+  }
+  await refreshAll();
+  bar.classList.remove('visible');
+  ocrBtn.disabled=false;
+  if(saved>0){
+    toast((errors>0?'✓ '+saved+' salvati ('+errors+' errori)':'✓ '+saved+' prodotti salvati')+' — € '+eur(total),'ok');
+    cancelOCR();clearScanImg();
+  }else{toast('Nessun prodotto salvato — controlla la connessione','warn');}
 }
 
 // ── Shopping list ──────────────────────────────────────────────────────
@@ -1235,12 +1377,17 @@ async function logConsumption(){
 }
 async function doLog(stockId,qty,note=''){
   const item=stockData.find(i=>i.id===stockId);if(!item)return;
-  const newQty=Math.max(0,parseFloat(item.current_qty)-qty);
+  const avail=parseFloat(item.current_qty);
+  if(qty>avail){
+    toast('⚠️ Non puoi usare '+fmt(qty)+' '+item.unit+' — ne hai solo '+fmt(avail),'warn');
+    return;
+  }
+  const newQty=Math.max(0,avail-qty);
   try{
     await sb('/rest/v1/consumption_log','POST',{id:genId(),stock_id:stockId,item_name:item.name,qty_consumed:qty,unit:item.unit,notes:note||null,logged_at:new Date().toISOString()});
     await sb('/rest/v1/pantry_stock?id=eq.'+encodeURIComponent(stockId),'PATCH',{current_qty:newQty},{'Prefer':'return=minimal'});
     await refreshAll();renderFullLog();
-    toast(`${item.name}: rimasti ${fmt(newQty)} ${item.unit}`,'ok');
+    toast(item.name+': rimasti '+fmt(newQty)+' '+item.unit,'ok');
   }catch(e){toast('Errore: '+e.message);}
 }
 
@@ -1384,6 +1531,56 @@ async function submitSession(){
     await loadSessions();renderHistoryPage();loadBudgetPage();
     closeAddSession();toast('Spesa registrata!','ok');
   }catch(e){toast('Errore: '+e.message);}
+}
+
+// ── Popup prodotti dashboard ──────────────────────────────────────────
+function openPopup(type){
+  const configs={
+    'all':  {title:'📦 Tutti i prodotti in dispensa', filter:()=>true},
+    'tobuy':{title:'🛒 Da comprare', filter:i=>i.ideal_qty&&parseFloat(i.current_qty)<parseFloat(i.ideal_qty)},
+    'empty':{title:'🚨 Prodotti esauriti', filter:i=>i.alert_level==='empty'||parseFloat(i.current_qty)===0},
+    'ok':   {title:'✅ Prodotti ok', filter:i=>i.alert_level==='ok'}
+  };
+  const cfg=configs[type]||configs['all'];
+  const filtered=stockData.filter(cfg.filter);
+  document.getElementById('popup-title').textContent=cfg.title+' ('+filtered.length+')';
+  const body=document.getElementById('popup-body');
+  if(!filtered.length){
+    body.innerHTML='<div class="empty-state"><div class="empty-icon">✨</div>Nessun prodotto in questa categoria</div>';
+  }else{
+    // Group by category
+    const g={};filtered.forEach(i=>{const c=i.category||'Altro';if(!g[c])g[c]=[];g[c].push(i);});
+    let html='';
+    CATS.forEach(cat=>{
+      if(!g[cat])return;
+      html+='<div class="cat-label">'+CAT_ICONS[cat]+' '+cat+'</div>';
+      g[cat].forEach(i=>{
+        const pct=i.pct_remaining!==null?Math.min(100,parseFloat(i.pct_remaining)):null;
+        const pctColor=pct===null?'var(--green)':pct<=25?'var(--red)':pct<=50?'#D4B400':'var(--green)';
+        html+='<div class="popup-item">'
+          +'<div class="popup-item-dot '+i.alert_level+'"></div>'
+          +'<span style="font-size:15px;flex-shrink:0">'+CAT_ICONS[i.category]+'</span>'
+          +'<div style="flex:1">'
+            +'<div style="font-size:13px;font-weight:500">'+esc(i.name)+'</div>'
+            +(i.ideal_qty?'<div style="font-size:11px;color:var(--text3)">Ideale: '+fmt(i.ideal_qty)+' '+esc(i.unit)+'</div>':'')
+          +'</div>'
+          +(pct!==null?'<div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px;min-width:60px">'
+            +'<div style="font-size:11px;color:'+pctColor+';font-weight:600">'+pct+'%</div>'
+            +'<div style="width:50px;height:4px;background:var(--border);border-radius:99px;overflow:hidden">'
+            +'<div style="width:'+pct+'%;height:100%;background:'+pctColor+';border-radius:99px"></div>'
+            +'</div></div>':'')
+          +'<span style="font-size:13px;font-weight:700;min-width:60px;text-align:right;color:'+(parseFloat(i.current_qty)===0?'var(--red)':'var(--text)')+'">'+fmt(i.current_qty)+'<span style="font-size:11px;color:var(--text3);font-weight:400"> '+esc(i.unit)+'</span></span>'
+          +'</div>';
+      });
+    });
+    body.innerHTML=html;
+  }
+  document.getElementById('products-popup').classList.add('visible');
+  document.body.style.overflow='hidden';
+}
+function closePopup(){
+  document.getElementById('products-popup').classList.remove('visible');
+  document.body.style.overflow='';
 }
 
 // ── Utility ────────────────────────────────────────────────────────────
