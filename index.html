@@ -298,7 +298,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
     <div class="nav-section">Negozio</div>
     <div class="nav-item" onclick="goTo('offers')"><span class="nav-icon">🏪</span>Offerte Ipercoop</div>
   </nav>
-  <div class="sidebar-footer">v2.0 · Supabase connected</div>
+  <div class="sidebar-footer" style="display:flex;flex-direction:column;gap:8px"><button onclick="runDbTest()" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.7);padding:6px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-family:inherit;text-align:left" id="test-btn">🔌 Testa connessione DB</button><div style="font-size:10px;color:rgba(255,255,255,.2)">v3.0 · Supabase</div></div>
 </aside>
 <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
 
@@ -720,7 +720,13 @@ async function sb(path,method='GET',body=null,extra={}){
   const r=await fetch(SB_URL+path,{method,headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,
     'Content-Type':'application/json','Prefer':'return=representation',...extra},
     body:body?JSON.stringify(body):undefined});
-  if(!r.ok)throw new Error(await r.text()||'HTTP '+r.status);
+  if(!r.ok){
+    const txt=await r.text();
+    let msg='HTTP '+r.status;
+    try{const j=JSON.parse(txt);msg=j.message||j.hint||j.details||txt;}catch(e){msg=txt||msg;}
+    console.error('SB ERR',method,path,msg);
+    throw new Error(msg);
+  }
   const t=await r.text();return t?JSON.parse(t):[];
 }
 
@@ -763,8 +769,56 @@ document.getElementById('sess-date').value=new Date().toISOString().slice(0,10);
     await Promise.all([loadStock(),loadIdeal(),loadLog(),loadSessions()]);
     setPill('ok','Supabase ✓');
     renderDashboard();
-  }catch(e){setPill('err','Errore DB');toast('Errore: '+e.message);}
+  }catch(e){
+    setPill('err','Errore DB');
+    console.error('Init error:',e);
+    // Mostra errore dettagliato
+    const msg=e.message||'Errore sconosciuto';
+    if(msg.includes('row-level security')||msg.includes('RLS')||msg.includes('permission')||msg.includes('policy')){
+      toast('🔒 RLS bloccato — esegui il file SQL su Supabase per abilitare i permessi','warn');
+    } else if(msg.includes('Failed to fetch')||msg.includes('NetworkError')){
+      toast('🌐 Errore di rete — controlla la connessione internet','warn');
+    } else {
+      toast('Errore DB: '+msg,'warn');
+    }
+  }
 })();
+
+async function runDbTest(){
+  const btn=document.getElementById('test-btn');
+  btn.textContent='⏳ Test in corso...';
+  btn.disabled=true;
+  const results=[];
+  // Test SELECT
+  try{
+    await sb('/rest/v1/pantry_stock?select=id&limit=1');
+    results.push('✅ SELECT: OK');
+  }catch(e){results.push('❌ SELECT: '+e.message);}
+  // Test INSERT
+  const testId='test_'+Date.now();
+  try{
+    await sb('/rest/v1/pantry_stock','POST',{id:testId,name:'__test__',category:'Altro',current_qty:0,unit:'pz',frequency:'occasional'});
+    results.push('✅ INSERT: OK');
+    // Test DELETE (cleanup)
+    try{
+      await sb('/rest/v1/pantry_stock?id=eq.'+testId,'DELETE',null,{'Prefer':'return=minimal'});
+      results.push('✅ DELETE: OK');
+    }catch(e){results.push('⚠️ DELETE: '+e.message);}
+  }catch(e){
+    results.push('❌ INSERT: '+e.message);
+    if(e.message.includes('row-level')||e.message.includes('policy')){
+      results.push('');
+      results.push('👉 SOLUZIONE: esegui spesa_db.sql su Supabase SQL Editor');
+      results.push('   La sezione "ABILITA RLS E POLICY" risolve questo errore');
+    }
+  }
+  btn.textContent='🔌 Testa connessione DB';
+  btn.disabled=false;
+  alert('Risultati test:
+
+'+results.join('
+'));
+}
 
 function setPill(t,l){
   const el=document.getElementById('db-pill');
