@@ -770,58 +770,142 @@ document.getElementById('sess-date').value=new Date().toISOString().slice(0,10);
 (async()=>{
   setPill('loading','Connessione...');
   try{
+    // Prima prova solo una chiamata leggera per verificare la connessione
+    await sb('/rest/v1/pantry_stock?select=id&limit=1');
+    // Se arriva qui, la connessione funziona — carica tutto
     await Promise.all([loadStock(),loadIdeal(),loadLog(),loadSessions()]);
     setPill('ok','Supabase ✓');
     renderDashboard();
   }catch(e){
     setPill('err','Errore DB');
     console.error('Init error:',e);
-    // Mostra errore dettagliato
-    const msg=e.message||'Errore sconosciuto';
-    if(msg.includes('row-level security')||msg.includes('RLS')||msg.includes('permission')||msg.includes('policy')){
-      toast('🔒 RLS bloccato — esegui il file SQL su Supabase per abilitare i permessi','warn');
-    } else if(msg.includes('Failed to fetch')||msg.includes('NetworkError')){
-      toast('🌐 Errore di rete — controlla la connessione internet','warn');
-    } else {
-      toast('Errore DB: '+msg,'warn');
-    }
+    showDbError(e.message||'Errore sconosciuto');
   }
 })();
 
+function showDbError(msg){
+  let title='Problema di connessione al database';
+  let detail='';
+  let solution='';
+
+  if(msg.includes('Failed to fetch')||msg.includes('NetworkError')||msg.includes('fetch')){
+    title='❌ Errore di rete';
+    detail='Il browser non riesce a raggiungere Supabase.';
+    solution='Controlla la connessione internet e ricarica la pagina.';
+  } else if(msg.includes('row-level security')||msg.includes('violates row-level')||msg.includes('permission denied')||msg.includes('policy')){
+    title='🔒 Permessi mancanti (RLS)';
+    detail='Supabase blocca le operazioni perché mancano le policy di accesso.';
+    solution='Vai su Supabase → SQL Editor → esegui il file <strong>spesa_db.sql</strong> (sezione "ABILITA RLS E POLICY").';
+  } else if(msg.includes('relation') && msg.includes('does not exist')){
+    title='📋 Tabelle non trovate';
+    detail='Le tabelle del database non esistono ancora.';
+    solution='Vai su Supabase → SQL Editor → esegui il file <strong>spesa_db.sql</strong> per creare tutto.';
+  } else if(msg.includes('JWT')||msg.includes('invalid token')||msg.includes('401')){
+    title='🔑 API Key non valida';
+    detail='La chiave API di Supabase non è riconosciuta.';
+    solution='Controlla che la chiave anon key nel file HTML sia quella corretta del tuo progetto.';
+  } else if(msg.includes('404')){
+    title='🔍 Progetto Supabase non trovato';
+    detail='L'URL del progetto non risponde.';
+    solution='Verifica l'URL del progetto Supabase nel file HTML.';
+  } else {
+    detail=msg;
+    solution='Premi <strong>"🔌 Diagnosi DB"</strong> nella barra laterale per vedere i dettagli.';
+  }
+
+  // Mostra pannello errore nella dashboard
+  const alertsEl=document.getElementById('alerts-wrap');
+  if(alertsEl){
+    alertsEl.innerHTML=`
+      <div style="background:#FDF0F0;border:1px solid #D9A0A0;border-radius:12px;padding:20px 22px;margin-bottom:16px">
+        <div style="font-size:17px;font-weight:600;color:#8B1A1A;margin-bottom:8px">${title}</div>
+        <div style="font-size:13px;color:#5C2020;margin-bottom:10px">${detail}</div>
+        <div style="background:#fff;border-radius:8px;padding:12px 14px;font-size:13px;color:#333;border:1px solid #E2DDD5;margin-bottom:14px">
+          💡 <strong>Soluzione:</strong> ${solution}
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-primary" onclick="location.reload()">↻ Ricarica pagina</button>
+          <button class="btn" onclick="runDbTest()">🔌 Diagnosi DB</button>
+        </div>
+        <div style="margin-top:10px;font-size:11px;color:#A08080;font-family:monospace;word-break:break-all">Errore: ${msg.slice(0,200)}</div>
+      </div>`;
+  }
+}
+
 async function runDbTest(){
   const btn=document.getElementById('test-btn');
-  btn.textContent='⏳ Test in corso...';
+  btn.textContent='⏳ Diagnosi...';
   btn.disabled=true;
-  const results=[];
-  // Test SELECT
-  try{
-    await sb('/rest/v1/pantry_stock?select=id&limit=1');
-    results.push('✅ SELECT: OK');
-  }catch(e){results.push('❌ SELECT: '+e.message);}
-  // Test INSERT
-  const testId='test_'+Date.now();
-  try{
-    await sb('/rest/v1/pantry_stock','POST',{id:testId,name:'__test__',category:'Altro',current_qty:0,unit:'pz',frequency:'occasional'});
-    results.push('✅ INSERT: OK');
-    // Test DELETE (cleanup)
+
+  const tests=[
+    {name:'Raggiungibilità Supabase', fn:async()=>{ await sb('/rest/v1/pantry_stock?select=id&limit=1'); }},
+    {name:'Lettura pantry_stock',     fn:async()=>{ await sb('/rest/v1/pantry_stock?select=id&limit=1'); }},
+    {name:'Lettura pantry_ideal',     fn:async()=>{ await sb('/rest/v1/pantry_ideal?select=id&limit=1'); }},
+    {name:'Vista v_stock_status',     fn:async()=>{ await sb('/rest/v1/v_stock_status?select=id&limit=1'); }},
+    {name:'Scrittura INSERT + DELETE',fn:async()=>{
+      const tid='_test_'+Date.now();
+      await sb('/rest/v1/pantry_stock','POST',{id:tid,name:'__test__',category:'Altro',current_qty:0,unit:'pz',frequency:'occasional'});
+      await sb('/rest/v1/pantry_stock?id=eq.'+tid,'DELETE',null,{'Prefer':'return=minimal'});
+    }},
+  ];
+
+  const lines=[];
+  let allOk=true;
+  for(const t of tests){
     try{
-      await sb('/rest/v1/pantry_stock?id=eq.'+testId,'DELETE',null,{'Prefer':'return=minimal'});
-      results.push('✅ DELETE: OK');
-    }catch(e){results.push('⚠️ DELETE: '+e.message);}
-  }catch(e){
-    results.push('❌ INSERT: '+e.message);
-    if(e.message.includes('row-level')||e.message.includes('policy')){
-      results.push('');
-      results.push('👉 SOLUZIONE: esegui spesa_db.sql su Supabase SQL Editor');
-      results.push('   La sezione "ABILITA RLS E POLICY" risolve questo errore');
+      await t.fn();
+      lines.push('<div style="display:flex;gap:8px;padding:6px 0;border-bottom:1px solid #eee;align-items:center"><span>✅</span><span style="flex:1;font-size:13px">'+t.name+'</span><b style="color:green;font-size:12px">OK</b></div>');
+    }catch(e){
+      allOk=false;
+      const m=e.message||'';
+      let hint='';
+      if(m.includes('row-level')||m.includes('policy')||m.includes('permission')||m.includes('denied'))
+        hint='Esegui spesa_db.sql → sezione "ABILITA RLS E POLICY"';
+      else if(m.includes('does not exist')||m.includes('relation'))
+        hint='Esegui spesa_db.sql per creare le tabelle';
+      else if(m.includes('fetch')||m.includes('network')||m.includes('Failed'))
+        hint='Controlla la connessione internet';
+      else if(m.includes('JWT')||m.includes('401'))
+        hint='API key non valida';
+      lines.push('<div style="padding:6px 0;border-bottom:1px solid #eee">'
+        +'<div style="display:flex;gap:8px;align-items:center"><span>❌</span><span style="flex:1;font-size:13px">'+t.name+'</span><b style="color:red;font-size:12px">ERRORE</b></div>'
+        +(hint?'<div style="font-size:12px;color:#8B4513;margin:3px 0 0 26px">→ '+hint+'</div>':'')
+        +'<div style="font-size:10px;color:#aaa;margin:2px 0 0 26px;font-family:monospace">'+m.slice(0,180)+'</div>'
+        +'</div>');
     }
   }
-  btn.textContent='🔌 Testa connessione DB';
-  btn.disabled=false;
-  alert('Risultati test:
 
-'+results.join('
-'));
+  const bg=document.createElement('div');
+  bg.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:299';
+  const panel=document.createElement('div');
+  panel.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;border-radius:14px;padding:24px;max-width:500px;width:92%;z-index:300;box-shadow:0 8px 40px rgba(0,0,0,.3);max-height:85vh;overflow-y:auto';
+  panel.innerHTML='<div style="font-family:'DM Serif Display',serif;font-size:19px;margin-bottom:14px">'
+    +(allOk?'✅ Database perfettamente funzionante':'⚠️ Problemi di connessione trovati')
+    +'</div>'
+    +lines.join('')
+    +(!allOk?'<div style="background:#FFF8E1;border:1px solid #D4B400;border-radius:8px;padding:12px 14px;margin-top:14px;font-size:13px;color:#5C4800">'
+      +'<b>Come risolvere:</b><br>'
+      +'1. Apri Supabase → SQL Editor<br>'
+      +'2. Incolla ed esegui il file <b>spesa_db.sql</b><br>'
+      +'3. Torna qui e ricarica la pagina</div>':'')
+    +'<div style="display:flex;gap:8px;margin-top:16px;justify-content:flex-end">'
+    +(allOk?'<button class="btn btn-primary" onclick="document.querySelectorAll('[data-diag]').forEach(e=>e.remove());location.reload()">↻ Ricarica app</button>':'')
+    +'<button class="btn" onclick="document.querySelectorAll('[data-diag]').forEach(e=>e.remove())">Chiudi</button></div>';
+  bg.dataset.diag='1'; panel.dataset.diag='1';
+  bg.onclick=()=>document.querySelectorAll('[data-diag]').forEach(e=>e.remove());
+  document.body.appendChild(bg);
+  document.body.appendChild(panel);
+
+  btn.textContent='🔌 Diagnosi DB';
+  btn.disabled=false;
+
+  if(allOk){
+    try{
+      await Promise.all([loadStock(),loadIdeal(),loadLog(),loadSessions()]);
+      renderDashboard();
+      setPill('ok','Supabase ✓');
+    }catch(e){}
+  }
 }
 
 function setPill(t,l){
