@@ -444,7 +444,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
       <div class="card-header">
         <div>
           <div class="card-title">📷 Scontrino — Lettura automatica OCR</div>
-          <div class="card-sub">Nessuna AI esterna: il testo viene letto direttamente nel tuo browser con Tesseract.js</div>
+          <div class="card-sub">Funziona completamente nel browser — nessuna connessione esterna richiesta</div>
         </div>
       </div>
       <div class="drop-zone" id="scan-drop">
@@ -457,7 +457,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
         <img id="scan-preview" class="preview-img" alt="">
       </div>
       <div style="display:none;gap:8px;padding:0 20px 14px;flex-wrap:wrap" id="scan-ocr-actions">
-        <button class="btn btn-primary" id="ocr-btn" onclick="runOCR()">🔍 Leggi scontrino (OCR + AI)</button>
+        <button class="btn btn-primary" id="ocr-btn" onclick="runOCR()">🔍 Leggi scontrino</button>
         <button class="btn" onclick="clearScanImg()">✕ Rimuovi</button>
       </div>
       <div class="loading-bar" id="ocr-loading">
@@ -482,13 +482,15 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
     <div class="card">
       <div class="card-header"><div class="card-title">💡 Come funziona e consigli</div></div>
       <div style="padding:14px 20px;display:flex;flex-direction:column;gap:8px">
-        <div style="display:flex;gap:8px;align-items:flex-start;font-size:13px"><span>1️⃣</span> <strong>Tesseract</strong> legge il testo dallo scontrino nel tuo browser</div>
-        <div style="display:flex;gap:8px;align-items:flex-start;font-size:13px"><span>2️⃣</span> <strong>Claude AI</strong> interpreta il testo e estrae prodotti + prezzi</div>
-        <div style="display:flex;gap:8px;align-items:flex-start;font-size:13px"><span>3️⃣</span> Rivedi la tabella e correggi se necessario, poi salva</div>
-        <div style="border-top:1px solid var(--border);padding-top:10px;margin-top:4px;font-size:12px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.05em">Per foto migliori</div>
-        <div style="display:flex;gap:8px;align-items:flex-start;font-size:13px"><span>📐</span> Scontrino disteso e piatto, fotografa dall'alto</div>
-        <div style="display:flex;gap:8px;align-items:flex-start;font-size:13px"><span>💡</span> Buona luce naturale, evita ombre sul testo</div>
-        <div style="display:flex;gap:8px;align-items:flex-start;font-size:13px"><span>🔍</span> Più la foto è nitida, più prodotti vengono rilevati</div>
+        <div style="display:flex;gap:8px;align-items:flex-start;font-size:13px"><span>⚡</span> <strong>Tutto nel browser</strong> — nessuna connessione esterna, funziona offline</div>
+        <div style="display:flex;gap:8px;align-items:flex-start;font-size:13px"><span>1️⃣</span> Carica o fotografa lo scontrino</div>
+        <div style="display:flex;gap:8px;align-items:flex-start;font-size:13px"><span>2️⃣</span> Premi <strong>Leggi scontrino</strong> — Tesseract estrae il testo automaticamente</div>
+        <div style="display:flex;gap:8px;align-items:flex-start;font-size:13px"><span>3️⃣</span> Controlla la tabella, correggi se vuoi, poi <strong>Salva in dispensa</strong></div>
+        <div style="border-top:1px solid var(--border);padding-top:10px;margin-top:6px;font-size:12px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.05em">📷 Per risultati migliori</div>
+        <div style="display:flex;gap:8px;align-items:flex-start;font-size:13px"><span>☀️</span> Buona luce — la qualità foto è tutto</div>
+        <div style="display:flex;gap:8px;align-items:flex-start;font-size:13px"><span>📐</span> Scontrino piatto, foto dall'alto senza ombre</div>
+        <div style="display:flex;gap:8px;align-items:flex-start;font-size:13px"><span>🔍</span> Usa "Testo grezzo OCR" per vedere cosa ha letto Tesseract</div>
+        <div style="display:flex;gap:8px;align-items:flex-start;font-size:13px"><span>✏️</span> Aggiungi righe manualmente se mancano prodotti</div>
       </div>
     </div>
   </div>
@@ -1173,33 +1175,33 @@ async function runOCR(){
   btn.disabled=true; bar.classList.add('visible'); prog.style.width='0%';
 
   try{
-    // ── STEP 1: OCR con Tesseract ──────────────────────────────
     ltxt.textContent='Lettura testo dallo scontrino...';
+
     const result=await Tesseract.recognize(scanImgData,'ita+eng',{
       logger:m=>{
         if(m.status==='recognizing text'){
-          const p=Math.round(m.progress*50); // 0-50%
-          prog.style.width=p+'%';
-          ltxt.textContent='OCR: '+p*2+'%';
+          prog.style.width=Math.round(m.progress*100)+'%';
+          ltxt.textContent='Lettura: '+Math.round(m.progress*100)+'%';
+        }else{
+          ltxt.textContent=m.status+'...';
         }
       }
     });
+
     const rawText=result.data.text;
     document.getElementById('ocr-raw-text').textContent=rawText;
-    prog.style.width='55%';
-
-    if(!rawText||rawText.trim().length<10){
-      throw new Error('Il testo OCR è troppo breve. Riprova con una foto più nitida.');
-    }
-
-    // ── STEP 2: Manda il testo grezzo a Claude per l'interpretazione ──
-    ltxt.textContent='AI sta interpretando i prodotti...';
-    ocrRows = await parseReceiptWithAI(rawText, ltxt, prog);
     prog.style.width='100%';
 
+    if(!rawText||rawText.trim().length<5){
+      throw new Error('Testo non rilevato. Riprova con una foto più nitida e ben illuminata.');
+    }
+
+    ltxt.textContent='Analisi prodotti...';
+    ocrRows=parseReceipt(rawText);
+
     if(!ocrRows.length){
-      toast('Nessun prodotto trovato. Controlla il testo grezzo e aggiungili manualmente.','warn');
-    } else {
+      toast('Nessun prodotto trovato. Premi "Testo grezzo OCR" per vedere cosa ha letto e aggiungi righe manualmente.','warn');
+    }else{
       toast('✓ '+ocrRows.length+' prodotti trovati!','ok');
     }
     renderOCRTable();
@@ -1214,143 +1216,165 @@ async function runOCR(){
   }
 }
 
-// ── AI parser: manda il testo OCR grezzo a Claude e ottieni JSON prodotti ──
-async function parseReceiptWithAI(rawText, ltxtEl, progEl){
-  progEl.style.width='60%';
-  if(ltxtEl) ltxtEl.textContent='Claude analizza lo scontrino...';
+/*
+  parseReceipt — parser robusto per scontrini italiani
+  Strategia: analizza più pattern contemporaneamente e li combina.
+  Gestisce i 3 formati più comuni degli scontrini italiani:
 
-  const prompt=`Sei un assistente che analizza scontrini della spesa italiani.
-Ti fornisco il testo grezzo estratto da uno scontrino con OCR (può contenere errori di riconoscimento).
-Il tuo compito è estrarre TUTTI i prodotti acquistati con il loro prezzo.
+  Formato A (Coop, Ipercoop):
+    PASTA BARILLA SPAGH  500G        1,39 A
+    LATTE INTERO 1L                  1,15 A
+    PARMIGIANO GR      0,200KG      3,58 B
 
-TESTO SCONTRINO:
-\`\`\`
-${rawText}
-\`\`\`
+  Formato B (con codice articolo):
+    *123456 OLIO EVO CL75           4,99
+    *789012 ACQUA NATUR 1,5L x6     2,10
 
-REGOLE:
-- Estrai OGNI prodotto con prezzo unitario. Non saltare nessuno.
-- I prezzi sugli scontrini italiani sono in formato X,XX (virgola) o X.XX
-- Ignora: totale, subtotale, IVA, sconti, resti, intestazione negozio, data/ora, punti, tessera
-- Se un prodotto ha sconto separato, usa il prezzo finale scontato
-- Normalizza i nomi: prima lettera maiuscola, resto minuscolo, leggibile
-- Se OCR ha sbagliato caratteri (es. 0 vs O, 1 vs I, rn vs m) correggili se puoi intuire il prodotto
-- qty: se la riga mostra "2 x 1,50" allora qty=2 e price=1.50; altrimenti qty=1
-- unit: scegli tra pz, kg, g, L, ml, conf (default: pz)
-- category: scegli la più appropriata tra: Frutta e verdura, Carne e pesce, Latticini, Pane e pasta, Bevande, Dolci e snack, Igiene, Pulizia, Altro
+  Formato C (quantità x prezzo):
+    MELA GOLDEN 1,200 KG x 1,89    2,27
+    2 x YOGURT BIANCO               1,58
+*/
+function parseReceipt(text){
+  const lines = text.split('\n');
+  const rows  = [];
+  const seen  = new Set();
 
-Rispondi SOLO con JSON valido, zero testo extra, zero backtick, zero markdown.
-Formato esatto: {"items":[{"name":"Nome prodotto","qty":1,"price":1.59,"unit":"pz","category":"Altro"}]}
+  /* ── Parole/righe da ignorare completamente ── */
+  const SKIP = /^\s*(totale|sub.?totale|iva|aliquota|sconto|punti|tessera|fidelity|
+    resto|contante|carta|bancomat|visa|mastercard|american|satispay|
+    codice fiscale|partita iva|scontrino|documento|ricevuta|
+    cassa|operatore|addetto|numero|data|ora|giorno|
+    benvenuto|grazie|arrivederci|buona|spesa|prossima|
+    www\.|http|\.it|\.com|
+    ipercoop|coop|esselunga|conad|lidl|aldi|penny|supermercato|iper|
+    esercizio|negozio|sede|indirizzo|via |piazza |corso |
+    cap |tel|fax|p\.iva|c\.f\.|reg\.|rea\.|
+    importo|pagamento|transaz|approvato|terminal|pos|autorizzaz|
+    credito|debito|saldo|disponib|
+    eur|€|totale articoli|nr\.|n\.|
+    [0-9]{6,}               ← solo numeri lunghi = codice barcode
+  )/ix;
 
-Se non riesci a trovare nessun prodotto: {"items":[],"error":"Nessun prodotto identificabile"}`;
+  /* ── Regex prezzi: cattura numero con 2 decimali (virgola o punto) ── */
+  // Alla fine riga: "1,39 A" o "1.39" o "1,39" o "€1,39"
+  const RE_PRICE_END = /(\d{1,4}[.,]\d{2})\s*[A-F]?\s*$/;
+  // In mezzo: "x 1,89" o "X1.89" o "* 1,89"
+  const RE_PRICE_MID = /[xX\*]\s*(\d{1,4}[.,]\d{2})/;
+  // Peso x prezzo unitario: "1,234 KG x 2,49" → totale = qty*price
+  const RE_KG = /(\d+[.,]\d+)\s*(?:kg|KG|Kg)\s*[xX\*]?\s*(\d+[.,]\d{2})/;
+  // Qty x product: "3 x YOGURT"
+  const RE_QTY_FIRST = /^(\d+)\s*[xX]\s+(.+)/;
 
-  const res=await fetch('https://api.anthropic.com/v1/messages',{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({
-      model:'claude-sonnet-4-20250514',
-      max_tokens:2000,
-      messages:[{role:'user',content:prompt}]
-    })
-  });
+  function toFloat(s){ return parseFloat(String(s).replace(',','.')); }
 
-  if(!res.ok){
-    const errText=await res.text();
-    console.warn('Claude API error:',errText);
-    // Fallback al parser locale se Claude non è disponibile
-    if(ltxtEl) ltxtEl.textContent='AI non disponibile, uso parser locale...';
-    progEl.style.width='80%';
-    return parseReceiptLocal(rawText);
+  function cleanName(s){
+    return s
+      .replace(/^\*+/,'')               // asterisco iniziale
+      .replace(/^[0-9]{4,}\s*/,'')       // codice articolo lungo
+      .replace(/\s+/g,' ')
+      .replace(/[_\-\.,:;*]+$/,'')       // punteggiatura finale
+      .trim()
+      .replace(/^(\w)/,c=>c.toUpperCase()); // prima lettera maiuscola
   }
 
-  const data=await res.json();
-  const text=(data.content||[]).map(b=>b.text||'').join('').trim();
-  progEl.style.width='90%';
-
-  let parsed;
-  try{
-    // Rimuovi eventuali backtick o testo extra
-    const clean=text.replace(/^[^{]*(\{)/,'$1').replace(/(\})[^}]*$/,'$1');
-    parsed=JSON.parse(clean);
-  }catch(e){
-    console.warn('JSON parse failed, trying fallback. Raw:', text);
-    return parseReceiptLocal(rawText);
+  function guessCat(n){
+    const s=n.toLowerCase();
+    if(/latte|yogurt|formaggio|parmigian|grana|mozzarell|burro|panna|ricotta|uov[ae]|pecorino|mascarpone|crescenza|fontina|asiago|brie|emmental|provolone/.test(s)) return 'Latticini';
+    if(/pasta|riso|pane|focaccia|grissini|farina|gallette|cereali|pizza|crackers|brioche|cornetto|lasagne|gnocchi|polenta|cous|quinoa|avena|orzo|farro/.test(s)) return 'Pane e pasta';
+    if(/pollo|tacchino|manzo|maiale|vitello|agnello|coniglio|carne|salume|prosciutto|salsicc|bresaola|mortadella|pancetta|speck|wurstel|pesce|tonno|salmone|merluzzo|branzino|orata|gamber|vongole|cozze|polpo/.test(s)) return 'Carne e pesce';
+    if(/acqua|succo|bibita|vino|birra|aranciata|cola|tè|caffe|gassosa|sprite|fanta|limonata|energy|drink|bevanda|lemon/.test(s)) return 'Bevande';
+    if(/mela|pera|arancia|banana|frutta|verdura|pomodor|insalata|zucchina|carota|patata|cipolla|aglio|broccoli|spinaci|limone|funghi|peperone|melanzana|finocchio|sedano|porri|cavolo|radicchio|rucola|basilico|kiwi|uva|fragola|pesca|melone|anguria|mandarino/.test(s)) return 'Frutta e verdura';
+    if(/biscotti|cioccolat|gelato|snack|patatine|caramelle|dolce|torta|wafer|nutella|miele|marmellata|barretta|crackers dolci|pan di stelle|ringo|oreo/.test(s)) return 'Dolci e snack';
+    if(/shampoo|sapone|dentifricio|deodorant|bagnoschiuma|rasoio|crema|pannolin|assorbent|cotton|igiene|profumo|dopobarba|lacca|balsamo/.test(s)) return 'Igiene';
+    if(/detersivo|bucato|stoviglie|pulizia|spugna|lavastoviglie|ammorbident|candeggina|scottex|salviette|pavimenti|vetri|wc|bagno|sgrassatore/.test(s)) return 'Pulizia';
+    return 'Altro';
   }
 
-  if(parsed.error&&!parsed.items?.length){
-    // Claude non ha trovato prodotti → prova parser locale come fallback
-    return parseReceiptLocal(rawText);
-  }
-
-  return (parsed.items||[]).map(it=>({
-    name:    String(it.name||'').trim(),
-    qty:     Math.max(1, parseInt(it.qty)||1),
-    price:   parseFloat(String(it.price||0).replace(',','.'))||0,
-    unit:    ['pz','kg','g','L','ml','conf'].includes(it.unit)?it.unit:'pz',
-    category:CATS.includes(it.category)?it.category:'Altro'
-  })).filter(it=>it.name.length>1);
-}
-
-// ── Parser locale di fallback (usato se Claude API non risponde) ──────
-function parseReceiptLocal(text){
-  const lines=text.split('\n').map(l=>l.trim()).filter(l=>l.length>1);
-  const rows=[];
-  const seen=new Set();
-  const skipRe=/^(totale|sub.?totale|iva|sconto|resto|contante|carta|bancomat|visa|mastercard|codice fiscale|scontrino|cassa|operatore|benvenuto|grazie|arrivederci|www\.|http|partita iva|importo|pagamento|approvato|credito|debito|saldo|punti|tessera|esercizio)/i;
-
-  // Pattern prezzo alla fine riga: numero con 2 decimali + eventuale lettera IVA
-  const endPrice=/[\s\t]([0-9]{1,4}[.,][0-9]{2})\s*[A-F]?\s*$/;
-  // Pattern qty x prezzo
-  const qtyX=/([0-9]+)\s*[xX\*]\s*([0-9]+[.,][0-9]{2})/;
-
-  for(const line of lines){
-    if(skipRe.test(line))continue;
-    if(line.length<3||line.length>100)continue;
-
-    let name='', qty=1, price=0;
-
-    const qm=line.match(qtyX);
-    const pm=line.match(endPrice);
-
-    if(qm){
-      qty=parseInt(qm[1])||1;
-      price=parseFloat(qm[2].replace(',','.'))||0;
-      name=line.slice(0,line.search(qtyX)).trim();
-    }else if(pm){
-      price=parseFloat(pm[1].replace(',','.'))||0;
-      const idx=line.lastIndexOf(pm[1]);
-      name=line.slice(0,idx).trim();
-    }else continue;
-
-    // Pulizia nome
-    name=name.replace(/^[\*\.\-\d]{0,6}\s*/,'').replace(/[\s\-_.:;\*]+$/,'').trim();
-    if(name.length<2||price>500)continue;
-
-    const key=name.toLowerCase()+'|'+price.toFixed(2);
-    if(seen.has(key))continue;
+  function addRow(name, qty, price){
+    name = cleanName(name);
+    if(!name || name.length < 2) return;
+    if(price < 0 || price > 500) return;
+    // Rimuovi righe che sono chiaramente metadati
+    if(/^(tot|sub|iva|sc[oa]|res|con|car|ban|cas|ope|num|dat|or[ae]|gra|arr|www|htt|pun|tes|eur|€)/i.test(name)) return;
+    const key = name.toLowerCase().slice(0,20)+'|'+price.toFixed(2);
+    if(seen.has(key)) return;
     seen.add(key);
-
-    rows.push({
-      name: name.charAt(0).toUpperCase()+name.slice(1).toLowerCase(),
-      qty, price,
-      unit:'pz',
-      category:guessCat(name)
-    });
+    rows.push({ name, qty:Math.max(1,qty), price, unit:'pz', category:guessCat(name) });
   }
-  return rows;
-}
 
-function guessCat(n){
-  n=n.toLowerCase();
-  if(/latte|yogurt|formaggio|parmigian|grana|mozzarella|burro|panna|ricotta|uova|uov|pecorino|mascarpone/.test(n))return'Latticini';
-  if(/pasta|riso|pane|focaccia|grissini|farina|gallette|cereali|pizza|crackers|brioche|lasagne|gnocchi/.test(n))return'Pane e pasta';
-  if(/pollo|carne|manzo|maiale|tacchino|salume|prosciutto|salsicc|pesce|tonno|salmone|bresaola|mortadella|pancetta|speck|wurstel/.test(n))return'Carne e pesce';
-  if(/acqua|succo|bibita|vino|birra|aranciata|cola|caffe|gassosa|sprite|fanta|limonata/.test(n))return'Bevande';
-  if(/mela|pera|arancia|banana|frutta|verdura|pomodor|insalata|zucchina|carota|patata|cipolla|aglio|spinaci|limone|funghi/.test(n))return'Frutta e verdura';
-  if(/biscott|cioccolat|gelato|snack|patatine|caramelle|dolce|torta|wafer|nutella|miele|marmellata/.test(n))return'Dolci e snack';
-  if(/shampoo|sapone|dentifricio|deodorant|bagnoschiuma|rasoio|crema|pannolin|assorbent/.test(n))return'Igiene';
-  if(/detersivo|bucato|stoviglie|pulizia|spugna|lavastoviglie|ammorbident|candeggina|scottex/.test(n))return'Pulizia';
-  return'Altro';
+  for(let i=0; i<lines.length; i++){
+    const raw = lines[i];
+    const line = raw.trim();
+    if(!line || line.length < 2) continue;
+    if(SKIP.test(line)) continue;
+    if(/^\d+$/.test(line)) continue;          // solo numeri = skip
+    if(line.replace(/[^a-zA-ZàèìòùÀÈÌÒÙ]/g,'').length < 2) continue; // niente lettere = skip
+
+    // ── Pattern A: peso x prezzo unitario  "1,234 KG x 2,49  3,07"
+    const kgM = line.match(RE_KG);
+    if(kgM){
+      const kg    = toFloat(kgM[1]);
+      const pUnit = toFloat(kgM[2]);
+      const pEnd  = line.match(RE_PRICE_END);
+      const pFin  = pEnd ? toFloat(pEnd[1]) : kg*pUnit;
+      // Nome = tutto prima del match peso
+      const nmRaw = line.slice(0, line.search(RE_KG)).trim();
+      addRow(nmRaw || 'Prodotto a peso', 1, pFin);
+      continue;
+    }
+
+    // ── Pattern B: "2 x NOME PRODOTTO   prezzo"  (qty all'inizio)
+    const qfM = line.match(RE_QTY_FIRST);
+    if(qfM){
+      const qty = parseInt(qfM[1]);
+      const rest = qfM[2];
+      const pm = rest.match(RE_PRICE_END) || rest.match(RE_PRICE_MID);
+      if(pm){
+        const price = toFloat(pm[1]);
+        const nmRaw = rest.slice(0, rest.search(pm[0]===pm[1]?RE_PRICE_END:RE_PRICE_MID)).trim();
+        addRow(nmRaw, qty, price);
+        continue;
+      }
+    }
+
+    // ── Pattern C: prezzo alla fine riga (formato più comune Coop)
+    const pmEnd = line.match(RE_PRICE_END);
+    if(pmEnd){
+      const price  = toFloat(pmEnd[1]);
+      const priceStr = pmEnd[1];
+      const priceIdx = line.lastIndexOf(priceStr);
+      let nmRaw  = line.slice(0, priceIdx).trim();
+
+      // Controlla se c'è un prezzo unitario prima (formato "NOME  PREZZO_UNIT  PREZZO_TOT")
+      const pmMid = nmRaw.match(RE_PRICE_END);
+      if(pmMid){
+        nmRaw = nmRaw.slice(0, nmRaw.lastIndexOf(pmMid[1])).trim();
+      }
+
+      // Controlla se la riga successiva ha solo un prezzo (continuazione del nome)
+      if(nmRaw.length < 3 && i+1 < lines.length){
+        const next = lines[i+1].trim();
+        if(next && !SKIP.test(next) && !/^\d/.test(next)){
+          nmRaw = next + ' ' + nmRaw;
+          i++; // salta riga successiva
+        }
+      }
+
+      addRow(nmRaw, 1, price);
+      continue;
+    }
+
+    // ── Pattern D: prezzo in mezzo "NOME x 1,99" senza prezzo finale
+    const pmMid = line.match(RE_PRICE_MID);
+    if(pmMid){
+      const price  = toFloat(pmMid[1]);
+      const midIdx = line.search(RE_PRICE_MID);
+      const nmRaw  = line.slice(0, midIdx).trim();
+      addRow(nmRaw, 1, price);
+    }
+  }
+
+  return rows;
 }
 
 
