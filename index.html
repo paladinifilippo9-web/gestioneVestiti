@@ -356,43 +356,103 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);displ
 
   <!-- SCONTRINO OCR -->
   <div id="pg-scan" class="pg">
-    <div class="card" style="margin-bottom:16px">
-      <div class="ch"><div><div class="ct">📷 Scontrino — OCR</div><div class="cs">Lettura automatica nel browser (Tesseract.js) — gratis, nessun abbonamento</div></div></div>
+
+    <!-- STEP 1: Foto -->
+    <div class="card" style="margin-bottom:14px">
+      <div class="ch">
+        <div>
+          <div class="ct">📷 Step 1 — Carica la foto</div>
+          <div class="cs">Scontrino piatto, buona luce, foto verticale dall'alto</div>
+        </div>
+      </div>
       <div class="dz" id="scan-dz">
         <input type="file" id="scan-fi" accept="image/*">
         <div style="font-size:26px;margin-bottom:6px">🧾</div>
-        <div style="font-size:13px;color:var(--tx2)"><strong style="color:var(--tx);display:block;margin-bottom:2px">Carica o fotografa lo scontrino</strong>Scontrino piatto, buona luce, foto dall'alto</div>
+        <div style="font-size:13px;color:var(--tx2)">
+          <strong style="color:var(--tx);display:block;margin-bottom:2px">Carica o fotografa lo scontrino</strong>
+          Clicca qui o trascina l'immagine
+        </div>
         <img id="scan-pv" class="pv" alt="">
       </div>
       <div style="display:none;gap:8px;padding:0 20px 14px;flex-wrap:wrap" id="scan-acts">
-        <button class="btn pr" id="ocr-btn" onclick="runOCR()">🔍 Leggi scontrino</button>
-        <button class="btn" onclick="clearScanImg()">✕ Rimuovi</button>
+        <button class="btn pr" id="ocr-btn" onclick="runOCR()">🔍 Leggi testo dallo scontrino</button>
+        <button class="btn" onclick="clearScanImg()">✕ Rimuovi foto</button>
       </div>
-      <div class="lb" id="ocr-lb"><div class="sp"></div><span id="ocr-lt">Lettura in corso...</span><div class="pbw"><div class="pbf" id="ocr-pb" style="width:0%"></div></div></div>
-      <div id="ocr-res" style="display:none;padding:0 20px 16px">
-        <div style="font-size:12px;font-weight:600;color:var(--tx2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Prodotti trovati — correggi e salva</div>
-        <button class="btn sm" style="margin-bottom:10px" onclick="toggleRaw()">👁 Testo grezzo OCR</button>
-        <div id="ocr-raw" style="display:none;font-size:11px;color:var(--tx3);font-family:monospace;background:var(--sur2);border-radius:var(--r);padding:10px;margin-bottom:12px;max-height:120px;overflow-y:auto;white-space:pre-wrap"></div>
-        <div style="overflow-x:auto"><table class="ot" id="ocr-tbl"><thead><tr><th>Prodotto</th><th>Qtà</th><th>Prezzo €</th><th>Categoria</th><th></th></tr></thead><tbody id="ocr-tbody"></tbody></table></div>
-        <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
-          <button class="btn pr" onclick="confirmOCR()">✓ Salva in dispensa</button>
-          <button class="btn" onclick="addOCRRow()">+ Riga</button>
-          <button class="btn" onclick="cancelOCR()">✕ Annulla</button>
+      <div class="lb" id="ocr-lb">
+        <div class="sp"></div>
+        <span id="ocr-lt">Lettura in corso...</span>
+        <div class="pbw"><div class="pbf" id="ocr-pb" style="width:0%"></div></div>
+      </div>
+    </div>
+
+    <!-- STEP 2: Testo grezzo editabile -->
+    <div class="card" id="step2-card" style="display:none;margin-bottom:14px">
+      <div class="ch">
+        <div>
+          <div class="ct">✏️ Step 2 — Testo letto (modificabile)</div>
+          <div class="cs">Tesseract ha letto questo testo. Correggilo se ci sono errori, poi analizza.</div>
+        </div>
+      </div>
+      <div style="padding:14px 20px">
+        <textarea id="ocr-raw-edit"
+          style="width:100%;height:200px;font-family:monospace;font-size:12px;padding:10px;border:1px solid var(--brd2);border-radius:var(--r);background:var(--sur2);color:var(--tx);resize:vertical;outline:none;line-height:1.6"
+          placeholder="Il testo dello scontrino apparirà qui..."></textarea>
+        <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+          <button class="btn pr" onclick="parseFromText()">⚙️ Analizza testo → estrai prodotti</button>
+          <button class="btn" onclick="document.getElementById('step2-card').style.display='none'">← Torna alla foto</button>
+        </div>
+        <div style="font-size:12px;color:var(--tx3);margin-top:8px">
+          💡 Puoi modificare il testo qui sopra prima di analizzarlo. Ogni riga con NOME e PREZZO (es: <em>PASTA BARILLA 1,39</em>) diventa un prodotto.
         </div>
       </div>
     </div>
-      <div class="ch"><div class="ct">💡 Come funziona</div></div>
-      <div style="padding:14px 20px;display:flex;flex-direction:column;gap:8px">
-        <div style="background:var(--grl);border:1px solid #A8CCA5;border-radius:var(--r);padding:10px 14px;font-size:13px;color:var(--gr);margin-bottom:4px">
-          ✅ <strong>Gratis e senza registrazione</strong> — usa Tesseract.js, motore OCR open source
+
+    <!-- STEP 3: Tabella prodotti -->
+    <div class="card" id="step3-card" style="display:none;margin-bottom:14px">
+      <div class="ch">
+        <div>
+          <div class="ct">✅ Step 3 — Prodotti estratti</div>
+          <div class="cs">Correggi se necessario, poi salva in dispensa</div>
         </div>
-        <div style="font-size:13px;display:flex;gap:8px"><span>🌐</span> <div><strong>Richiede internet</strong> solo al primo utilizzo per scaricare i dizionari (≈10MB). Poi funziona anche offline.</div></div>
-        <div style="font-size:13px;display:flex;gap:8px"><span>☀️</span> Buona luce naturale, evita ombre sul testo</div>
-        <div style="font-size:13px;display:flex;gap:8px"><span>📐</span> Scontrino piatto, foto verticale dall'alto</div>
-        <div style="font-size:13px;display:flex;gap:8px"><span>🔍</span> Più la foto è a fuoco, più prodotti vengono rilevati</div>
-        <div style="font-size:13px;display:flex;gap:8px"><span>✏️</span> Puoi correggere ogni campo prima di salvare, o aggiungere righe mancanti</div>
-        <div style="font-size:13px;display:flex;gap:8px"><span>👁</span> Usa "Testo grezzo OCR" per vedere cosa ha letto Tesseract</div>
+        <div class="ca">
+          <button class="btn sm" onclick="addOCRRow()">+ Riga</button>
+        </div>
       </div>
+      <div style="padding:0 20px 6px;overflow-x:auto">
+        <table class="ot" id="ocr-tbl">
+          <thead><tr><th>Prodotto</th><th>Qtà</th><th>Prezzo €</th><th>Categoria</th><th></th></tr></thead>
+          <tbody id="ocr-tbody"></tbody>
+        </table>
+      </div>
+      <div style="padding:12px 20px;border-top:1px solid var(--brd);display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <button class="btn pr" onclick="confirmOCR()">✓ Salva tutto in dispensa</button>
+        <button class="btn" onclick="document.getElementById('step3-card').style.display='none';document.getElementById('step2-card').style.display='block'">← Modifica testo</button>
+        <button class="btn dr" onclick="cancelOCR()">✕ Annulla</button>
+        <span id="ocr-count" style="font-size:13px;color:var(--tx2);margin-left:4px"></span>
+      </div>
+    </div>
+
+    <!-- Info box -->
+    <div class="card">
+      <div class="ch"><div class="ct">💡 Come funziona — step by step</div></div>
+      <div style="padding:14px 20px;display:flex;flex-direction:column;gap:10px">
+        <div style="background:var(--grl);border:1px solid #A8CCA5;border-radius:var(--r);padding:10px 14px;font-size:13px;color:var(--gr)">
+          ✅ <strong>100% gratis</strong> — Tesseract.js è open source. I dizionari (~10MB) si scaricano automaticamente dal browser la prima volta, non devi fare nulla.
+        </div>
+        <div style="display:flex;gap:10px;align-items:flex-start;font-size:13px">
+          <span style="background:var(--gr);color:#fff;border-radius:99px;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">1</span>
+          <div><strong>Carica la foto</strong> — scontrino piatto, buona luce, senza ombre</div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:flex-start;font-size:13px">
+          <span style="background:var(--gr);color:#fff;border-radius:99px;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">2</span>
+          <div><strong>Leggi testo</strong> — Tesseract converte la foto in testo. Puoi <strong>modificare il testo</strong> se ci sono errori prima di analizzarlo.</div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:flex-start;font-size:13px">
+          <span style="background:var(--gr);color:#fff;border-radius:99px;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">3</span>
+          <div><strong>Analizza</strong> — estrae i prodotti con prezzi in una tabella modificabile, poi salva in dispensa.</div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- CONSUMI -->
@@ -1035,7 +1095,10 @@ function clearScanImg(){
   const pv=document.getElementById('scan-pv');if(pv){pv.src='';pv.style.display='none';}
   const ac=document.getElementById('scan-acts');if(ac)ac.style.display='none';
   const fi=document.getElementById('scan-fi');if(fi)fi.value='';
-  document.getElementById('ocr-res').style.display='none';ocrRows=[];
+  const s2=document.getElementById('step2-card');if(s2)s2.style.display='none';
+  const s3=document.getElementById('step3-card');if(s3)s3.style.display='none';
+  const ta=document.getElementById('ocr-raw-edit');if(ta)ta.value='';
+  ocrRows=[];
 }
 async function runOCR(){
   if(!scanImg)return;
@@ -1046,96 +1109,86 @@ async function runOCR(){
   if(btn)btn.disabled=true;
   if(lb)lb.classList.add('on');
   if(pb)pb.style.width='0%';
-  if(lt)lt.textContent='Avvio motore OCR...';
+  if(lt)lt.textContent='Avvio Tesseract...';
+  // Nascondi step 2 e 3
+  const s2=document.getElementById('step2-card');
+  const s3=document.getElementById('step3-card');
+  if(s2)s2.style.display='none';
+  if(s3)s3.style.display='none';
 
   let worker=null;
   try{
-    // Tesseract.js v4 — path espliciti per funzionare da file locale
     worker = await Tesseract.createWorker({
-      workerPath:  'https://cdn.jsdelivr.net/npm/tesseract.js@4.1.4/dist/worker.min.js',
-      langPath:    'https://tessdata.projectnaptha.com/4.0.0',
-      corePath:    'https://cdn.jsdelivr.net/npm/tesseract.js-core@4.0.4/tesseract-core-simd.wasm.js',
+      workerPath: 'https://cdn.jsdelivr.net/npm/tesseract.js@4.1.4/dist/worker.min.js',
+      langPath:   'https://tessdata.projectnaptha.com/4.0.0',
+      corePath:   'https://cdn.jsdelivr.net/npm/tesseract.js-core@4.0.4/tesseract-core-simd.wasm.js',
       logger: m=>{
         if(!lt||!pb)return;
-        if(m.status==='loading tesseract core'){
-          if(lt)lt.textContent='Caricamento motore OCR...';
-          if(pb)pb.style.width='5%';
-        } else if(m.status==='initializing tesseract'){
-          if(lt)lt.textContent='Inizializzazione...';
-          if(pb)pb.style.width='15%';
-        } else if(m.status==='loading language traineddata'){
-          if(lt)lt.textContent='Caricamento dizionario italiano...';
-          if(pb)pb.style.width='30%';
-        } else if(m.status==='initializing api'){
-          if(lt)lt.textContent='Avvio analisi...';
-          if(pb)pb.style.width='45%';
-        } else if(m.status==='recognizing text'){
-          const pct=Math.round(45 + m.progress*55);
-          if(lt)lt.textContent='Lettura testo: '+pct+'%';
-          if(pb)pb.style.width=pct+'%';
+        if(m.status==='loading tesseract core'){ lt.textContent='Caricamento motore...'; pb.style.width='5%'; }
+        else if(m.status==='initializing tesseract'){ lt.textContent='Inizializzazione...'; pb.style.width='15%'; }
+        else if(m.status==='loading language traineddata'){ lt.textContent='Caricamento dizionario (si scarica solo la prima volta)...'; pb.style.width='35%'; }
+        else if(m.status==='initializing api'){ lt.textContent='Avvio analisi...'; pb.style.width='50%'; }
+        else if(m.status==='recognizing text'){
+          const p=Math.round(50+m.progress*50);
+          lt.textContent='Lettura testo: '+p+'%'; pb.style.width=p+'%';
         }
       }
     });
-
-    if(lt)lt.textContent='Caricamento lingue...';
     await worker.loadLanguage('ita+eng');
     await worker.initialize('ita+eng');
-
-    // Parametri per scontrini: font monospace, tutto maiuscolo
-    await worker.setParameters({
-      tessedit_char_whitelist: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789.,€ \'"-/()àèìòùÀÈÌÒÙáéíóú',
-      preserve_interword_spaces: '1',
-    });
-
-    if(lt)lt.textContent='Lettura scontrino in corso...';
     const { data } = await worker.recognize(scanImg);
     const raw = data.text || '';
-
-    if(pb)pb.style.width='100%';
-    const rw=document.getElementById('ocr-raw');
-    if(rw)rw.textContent=raw;
+    pb.style.width='100%';
 
     if(!raw.trim()||raw.trim().length<5){
-      throw new Error('Nessun testo rilevato. Riprova con una foto più nitida e con buona luce.');
+      throw new Error('Nessun testo trovato nella foto. Riprova con una foto più nitida.');
     }
 
-    if(lt)lt.textContent='Analisi prodotti...';
-    ocrRows=parseReceipt(raw);
-    renderOCRTable();
-    document.getElementById('ocr-res').style.display='block';
-    const msg=ocrRows.length>0
-      ?'✓ '+ocrRows.length+' prodotti trovati!'
-      :'Testo letto ma nessun prodotto rilevato — premi 👁 Testo grezzo e aggiungi manualmente';
-    toast(msg, ocrRows.length>0?'ok':'wn');
+    // Mostra il testo grezzo nello STEP 2 — editabile
+    const textarea=document.getElementById('ocr-raw-edit');
+    if(textarea) textarea.value=raw;
+    if(s2) s2.style.display='block';
+    // Scroll to step 2
+    if(s2) s2.scrollIntoView({behavior:'smooth',block:'start'});
+    toast('✓ Testo letto! Controllalo e premi "Analizza testo"','ok');
 
   }catch(e){
     console.error('OCR error:',e);
-    // Mostra errore dettagliato nella UI
-    const resEl=document.getElementById('ocr-res');
-    if(resEl){
-      resEl.style.display='block';
-      resEl.innerHTML=`<div style="background:var(--rdl);border:1px solid var(--rdb);border-radius:var(--r);padding:14px 16px;margin-bottom:12px">
-        <div style="font-weight:600;color:var(--rd);margin-bottom:6px">❌ Errore OCR</div>
-        <div style="font-size:13px;color:#5C2020;margin-bottom:10px">${esc(e.message)}</div>
-        <div style="font-size:13px;color:var(--tx2)">
-          Possibili cause:<br>
-          • Connessione internet assente (Tesseract scarica i dizionari dal web)<br>
-          • Foto troppo sfocata o con poca luce<br>
-          • Il file immagine è corrotto
-        </div>
-        <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
-          <button class="btn pr" onclick="document.getElementById('ocr-res').style.display='none';runOCR()">↻ Riprova</button>
-          <button class="btn" onclick="addOCRRow();document.getElementById('ocr-res').innerHTML='';renderOCRTable();document.getElementById('ocr-res').style.display='block'">✏️ Inserisci manualmente</button>
-        </div>
-      </div>`;
-    } else {
-      toast('Errore OCR: '+e.message);
+    // Mostra errore direttamente nel step 2 per dare comunque modo di inserire manualmente
+    if(s2){
+      s2.style.display='block';
+      const textarea=document.getElementById('ocr-raw-edit');
+      if(textarea) textarea.value='[ERRORE OCR: '+e.message+']\n\nPuoi inserire il testo manualmente qui sotto:\nEs:\nPASTA BARILLA 500G 1,39\nLATTE INTERO 1L 1,15\nAGUA MINERALE 6X1,5 2,10';
     }
+    toast('Errore Tesseract: '+e.message,'wn');
   }finally{
     if(worker)try{await worker.terminate();}catch(e){}
     if(btn)btn.disabled=false;
     if(lb)lb.classList.remove('on');
   }
+}
+
+// Analizza il testo (grezzo o modificato manualmente) ed estrae i prodotti
+function parseFromText(){
+  const textarea=document.getElementById('ocr-raw-edit');
+  if(!textarea)return;
+  const raw=textarea.value.trim();
+  if(!raw||raw.length<3){toast('Nessun testo da analizzare','wn');return;}
+
+  ocrRows=parseReceipt(raw);
+
+  // Aggiungi sempre almeno una riga vuota se non trova nulla
+  if(!ocrRows.length){
+    toast('Nessun prodotto rilevato automaticamente — aggiungi le righe manualmente','wn');
+    ocrRows=[{name:'',qty:1,price:0,unit:'pz',category:'Altro'}];
+  }
+
+  renderOCRTable();
+  const s3=document.getElementById('step3-card');
+  if(s3){s3.style.display='block';s3.scrollIntoView({behavior:'smooth',block:'start'});}
+  const cnt=document.getElementById('ocr-count');
+  if(cnt) cnt.textContent=ocrRows.filter(r=>r.name.trim()).length+' prodotti estratti';
+  if(ocrRows.length>1) toast('✓ '+ocrRows.length+' prodotti estratti!','ok');
 }
 
 function parseReceipt(text){
@@ -1198,7 +1251,10 @@ function renderOCRTable(){
   </tr>`).join('');
 }
 function addOCRRow(){ocrRows.push({name:'',qty:1,price:0,unit:'pz',category:'Altro'});renderOCRTable();}
-function cancelOCR(){document.getElementById('ocr-res').style.display='none';ocrRows=[];}
+function cancelOCR(){
+  const s3=document.getElementById('step3-card');if(s3)s3.style.display='none';
+  ocrRows=[];
+}
 function toggleRaw(){const el=document.getElementById('ocr-raw');if(el)el.style.display=el.style.display==='none'?'block':'none';}
 
 async function confirmOCR(){
