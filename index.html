@@ -336,7 +336,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);displ
           <option value="Altro">🛒 Altro</option><option value="Frutta e verdura">🥦 Frutta e verdura</option>
           <option value="Carne e pesce">🥩 Carne e pesce</option><option value="Latticini">🧀 Latticini</option>
           <option value="Pane e pasta">🍞 Pane e pasta</option><option value="Bevande">🧃 Bevande</option>
-          <option value="Dolci e snack">🍫 Dolci e snack</option><option value="Igiene">🧴 Igiene</option>
+          <option value="Dolci e snack">🍫 Dolci e snack</option><option value="Tofu e vegetali">🌿 Tofu e vegetali</option>
+          <option value="Bio e tisane">🌱 Bio e tisane</option><option value="Igiene">🧴 Igiene</option>
           <option value="Pulizia">🧹 Pulizia</option>
         </select>
         <select id="i-freq" class="w130"><option value="daily">📅 Quotidiano</option><option value="occasional">📆 Occasionale</option></select>
@@ -608,8 +609,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);displ
 const SB_URL='https://nfwzorbnlrudtpbnlmpt.supabase.co';
 const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5md3pvcmJubHJ1ZHRwYm5sbXB0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4MTU2NjgsImV4cCI6MjA5MjM5MTY2OH0.S59qMU1vfQtSYVIe8P0lfz6hp4bXKnhJRCPKXqliAlo';
 
-const CATS=['Frutta e verdura','Carne e pesce','Latticini','Pane e pasta','Bevande','Dolci e snack','Igiene','Pulizia','Altro'];
-const CICO={'Frutta e verdura':'🥦','Carne e pesce':'🥩','Latticini':'🧀','Pane e pasta':'🍞','Bevande':'🧃','Dolci e snack':'🍫','Igiene':'🧴','Pulizia':'🧹','Altro':'🛒'};
+const CATS=['Frutta e verdura','Carne e pesce','Latticini','Pane e pasta','Bevande','Dolci e snack','Tofu e vegetali','Bio e tisane','Igiene','Pulizia','Altro'];
+const CICO={'Frutta e verdura':'🥦','Carne e pesce':'🥩','Latticini':'🧀','Pane e pasta':'🍞','Bevande':'🧃','Dolci e snack':'🍫','Tofu e vegetali':'🌿','Bio e tisane':'🌱','Igiene':'🧴','Pulizia':'🧹','Altro':'🛒'};
 const PAGE_LABELS={'dashboard':'Dashboard','stock':'Dispensa','ideal':'Dispensa Ideale','shop':'Lista Spesa','scan':'Scontrino OCR','consume':'Registra Consumo','history':'Storico Spese','budget':'Gestione Soldi','offers':'Offerte Ipercoop','diag':'Diagnostica DB'};
 
 // ════════════════════════════════════════════════════════════════════
@@ -925,7 +926,17 @@ async function readIdealList(){
         {type:'text',text:`Leggi questa lista della spesa scritta a mano o su documento.
 Rispondi SOLO con JSON valido, niente testo extra.
 Formato: {"items":[{"name":"Nome","qty":1,"unit":"pz","category":"cat","frequency":"occasional"}]}
-unit: pz,kg,g,L,ml,conf | category: ${CATS.join(', ')} | frequency: daily o occasional
+Unità disponibili: pz,kg,g,L,ml,conf
+Categorie disponibili: ${CATS.join(', ')}
+frequency: daily (quotidiano: latte, pane, uova, frutta, verdura...) oppure occasional
+
+Regole speciali per categoria:
+- "Tofu e vegetali": tofu, seitan, burger vegetale, legumi, lenticchie, ceci, prodotti vegani/vegetariani
+- "Bio e tisane": prodotti biologici, tisane, camomilla, infusi, integratori, bustine di tè
+- "Carne e pesce": anche abbreviazioni come "pros.", "prsc.", "petto p.", "sal.", "wurs.", "manz."
+
+Interpreta le quantità: "2 latte 1L" → qty:2,unit:L | "4 gallette mais" → qty:4,unit:conf
+Correggi abbreviazioni comuni: "pros.cotto" → "Prosciutto cotto", "motz" → "Mozzarella"
 Se non leggibile: {"items":[],"error":"Non leggibile"}`}
       ]}]
     })});
@@ -1191,26 +1202,56 @@ function parseFromText(){
   if(ocrRows.length>1) toast('✓ '+ocrRows.length+' prodotti estratti!','ok');
 }
 
+// ── Categoria fuzzy: capisce abbreviazioni, troncature, errori OCR ──────
+function guessCategory(n){
+  if(!n)return'Altro';
+  const s=n.toLowerCase()
+    .replace(/[^a-zàèìòùáéíóú0-9 ]/g,' ')  // normalizza caratteri speciali
+    .replace(/\s+/g,' ').trim();
+
+  // Carne e pesce — fuzzy: "pros." "prosc" "prsc" "wurs" ecc.
+  if(/(poll|tac?ch|manzo|maial|vitel|agnell|conig|arrosto|bistec|cotol|scalop|fett[ae]|carne|sal[au]me|prosciut|prosc|pros|pros\.|wurs|lugan|salsicc|bresaol|mortad|pancet|speck|coppa|culatell|capicol|guancial|lardo|filetto|coscia|petto di|pesce|tonno|sacc|salmon|merluzzo|baccal|orata|bran?zino|gamber|calamari|polp|vongol|cozze|alici|sardine|sgombro|trota)/.test(s)) return 'Carne e pesce';
+
+  // Latticini
+  if(/(latte|yogurt|yog|formag|parmigia|parmes|grana|mozzar|mozz|burro|panna|ricot|uov[ae]|uova|uovo|pecor|mascarp|crescenz|fontina|asiago|brie|camembert|emmental|taleggio|caciotta|scamorz|provolone|philadelphia|stracch|stracchino)/.test(s)) return 'Latticini';
+
+  // Pane e pasta
+  if(/(pasta|rigatoni|spaghett|penne|fusil|farfall|taglia|paccheri|bucatini|riso|risotto|pane|panino|focacc|grissini|farina|gallette|gallet|cereal|pizza|crackers|brioche|cornett|lasagne|gnocc|polenta|cous|quinoa|avena|orzo|farro|semola|cannel|crostata|grissini)/.test(s)) return 'Pane e pasta';
+
+  // Tofu e vegetali (nuova categoria)
+  if(/(tofu|seitan|tempeh|burger veg|veggie|vegetale|vegetarian|vegan|soia|edamame|lenticchie|ceci|fagioli|fave|piselli|legumi|lupini|lenticch|hummus|quorn|prodotto veg)/.test(s)) return 'Tofu e vegetali';
+
+  // Bio e tisane (nuova categoria)
+  if(/(bio|biologico|organi|tisana|tisane|camomilla|finocchio tis|menta tis|verbena|echinacea|rooibos|mate|green tea|te verde|te nero|infuso|erborist|integratore|supplements|vitamine|zenzero tis|curcuma tis|bustina|bustine)/.test(s)) return 'Bio e tisane';
+
+  // Bevande
+  if(/(acqua|succo|bibita|vino|birra|aranciata|cola|caffe|caffè|gassosa|sprite|fanta|limonata|energy|redbull|the|tè|lemon|cedrata|chinotto|gazzosa|aperitivo|spumante|prosecco|liquore|whisky|rum|gin|vodka)/.test(s)) return 'Bevande';
+
+  // Frutta e verdura
+  if(/(mel[ae]|per[ae]|aranci|banana|fichi|kiwi|uva|fragol|pesche?|albicocch|cilieg|mango|papaia|ananas|cocco|lamponi|more|mirtil|frutta|verdura|insalata|pomodor|pomodo|zucchin|carota|patata|cipolla|aglio|broccoli|spinaci|limone|funghi|peperone|melanzana|finocchio|sedano|porri|cavolo|radici|radicchio|rucola|basilico|prezzemolo|erba cipollina|carciofi|asparagi|avocado|mais|corn)/.test(s)) return 'Frutta e verdura';
+
+  // Dolci e snack
+  if(/(biscot|cioccolat|gelato|snack|patatine|chips|caramel|dolce|torta|wafer|nutella|miele|marmellat|barretta|cereali dolci|pan di stelle|ringo|oreo|kinder|ferrero|ovetto|merenda|crackers dolci|crostata|croissant|plumcake|merendina|confetti)/.test(s)) return 'Dolci e snack';
+
+  // Igiene
+  if(/(shampoo|sapone|dentifricio|spazzolino|filo dental|deodorant|bagnoschiuma|docc?ia gel|rasoio|crema|pannolin|assorbent|cotton|igiene|profumo|dopobarba|lacca|balsamo|mascara|fondotinta|rossetto|make.?up|salviette umide)/.test(s)) return 'Igiene';
+
+  // Pulizia
+  if(/(detersivo|bucato|lavatrice|stoviglie|lavastoviglie|spugna|ammorbident|ammorb|candeggina|sbiancante|pavimenti|vetri|wc|bagno|sgrassatore|scottex|carta casa|tovaglioli|piatti usa|bicchieri usa|pattumiera|sacchetti)/.test(s)) return 'Pulizia';
+
+  return 'Altro';
+}
+
 function parseReceipt(text){
   const lines=text.split('\n');const rows=[];const seen=new Set();
-  const SK=/^\s*(totale|sub.?totale|iva|aliquota|sconto|punti|tessera|fidelity|resto|contante|carta|bancomat|visa|mastercard|satispay|codice fiscale|partita iva|scontrino|documento|ricevuta|cassa|operatore|addetto|numero|data|ora|giorno|benvenuto|grazie|arrivederci|buona|spesa|prossima|www\.|http|\.it|\.com|ipercoop|coop|esselunga|conad|lidl|supermercato|iper|esercizio|negozio|sede|indirizzo|via |piazza |cap |tel|fax|p\.iva|c\.f\.|importo|pagamento|transaz|approvato|terminal|pos|credito|debito|saldo|eur|€|totale articoli)/i;
+  // Pattern per riconoscere linee NON prodotto (intestazione, footer, metadati)
+  const SK=/^\s*(tot[a-z]*[\s\.:]*[€\d]|sub.?tot|iva[\s\d%]|aliquota|scont[oi]|punti|tessera|fidelit|resto[\s:€\d]|contante|bancoma|carta[\s:€]|visa|master|satispay|paypal|codice fiscale|partita.?iva|p\.?iva|c\.?f\.|scontrino|documento commerciale|ricevuta|n\.[\s\d]|cassa\b|operatore|addetto|num[eo]|data[\s:]|ora[\s:]|giorn[oi]|benvenuto|grazie|arrivederci|buona|a presto|prossima|www\.|http|@|email|negozio|esercizio|sede legale|indirizzo|via |piazza |corso |p\.zza|c\.so |cap[\s\d]|tel[\s:\.]|fax|cell|importo|pagamento|transazione|approvato|autorizzato|terminal|pos[\s\d]|debito|credito|disponib|saldo|eur[o\s]|€[\s\d]|totale[\s\*]|totale articoli|subtotal|nr\.?[\s\d]|articoli[\s:]|prezzo[\s:]|listino|ivato|reparto|rif\.|descrizione|quantita|descri)/i;
   const EP=/(\d{1,4}[.,]\d{2})\s*[A-F]?\s*$/;
   const QX=/(\d+)\s*[xX\*]\s*(\d{1,4}[.,]\d{2})/;
   const KG=/(\d+[.,]\d+)\s*(?:kg|KG|Kg)\s*[xX\*]?\s*(\d{1,4}[.,]\d{2})/;
   function tf(s){return parseFloat(String(s).replace(',','.'))||0;}
   function cn(s){return s.replace(/^\*+/,'').replace(/^[0-9]{4,}\s*/,'').replace(/\s+/g,' ').replace(/[_\-\.,:;*]+$/,'').trim().replace(/^(\w)/,c=>c.toUpperCase());}
-  function gc(n){
-    const s=n.toLowerCase();
-    if(/latte|yogurt|formaggio|parmigian|grana|mozzarell|burro|panna|ricotta|uov[ae]|pecorino|mascarpone/.test(s))return'Latticini';
-    if(/pasta|riso|pane|focaccia|grissini|farina|gallette|cereali|pizza|crackers|brioche|lasagne|gnocchi/.test(s))return'Pane e pasta';
-    if(/pollo|tacchino|manzo|maiale|vitello|carne|salume|prosciutto|salsicc|bresaola|mortadella|pancetta|speck|wurstel|pesce|tonno|salmone|merluzzo|gamber/.test(s))return'Carne e pesce';
-    if(/acqua|succo|bibita|vino|birra|aranciata|cola|caffe|gassosa|sprite|fanta|limonata/.test(s))return'Bevande';
-    if(/mela|pera|arancia|banana|frutta|verdura|pomodor|insalata|zucchina|carota|patata|cipolla|aglio|spinaci|limone|funghi|broccoli/.test(s))return'Frutta e verdura';
-    if(/biscotti|cioccolat|gelato|snack|patatine|caramelle|dolce|torta|wafer|nutella|miele|marmellata/.test(s))return'Dolci e snack';
-    if(/shampoo|sapone|dentifricio|deodorant|bagnoschiuma|rasoio|crema|pannolin/.test(s))return'Igiene';
-    if(/detersivo|bucato|stoviglie|pulizia|spugna|lavastoviglie|ammorbident|candeggina|scottex/.test(s))return'Pulizia';
-    return'Altro';
-  }
+  // usa la funzione globale guessCategory()
   function add(name,qty,price){
     name=cn(name);
     if(!name||name.length<2)return;
@@ -1218,7 +1259,7 @@ function parseReceipt(text){
     if(SK.test(name))return;
     const key=name.toLowerCase().slice(0,20)+'|'+price.toFixed(2);
     if(seen.has(key))return;seen.add(key);
-    rows.push({name,qty:Math.max(1,qty),price,unit:'pz',category:gc(name)});
+    rows.push({name,qty:Math.max(1,qty),price,unit:'pz',category:guessCategory(name)});
   }
   for(let i=0;i<lines.length;i++){
     const line=lines[i].trim();
@@ -1305,9 +1346,33 @@ function renderHistory(){
     :SESS.map(s=>`<div class="sr"><div style="flex:1"><div style="font-size:13px;font-weight:600">${esc(s.label||'Spesa')} — ${esc(s.store||'')}</div><div class="is">${fmtD(s.spent_at)}${s.note?' · '+esc(s.note):''}</div></div><div style="font-size:15px;font-weight:700;color:var(--gr)">€ ${eur(s.total)}</div><button class="btn sm dr" onclick="delSess('${esc(s.id)}')">✕</button></div>`).join('');
 }
 async function delSess(id){
-  if(!confirm('Eliminare questa sessione?'))return;
-  try{await sb('/rest/v1/spending_sessions?id=eq.'+encodeURIComponent(id),'DELETE',null,{'Prefer':'return=minimal'});await loadSess();renderHistory();loadBudget();toast('Eliminata');}
-  catch(e){toast(e.message);}
+  if(!confirm('Eliminare questa sessione di spesa?\n\nAttenzione: verranno eliminati anche tutti i prodotti aggiunti in questa spesa dalla dispensa.'))return;
+  try{
+    // 1. Recupera i prodotti dello scontrino
+    let items=[];
+    try{ items=await sb('/rest/v1/spending_items?session_id=eq.'+encodeURIComponent(id)+'&select=name'); }catch(e){}
+
+    // 2. Per ogni prodotto trovato, rimuovilo dalla dispensa
+    if(items.length>0){
+      for(const it of items){
+        try{
+          // Cerca in pantry_stock per nome
+          const stocks=await sb('/rest/v1/pantry_stock?name=eq.'+encodeURIComponent(it.name)+'&select=id');
+          for(const s of stocks){
+            await sb('/rest/v1/pantry_stock?id=eq.'+encodeURIComponent(s.id),'DELETE',null,{'Prefer':'return=minimal'});
+          }
+        }catch(e){}
+      }
+    }
+
+    // 3. Elimina la sessione (spending_items eliminati in cascade da DB)
+    await sb('/rest/v1/spending_sessions?id=eq.'+encodeURIComponent(id),'DELETE',null,{'Prefer':'return=minimal'});
+
+    // 4. Ricarica tutto
+    await Promise.all([loadSess(),loadStock()]);
+    renderDash();renderHistory();loadBudget();
+    toast('Sessione e prodotti eliminati','ok');
+  }catch(e){toast('Errore: '+e.message);}
 }
 
 // ════════════════════════════════════════════════════════════════════
