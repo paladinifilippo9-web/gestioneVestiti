@@ -767,70 +767,81 @@ for(let i=0;i<12;i++){
 // Session date default
 document.getElementById('sess-date').value=new Date().toISOString().slice(0,10);
 
-(async()=>{
+// ── Init NON BLOCCANTE ────────────────────────────────────────────────
+// La UI si apre subito. I dati si caricano in background con timeout.
+function sbWithTimeout(path, ms=8000){
+  return Promise.race([
+    sb(path),
+    new Promise((_,rej)=>setTimeout(()=>rej(new Error('Timeout: Supabase non risponde dopo '+ms/1000+'s')),ms))
+  ]);
+}
+
+// initApp() viene chiamata dopo che tutte le funzioni sono caricate — vedi fondo script
+async function initApp(){
   setPill('loading','Connessione...');
+
+  // Timeout di 10 secondi — dopo mostra errore ma la UI resta usabile
+  const timer = setTimeout(()=>{
+    setPill('err','Timeout');
+    showBanner('⏱ Connessione lenta',
+      'Supabase non risponde. Possibili cause: progetto in pausa, internet assente.',
+      'Vai su <a href="https://supabase.com" target="_blank" style="color:var(--green)">supabase.com</a>, apri il progetto e premi <b>Restore</b> se è in pausa. Poi ricarica.');
+  }, 10000);
+
   try{
-    // Prima prova solo una chiamata leggera per verificare la connessione
-    await sb('/rest/v1/pantry_stock?select=id&limit=1');
-    // Se arriva qui, la connessione funziona — carica tutto
-    await Promise.all([loadStock(),loadIdeal(),loadLog(),loadSessions()]);
+    // Test veloce di connessione
+    await sbWithTimeout('/rest/v1/pantry_stock?select=id&limit=1', 8000);
+    clearTimeout(timer);
+
+    // Connessione ok — carica tutti i dati
+    setPill('loading','Caricamento...');
+    await Promise.all([loadStock(), loadIdeal(), loadLog(), loadSessions()]);
     setPill('ok','Supabase ✓');
     renderDashboard();
+
   }catch(e){
+    clearTimeout(timer);
     setPill('err','Errore DB');
-    console.error('Init error:',e);
-    showDbError(e.message||'Errore sconosciuto');
-  }
-})();
+    console.error('DB error:', e.message);
 
-function showDbError(msg){
-  let title='Problema di connessione al database';
-  let detail='';
-  let solution='';
-
-  if(msg.includes('Failed to fetch')||msg.includes('NetworkError')||msg.includes('fetch')){
-    title='❌ Errore di rete';
-    detail='Il browser non riesce a raggiungere Supabase.';
-    solution='Controlla la connessione internet e ricarica la pagina.';
-  } else if(msg.includes('row-level security')||msg.includes('violates row-level')||msg.includes('permission denied')||msg.includes('policy')){
-    title='🔒 Permessi mancanti (RLS)';
-    detail='Supabase blocca le operazioni perché mancano le policy di accesso.';
-    solution='Vai su Supabase → SQL Editor → esegui il file <strong>spesa_db.sql</strong> (sezione "ABILITA RLS E POLICY").';
-  } else if(msg.includes('relation') && msg.includes('does not exist')){
-    title='📋 Tabelle non trovate';
-    detail='Le tabelle del database non esistono ancora.';
-    solution='Vai su Supabase → SQL Editor → esegui il file <strong>spesa_db.sql</strong> per creare tutto.';
-  } else if(msg.includes('JWT')||msg.includes('invalid token')||msg.includes('401')){
-    title='🔑 API Key non valida';
-    detail='La chiave API di Supabase non è riconosciuta.';
-    solution='Controlla che la chiave anon key nel file HTML sia quella corretta del tuo progetto.';
-  } else if(msg.includes('404')){
-    title='🔍 Progetto Supabase non trovato';
-    detail='L'URL del progetto non risponde.';
-    solution='Verifica l'URL del progetto Supabase nel file HTML.';
-  } else {
-    detail=msg;
-    solution='Premi <strong>"🔌 Diagnosi DB"</strong> nella barra laterale per vedere i dettagli.';
-  }
-
-  // Mostra pannello errore nella dashboard
-  const alertsEl=document.getElementById('alerts-wrap');
-  if(alertsEl){
-    alertsEl.innerHTML=`
-      <div style="background:#FDF0F0;border:1px solid #D9A0A0;border-radius:12px;padding:20px 22px;margin-bottom:16px">
-        <div style="font-size:17px;font-weight:600;color:#8B1A1A;margin-bottom:8px">${title}</div>
-        <div style="font-size:13px;color:#5C2020;margin-bottom:10px">${detail}</div>
-        <div style="background:#fff;border-radius:8px;padding:12px 14px;font-size:13px;color:#333;border:1px solid #E2DDD5;margin-bottom:14px">
-          💡 <strong>Soluzione:</strong> ${solution}
-        </div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <button class="btn btn-primary" onclick="location.reload()">↻ Ricarica pagina</button>
-          <button class="btn" onclick="runDbTest()">🔌 Diagnosi DB</button>
-        </div>
-        <div style="margin-top:10px;font-size:11px;color:#A08080;font-family:monospace;word-break:break-all">Errore: ${msg.slice(0,200)}</div>
-      </div>`;
+    // Mostra banner ma NON blocca la navigazione
+    const m = e.message||'';
+    if(m.includes('Timeout')||m.includes('fetch')||m.includes('network')||m.toLowerCase().includes('failed')){
+      showBanner('🌐 Impossibile raggiungere il database',
+        'Il browser non riesce a connettersi a Supabase.',
+        'Controlla la connessione internet. Se il progetto Supabase è inattivo, vai su <a href="https://supabase.com" target="_blank" style="color:var(--green)">supabase.com</a> e riattivalo. Poi premi ↻ qui sotto.');
+    } else if(m.includes('row-level')||m.includes('policy')||m.includes('permission')||m.includes('denied')){
+      showBanner('🔒 Permessi mancanti (RLS)',
+        'Supabase blocca le operazioni perché mancano le policy di accesso.',
+        'Vai su Supabase → SQL Editor → esegui il file <b>spesa_db.sql</b> (sezione "ABILITA RLS"). Poi ricarica.');
+    } else if(m.includes('does not exist')||m.includes('relation')){
+      showBanner('📋 Tabelle non trovate',
+        'Le tabelle del database non esistono ancora.',
+        'Vai su Supabase → SQL Editor → esegui il file <b>spesa_db.sql</b> per creare tutto. Poi ricarica.');
+    } else {
+      showBanner('❌ Errore database',
+        m.slice(0,200),
+        'Clicca <b>🔌 Diagnosi DB</b> nel menu laterale per vedere i dettagli.');
+    }
   }
 }
+
+function showBanner(title, detail, solution){
+  const el = document.getElementById('alerts-wrap');
+  if(!el) return;
+  el.innerHTML = `<div style="background:#FDF0F0;border:1px solid #D9A0A0;border-radius:12px;padding:18px 20px;margin-bottom:16px">
+    <div style="font-size:16px;font-weight:600;color:#8B1A1A;margin-bottom:6px">${title}</div>
+    <div style="font-size:13px;color:#5C2020;margin-bottom:10px">${detail}</div>
+    <div style="background:#fff;border-radius:8px;padding:11px 14px;font-size:13px;color:#333;border:1px solid #E2DDD5;margin-bottom:12px">
+      💡 <b>Soluzione:</b> ${solution}
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-primary" onclick="location.reload()">↻ Ricarica</button>
+      <button class="btn" onclick="runDbTest()">🔌 Diagnosi DB</button>
+    </div>
+  </div>`;
+}
+
 
 async function runDbTest(){
   const btn=document.getElementById('test-btn');
@@ -1829,6 +1840,8 @@ function toast(msg,type){
   t.className='toast'+(type?' '+type:'');t.textContent=msg;
   toastTmr=setTimeout(()=>t.parentNode&&t.parentNode.removeChild(t),3800);
 }
+// Avvia app — tutte le funzioni sono ora definite
+initApp();
 </script>
 </body>
 </html>
