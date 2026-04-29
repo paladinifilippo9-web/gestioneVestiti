@@ -4,7 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>La Mia Dispensa</title>
-<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<!-- Tesseract.js v4 — più stabile da file locale, worker con path espliciti -->
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@4.1.4/dist/tesseract.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -356,7 +357,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);displ
   <!-- SCONTRINO OCR -->
   <div id="pg-scan" class="pg">
     <div class="card" style="margin-bottom:16px">
-      <div class="ch"><div><div class="ct">📷 Scontrino — OCR</div><div class="cs">Lettura automatica nel browser — nessuna connessione esterna</div></div></div>
+      <div class="ch"><div><div class="ct">📷 Scontrino — OCR</div><div class="cs">Lettura automatica nel browser (Tesseract.js) — gratis, nessun abbonamento</div></div></div>
       <div class="dz" id="scan-dz">
         <input type="file" id="scan-fi" accept="image/*">
         <div style="font-size:26px;margin-bottom:6px">🧾</div>
@@ -380,14 +381,18 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);displ
         </div>
       </div>
     </div>
-    <div class="card"><div class="ch"><div class="ct">💡 Consigli</div></div>
+      <div class="ch"><div class="ct">💡 Come funziona</div></div>
       <div style="padding:14px 20px;display:flex;flex-direction:column;gap:8px">
-        <div style="font-size:13px;display:flex;gap:8px"><span>☀️</span> Buona luce naturale, evita ombre</div>
-        <div style="font-size:13px;display:flex;gap:8px"><span>📐</span> Scontrino piatto, foto dall'alto</div>
-        <div style="font-size:13px;display:flex;gap:8px"><span>✏️</span> Puoi correggere ogni campo prima di salvare</div>
-        <div style="font-size:13px;display:flex;gap:8px"><span>👁</span> Usa "Testo grezzo" per vedere cosa ha letto Tesseract</div>
+        <div style="background:var(--grl);border:1px solid #A8CCA5;border-radius:var(--r);padding:10px 14px;font-size:13px;color:var(--gr);margin-bottom:4px">
+          ✅ <strong>Gratis e senza registrazione</strong> — usa Tesseract.js, motore OCR open source
+        </div>
+        <div style="font-size:13px;display:flex;gap:8px"><span>🌐</span> <div><strong>Richiede internet</strong> solo al primo utilizzo per scaricare i dizionari (≈10MB). Poi funziona anche offline.</div></div>
+        <div style="font-size:13px;display:flex;gap:8px"><span>☀️</span> Buona luce naturale, evita ombre sul testo</div>
+        <div style="font-size:13px;display:flex;gap:8px"><span>📐</span> Scontrino piatto, foto verticale dall'alto</div>
+        <div style="font-size:13px;display:flex;gap:8px"><span>🔍</span> Più la foto è a fuoco, più prodotti vengono rilevati</div>
+        <div style="font-size:13px;display:flex;gap:8px"><span>✏️</span> Puoi correggere ogni campo prima di salvare, o aggiungere righe mancanti</div>
+        <div style="font-size:13px;display:flex;gap:8px"><span>👁</span> Usa "Testo grezzo OCR" per vedere cosa ha letto Tesseract</div>
       </div>
-    </div>
   </div>
 
   <!-- CONSUMI -->
@@ -1038,26 +1043,99 @@ async function runOCR(){
   const lb=document.getElementById('ocr-lb');
   const lt=document.getElementById('ocr-lt');
   const pb=document.getElementById('ocr-pb');
-  if(btn)btn.disabled=true;if(lb)lb.classList.add('on');if(pb)pb.style.width='0%';
+  if(btn)btn.disabled=true;
+  if(lb)lb.classList.add('on');
+  if(pb)pb.style.width='0%';
+  if(lt)lt.textContent='Avvio motore OCR...';
+
+  let worker=null;
   try{
-    if(lt)lt.textContent='Lettura testo...';
-    const res=await Tesseract.recognize(scanImg,'ita+eng',{
-      logger:m=>{
-        if(m.status==='recognizing text'&&pb){
-          pb.style.width=Math.round(m.progress*100)+'%';
-          if(lt)lt.textContent='OCR: '+Math.round(m.progress*100)+'%';
+    // Tesseract.js v4 — path espliciti per funzionare da file locale
+    worker = await Tesseract.createWorker({
+      workerPath:  'https://cdn.jsdelivr.net/npm/tesseract.js@4.1.4/dist/worker.min.js',
+      langPath:    'https://tessdata.projectnaptha.com/4.0.0',
+      corePath:    'https://cdn.jsdelivr.net/npm/tesseract.js-core@4.0.4/tesseract-core-simd.wasm.js',
+      logger: m=>{
+        if(!lt||!pb)return;
+        if(m.status==='loading tesseract core'){
+          if(lt)lt.textContent='Caricamento motore OCR...';
+          if(pb)pb.style.width='5%';
+        } else if(m.status==='initializing tesseract'){
+          if(lt)lt.textContent='Inizializzazione...';
+          if(pb)pb.style.width='15%';
+        } else if(m.status==='loading language traineddata'){
+          if(lt)lt.textContent='Caricamento dizionario italiano...';
+          if(pb)pb.style.width='30%';
+        } else if(m.status==='initializing api'){
+          if(lt)lt.textContent='Avvio analisi...';
+          if(pb)pb.style.width='45%';
+        } else if(m.status==='recognizing text'){
+          const pct=Math.round(45 + m.progress*55);
+          if(lt)lt.textContent='Lettura testo: '+pct+'%';
+          if(pb)pb.style.width=pct+'%';
         }
       }
     });
-    const raw=res.data.text;
-    const rw=document.getElementById('ocr-raw');if(rw)rw.textContent=raw;
+
+    if(lt)lt.textContent='Caricamento lingue...';
+    await worker.loadLanguage('ita+eng');
+    await worker.initialize('ita+eng');
+
+    // Parametri per scontrini: font monospace, tutto maiuscolo
+    await worker.setParameters({
+      tessedit_char_whitelist: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789.,€ \'"-/()àèìòùÀÈÌÒÙáéíóú',
+      preserve_interword_spaces: '1',
+    });
+
+    if(lt)lt.textContent='Lettura scontrino in corso...';
+    const { data } = await worker.recognize(scanImg);
+    const raw = data.text || '';
+
+    if(pb)pb.style.width='100%';
+    const rw=document.getElementById('ocr-raw');
+    if(rw)rw.textContent=raw;
+
+    if(!raw.trim()||raw.trim().length<5){
+      throw new Error('Nessun testo rilevato. Riprova con una foto più nitida e con buona luce.');
+    }
+
     if(lt)lt.textContent='Analisi prodotti...';
     ocrRows=parseReceipt(raw);
     renderOCRTable();
     document.getElementById('ocr-res').style.display='block';
-    toast(ocrRows.length>0?'✓ '+ocrRows.length+' prodotti trovati!':'Nessun prodotto — aggiungi manualmente',ocrRows.length>0?'ok':'wn');
-  }catch(e){toast('Errore OCR: '+e.message);}
-  finally{if(btn)btn.disabled=false;if(lb)lb.classList.remove('on');}
+    const msg=ocrRows.length>0
+      ?'✓ '+ocrRows.length+' prodotti trovati!'
+      :'Testo letto ma nessun prodotto rilevato — premi 👁 Testo grezzo e aggiungi manualmente';
+    toast(msg, ocrRows.length>0?'ok':'wn');
+
+  }catch(e){
+    console.error('OCR error:',e);
+    // Mostra errore dettagliato nella UI
+    const resEl=document.getElementById('ocr-res');
+    if(resEl){
+      resEl.style.display='block';
+      resEl.innerHTML=`<div style="background:var(--rdl);border:1px solid var(--rdb);border-radius:var(--r);padding:14px 16px;margin-bottom:12px">
+        <div style="font-weight:600;color:var(--rd);margin-bottom:6px">❌ Errore OCR</div>
+        <div style="font-size:13px;color:#5C2020;margin-bottom:10px">${esc(e.message)}</div>
+        <div style="font-size:13px;color:var(--tx2)">
+          Possibili cause:<br>
+          • Connessione internet assente (Tesseract scarica i dizionari dal web)<br>
+          • Foto troppo sfocata o con poca luce<br>
+          • Il file immagine è corrotto
+        </div>
+        <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+          <button class="btn pr" onclick="document.getElementById('ocr-res').style.display='none';runOCR()">↻ Riprova</button>
+          <button class="btn" onclick="addOCRRow();document.getElementById('ocr-res').innerHTML='';renderOCRTable();document.getElementById('ocr-res').style.display='block'">✏️ Inserisci manualmente</button>
+        </div>
+      </div>`;
+    } else {
+      toast('Errore OCR: '+e.message);
+    }
+  }finally{
+    if(worker)try{await worker.terminate();}catch(e){}
+    if(btn)btn.disabled=false;
+    if(lb)lb.classList.remove('on');
+  }
 }
 
 function parseReceipt(text){
