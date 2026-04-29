@@ -801,23 +801,8 @@ let _seq=1;
 function genId(){return 'x'+Date.now()+'_'+(_seq++);}
 
 // ── Init ───────────────────────────────────────────────────────────────
-document.getElementById('topbar-date').textContent=
-  new Date().toLocaleDateString('it-IT',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
-
-// Month selector for budget
+// Tutte le init DOM sono dentro una funzione chiamata a fine script
 const now=new Date();
-const monthSel=document.getElementById('b-month-sel');
-for(let i=0;i<12;i++){
-  const d=new Date(now.getFullYear(),now.getMonth()-i,1);
-  const opt=document.createElement('option');
-  opt.value=`${d.getFullYear()}-${d.getMonth()+1}`;
-  opt.textContent=d.toLocaleDateString('it-IT',{month:'long',year:'numeric'});
-  if(i===0)opt.selected=true;
-  monthSel.appendChild(opt);
-}
-
-// Session date default
-document.getElementById('sess-date').value=new Date().toISOString().slice(0,10);
 
 // ── Init NON BLOCCANTE ────────────────────────────────────────────────
 // La UI si apre subito. I dati si caricano in background con timeout.
@@ -1253,15 +1238,7 @@ async function deleteIdeal(id){
 }
 
 // ── AI: lettura lista ideale da foto ──────────────────────────────────
-const idealFile=document.getElementById('ideal-file');
-const idealDrop=document.getElementById('ideal-drop');
-idealFile.addEventListener('change',e=>{if(e.target.files[0])loadIdealImg(e.target.files[0]);});
-idealDrop.addEventListener('dragover',e=>{e.preventDefault();idealDrop.classList.add('drag-over');});
-idealDrop.addEventListener('dragleave',()=>idealDrop.classList.remove('drag-over'));
-idealDrop.addEventListener('drop',e=>{
-  e.preventDefault();idealDrop.classList.remove('drag-over');
-  const f=e.dataTransfer.files[0];if(f)loadIdealImg(f);
-});
+// (listeners registrati in domInit() per evitare crash se elementi non trovati)
 function loadIdealImg(file){
   const r=new FileReader();
   r.onload=ev=>{
@@ -1354,15 +1331,7 @@ async function confirmIdealList(){
 function cancelIdealScan(){document.getElementById('ideal-scan-result').style.display='none';idealParsed=[];}
 
 // ── OCR Scontrino con Tesseract.js ────────────────────────────────────
-const scanFile=document.getElementById('scan-file');
-const scanDrop=document.getElementById('scan-drop');
-scanFile.addEventListener('change',e=>{if(e.target.files[0])loadScanImg(e.target.files[0]);});
-scanDrop.addEventListener('dragover',e=>{e.preventDefault();scanDrop.classList.add('drag-over');});
-scanDrop.addEventListener('dragleave',()=>scanDrop.classList.remove('drag-over'));
-scanDrop.addEventListener('drop',e=>{
-  e.preventDefault();scanDrop.classList.remove('drag-over');
-  const f=e.dataTransfer.files[0];if(f&&f.type.startsWith('image/'))loadScanImg(f);
-});
+// (scanFile listeners registrati in domInit())
 function loadScanImg(file){
   const r=new FileReader();
   r.onload=ev=>{
@@ -1962,7 +1931,71 @@ function toast(msg,type){
   t.className='toast'+(type?' '+type:'');t.textContent=msg;
   toastTmr=setTimeout(()=>t.parentNode&&t.parentNode.removeChild(t),3800);
 }
-// Avvia app — tutte le funzioni sono ora definite
+// ── domInit: registra tutti i listener DOM in modo sicuro ─────────────
+function domInit(){
+  try{
+    // Date
+    const topbarDate = document.getElementById('topbar-date');
+    if(topbarDate) topbarDate.textContent = now.toLocaleDateString('it-IT',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+
+    // Month selector budget
+    const monthSel = document.getElementById('b-month-sel');
+    if(monthSel){
+      for(let i=0;i<12;i++){
+        const d=new Date(now.getFullYear(),now.getMonth()-i,1);
+        const opt=document.createElement('option');
+        opt.value=`${d.getFullYear()}-${d.getMonth()+1}`;
+        opt.textContent=d.toLocaleDateString('it-IT',{month:'long',year:'numeric'});
+        if(i===0)opt.selected=true;
+        monthSel.appendChild(opt);
+      }
+    }
+
+    // Session date default
+    const sessDate = document.getElementById('sess-date');
+    if(sessDate) sessDate.value = new Date().toISOString().slice(0,10);
+
+    // Ideal image drop zone
+    const idealFile = document.getElementById('ideal-file');
+    const idealDrop = document.getElementById('ideal-drop');
+    if(idealFile) idealFile.addEventListener('change',e=>{if(e.target.files[0])loadIdealImg(e.target.files[0]);});
+    if(idealDrop){
+      idealDrop.addEventListener('dragover',e=>{e.preventDefault();idealDrop.classList.add('drag-over');});
+      idealDrop.addEventListener('dragleave',()=>idealDrop.classList.remove('drag-over'));
+      idealDrop.addEventListener('drop',e=>{
+        e.preventDefault();idealDrop.classList.remove('drag-over');
+        const f=e.dataTransfer.files[0];if(f)loadIdealImg(f);
+      });
+    }
+
+    // Scan drop zone
+    const scanFile = document.getElementById('scan-file');
+    const scanDrop = document.getElementById('scan-drop');
+    if(scanFile) scanFile.addEventListener('change',e=>{if(e.target.files[0])loadScanImg(e.target.files[0]);});
+    if(scanDrop){
+      scanDrop.addEventListener('dragover',e=>{e.preventDefault();scanDrop.classList.add('drag-over');});
+      scanDrop.addEventListener('dragleave',()=>scanDrop.classList.remove('drag-over'));
+      scanDrop.addEventListener('drop',e=>{
+        e.preventDefault();scanDrop.classList.remove('drag-over');
+        const f=e.dataTransfer.files[0];if(f&&f.type.startsWith('image/'))loadScanImg(f);
+      });
+    }
+
+    // Consume selects
+    const cItem = document.getElementById('c-item');
+    const mItem = document.getElementById('m-item');
+    if(cItem) cItem.addEventListener('change', syncCUnit);
+    if(mItem) mItem.addEventListener('change', updateModalUnit);
+
+  }catch(e){
+    console.error('domInit error (non bloccante):', e);
+  }
+}
+
+// ── Avvio ──────────────────────────────────────────────────────────────
+// 1. Prima registra listeners DOM (sincrono, sicuro)
+domInit();
+// 2. Poi avvia connessione DB in background (asincrono, non blocca UI)
 initApp();
 </script>
 </body>
