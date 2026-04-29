@@ -297,8 +297,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 
     <div class="nav-section">Negozio</div>
     <div class="nav-item" onclick="goTo('offers')"><span class="nav-icon">🏪</span>Offerte Ipercoop</div>
+    <div class="nav-section">Supporto</div>
+    <div class="nav-item" onclick="goTo('diag')"><span class="nav-icon">🔌</span>Diagnostica DB</div>
   </nav>
-  <div class="sidebar-footer" style="display:flex;flex-direction:column;gap:8px"><button onclick="runDbTest()" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.7);padding:6px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-family:inherit;text-align:left" id="test-btn">🔌 Testa connessione DB</button><div style="font-size:10px;color:rgba(255,255,255,.2)">v3.0 · Supabase</div></div>
+  <div class="sidebar-footer" style="display:flex;flex-direction:column;gap:8px"><button onclick="runDbTest()" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.7);padding:6px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-family:inherit;text-align:left" id="test-btn" onclick="runDbTest()">🔌 Diagnosi DB</button><div style="font-size:10px;color:rgba(255,255,255,.2)">v3.0 · Supabase</div></div>
 </aside>
 <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
 
@@ -667,6 +669,56 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
     </div>
   </div>
 
+  <!-- ══ PAGE: DIAGNOSTICA ══ -->
+  <div id="page-diag" class="page">
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-header">
+        <div class="card-title">🔌 Diagnostica connessione Supabase</div>
+        <div class="card-sub">Verifica in tempo reale ogni componente del database</div>
+      </div>
+      <div style="padding:16px 20px">
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px">
+          <button class="btn btn-primary" onclick="runFullDiag()">▶ Avvia diagnostica</button>
+          <button class="btn" onclick="document.getElementById('diag-log').innerHTML=''">✕ Pulisci log</button>
+        </div>
+        <!-- Info connessione -->
+        <div style="background:var(--surface2);border-radius:var(--radius);padding:12px 14px;margin-bottom:14px;font-size:12px;font-family:monospace">
+          <div style="color:var(--text2);margin-bottom:4px;font-weight:600">Configurazione</div>
+          <div>URL: <span style="color:var(--green)">https://nfwzorbnlrudtpbnlmpt.supabase.co</span></div>
+          <div>Key: <span style="color:var(--green)">eyJhbGci... (anon)</span></div>
+        </div>
+        <!-- Log diagnostica -->
+        <div id="diag-log" style="font-family:monospace;font-size:12px;background:#111;color:#eee;border-radius:var(--radius);padding:14px;min-height:200px;max-height:500px;overflow-y:auto;line-height:1.8"></div>
+      </div>
+    </div>
+    <!-- Istruzioni fix -->
+    <div class="card">
+      <div class="card-header"><div class="card-title">🛠 Soluzioni comuni</div></div>
+      <div style="padding:14px 20px;display:flex;flex-direction:column;gap:14px">
+        <div style="border-left:3px solid var(--red);padding-left:12px">
+          <div style="font-size:13px;font-weight:600;color:var(--red);margin-bottom:4px">Progetto Supabase in pausa</div>
+          <div style="font-size:13px;color:var(--text2)">Il piano gratuito mette in pausa i progetti dopo 7 giorni di inattività.<br>
+          <b>Soluzione:</b> vai su <a href="https://supabase.com/dashboard" target="_blank" style="color:var(--green)">supabase.com/dashboard</a> → apri il progetto → premi <b>"Restore project"</b> → aspetta 1-2 minuti → ricarica questa pagina.</div>
+        </div>
+        <div style="border-left:3px solid var(--orange);padding-left:12px">
+          <div style="font-size:13px;font-weight:600;color:var(--orange);margin-bottom:4px">Errore RLS / permessi</div>
+          <div style="font-size:13px;color:var(--text2)">Le policy di accesso non sono state configurate.<br>
+          <b>Soluzione:</b> Supabase → SQL Editor → esegui il file <b>spesa_db.sql</b> → ricarica.</div>
+        </div>
+        <div style="border-left:3px solid var(--yellow-border);padding-left:12px">
+          <div style="font-size:13px;font-weight:600;color:var(--yellow-text);margin-bottom:4px">Tabelle non esistono</div>
+          <div style="font-size:13px;color:var(--text2)">Il database è vuoto, le tabelle non sono state create.<br>
+          <b>Soluzione:</b> Supabase → SQL Editor → esegui il file <b>spesa_db.sql</b> → ricarica.</div>
+        </div>
+        <div style="border-left:3px solid var(--blue);padding-left:12px">
+          <div style="font-size:13px;font-weight:600;color:var(--blue);margin-bottom:4px">Internet assente</div>
+          <div style="font-size:13px;color:var(--text2)">Il browser non ha accesso a internet.<br>
+          <b>Soluzione:</b> controlla WiFi/rete e ricarica la pagina.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   </div><!-- /content -->
 </div><!-- /main -->
 
@@ -844,91 +896,161 @@ function showBanner(title, detail, solution){
 
 
 async function runDbTest(){
-  const btn=document.getElementById('test-btn');
-  btn.textContent='⏳ Diagnosi...';
-  btn.disabled=true;
+  // Funziona sia dalla sidebar che dalla pagina diagnostica
+  const btn = document.getElementById('test-btn');
+  if(btn){ btn.textContent='⏳...'; btn.disabled=true; }
 
-  const tests=[
-    {name:'Raggiungibilità Supabase', fn:async()=>{ await sb('/rest/v1/pantry_stock?select=id&limit=1'); }},
-    {name:'Lettura pantry_stock',     fn:async()=>{ await sb('/rest/v1/pantry_stock?select=id&limit=1'); }},
-    {name:'Lettura pantry_ideal',     fn:async()=>{ await sb('/rest/v1/pantry_ideal?select=id&limit=1'); }},
-    {name:'Vista v_stock_status',     fn:async()=>{ await sb('/rest/v1/v_stock_status?select=id&limit=1'); }},
-    {name:'Scrittura INSERT + DELETE',fn:async()=>{
-      const tid='_test_'+Date.now();
-      await sb('/rest/v1/pantry_stock','POST',{id:tid,name:'__test__',category:'Altro',current_qty:0,unit:'pz',frequency:'occasional'});
-      await sb('/rest/v1/pantry_stock?id=eq.'+tid,'DELETE',null,{'Prefer':'return=minimal'});
-    }},
-  ];
+  // Vai alla pagina diagnostica
+  goTo('diag');
 
-  const lines=[];
-  let allOk=true;
-  for(const t of tests){
-    try{
-      await t.fn();
-      lines.push('<div style="display:flex;gap:8px;padding:6px 0;border-bottom:1px solid #eee;align-items:center"><span>✅</span><span style="flex:1;font-size:13px">'+t.name+'</span><b style="color:green;font-size:12px">OK</b></div>');
-    }catch(e){
-      allOk=false;
-      const m=e.message||'';
-      let hint='';
-      if(m.includes('row-level')||m.includes('policy')||m.includes('permission')||m.includes('denied'))
-        hint='Esegui spesa_db.sql → sezione "ABILITA RLS E POLICY"';
-      else if(m.includes('does not exist')||m.includes('relation'))
-        hint='Esegui spesa_db.sql per creare le tabelle';
-      else if(m.includes('fetch')||m.includes('network')||m.includes('Failed'))
-        hint='Controlla la connessione internet';
-      else if(m.includes('JWT')||m.includes('401'))
-        hint='API key non valida';
-      lines.push('<div style="padding:6px 0;border-bottom:1px solid #eee">'
-        +'<div style="display:flex;gap:8px;align-items:center"><span>❌</span><span style="flex:1;font-size:13px">'+t.name+'</span><b style="color:red;font-size:12px">ERRORE</b></div>'
-        +(hint?'<div style="font-size:12px;color:#8B4513;margin:3px 0 0 26px">→ '+hint+'</div>':'')
-        +'<div style="font-size:10px;color:#aaa;margin:2px 0 0 26px;font-family:monospace">'+m.slice(0,180)+'</div>'
-        +'</div>');
+  const logEl = document.getElementById('diag-log');
+  if(!logEl){ if(btn){btn.textContent='🔌 Diagnosi DB';btn.disabled=false;} return; }
+
+  logEl.innerHTML = '';
+  function log(msg, color='#eee'){
+    const t = new Date().toLocaleTimeString('it-IT');
+    logEl.innerHTML += `<div style="color:${color}">[${t}] ${msg}</div>`;
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+  function ok(msg)  { log('✅ '+msg, '#6DBF5E'); }
+  function err(msg) { log('❌ '+msg, '#F08080'); }
+  function info(msg){ log('ℹ️  '+msg, '#A8C8F0'); }
+  function warn(msg){ log('⚠️  '+msg, '#F0C060'); }
+
+  log('=== INIZIO DIAGNOSTICA ===', '#fff');
+  info('URL: '+SB_URL);
+
+  // Test 1: Raggiungibilità
+  log('');
+  log('[ TEST 1 ] Raggiungibilità Supabase...', '#fff');
+  try{
+    const r = await Promise.race([
+      fetch(SB_URL+'/rest/v1/', {headers:{'apikey':SB_KEY}}),
+      new Promise((_,rej)=>setTimeout(()=>rej(new Error('Timeout 8s')),8000))
+    ]);
+    if(r.ok || r.status===200 || r.status===404){
+      ok('Server raggiungibile (HTTP '+r.status+')');
+    } else {
+      warn('Risposta HTTP '+r.status);
+    }
+  }catch(e){
+    err('Non raggiungibile: '+e.message);
+    if(e.message.includes('Timeout')){
+      warn('Il progetto Supabase potrebbe essere IN PAUSA');
+      warn('Vai su supabase.com → apri progetto → clicca "Restore project"');
+    } else {
+      warn('Controlla la connessione internet');
+    }
+    log('');
+    log('=== DIAGNOSTICA INTERROTTA ===','#F08080');
+    if(btn){btn.textContent='🔌 Diagnosi DB';btn.disabled=false;}
+    setPill('err','Timeout');
+    return;
+  }
+
+  // Test 2: SELECT
+  log('');
+  log('[ TEST 2 ] Lettura tabella pantry_stock...','#fff');
+  try{
+    const rows = await sb('/rest/v1/pantry_stock?select=id,name&limit=3');
+    ok('SELECT ok — '+rows.length+' righe trovate');
+    if(rows.length>0) info('Esempio: '+rows.map(r=>r.name).join(', '));
+    else info('Tabella vuota (ok, aggiungi prodotti)');
+  }catch(e){
+    err('SELECT fallito: '+e.message);
+    if(e.message.includes('relation')||e.message.includes('does not exist')){
+      warn('SOLUZIONE: esegui spesa_db.sql su Supabase → SQL Editor');
+    } else if(e.message.includes('row-level')||e.message.includes('permission')||e.message.includes('policy')){
+      warn('SOLUZIONE: esegui spesa_db.sql → sezione "ABILITA RLS E POLICY"');
     }
   }
 
-  const bg=document.createElement('div');
-  bg.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:299';
-  const panel=document.createElement('div');
-  panel.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;border-radius:14px;padding:24px;max-width:500px;width:92%;z-index:300;box-shadow:0 8px 40px rgba(0,0,0,.3);max-height:85vh;overflow-y:auto';
-  panel.innerHTML='<div style="font-family:'DM Serif Display',serif;font-size:19px;margin-bottom:14px">'
-    +(allOk?'✅ Database perfettamente funzionante':'⚠️ Problemi di connessione trovati')
-    +'</div>'
-    +lines.join('')
-    +(!allOk?'<div style="background:#FFF8E1;border:1px solid #D4B400;border-radius:8px;padding:12px 14px;margin-top:14px;font-size:13px;color:#5C4800">'
-      +'<b>Come risolvere:</b><br>'
-      +'1. Apri Supabase → SQL Editor<br>'
-      +'2. Incolla ed esegui il file <b>spesa_db.sql</b><br>'
-      +'3. Torna qui e ricarica la pagina</div>':'')
-    +'<div style="display:flex;gap:8px;margin-top:16px;justify-content:flex-end">'
-    +(allOk?'<button class="btn btn-primary" onclick="document.querySelectorAll('[data-diag]').forEach(e=>e.remove());location.reload()">↻ Ricarica app</button>':'')
-    +'<button class="btn" onclick="document.querySelectorAll('[data-diag]').forEach(e=>e.remove())">Chiudi</button></div>';
-  bg.dataset.diag='1'; panel.dataset.diag='1';
-  bg.onclick=()=>document.querySelectorAll('[data-diag]').forEach(e=>e.remove());
-  document.body.appendChild(bg);
-  document.body.appendChild(panel);
+  // Test 3: Vista
+  log('');
+  log('[ TEST 3 ] Vista v_stock_status...','#fff');
+  try{
+    await sb('/rest/v1/v_stock_status?select=id&limit=1');
+    ok('Vista v_stock_status ok');
+  }catch(e){
+    err('Vista mancante: '+e.message);
+    warn('SOLUZIONE: esegui spesa_db.sql su Supabase');
+  }
 
-  btn.textContent='🔌 Diagnosi DB';
-  btn.disabled=false;
+  // Test 4: INSERT
+  log('');
+  log('[ TEST 4 ] Scrittura (INSERT)...','#fff');
+  const tid = '_diag_'+Date.now();
+  let insertOk = false;
+  try{
+    await sb('/rest/v1/pantry_stock','POST',{
+      id:tid, name:'__diagnostica__', category:'Altro',
+      current_qty:0, unit:'pz', frequency:'occasional'
+    });
+    insertOk = true;
+    ok('INSERT ok');
+  }catch(e){
+    err('INSERT fallito: '+e.message);
+    if(e.message.includes('row-level')||e.message.includes('permission')||e.message.includes('policy')||e.message.includes('denied')){
+      warn('RLS bloccato → esegui spesa_db.sql → sezione "ABILITA RLS E POLICY"');
+    } else if(e.message.includes('does not exist')||e.message.includes('relation')){
+      warn('Tabella non esiste → esegui spesa_db.sql');
+    }
+  }
 
-  if(allOk){
+  // Test 5: DELETE (solo se insert ok)
+  log('');
+  log('[ TEST 5 ] Cancellazione (DELETE)...','#fff');
+  if(insertOk){
+    try{
+      await sb('/rest/v1/pantry_stock?id=eq.'+tid,'DELETE',null,{'Prefer':'return=minimal'});
+      ok('DELETE ok — pulizia record di test completata');
+    }catch(e){
+      err('DELETE fallito: '+e.message);
+    }
+  } else {
+    warn('Skippato (INSERT non riuscito)');
+  }
+
+  // Test 6: Tabelle extra
+  log('');
+  log('[ TEST 6 ] Altre tabelle...','#fff');
+  const tables=['pantry_ideal','consumption_log','spending_sessions','monthly_budget'];
+  for(const t of tables){
+    try{
+      await sb('/rest/v1/'+t+'?select=id&limit=1');
+      ok(t+' ok');
+    }catch(e){
+      err(t+': '+e.message.slice(0,80));
+    }
+  }
+
+  // Sommario
+  log('');
+  log('=== DIAGNOSTICA COMPLETATA ===','#6DBF5E');
+  if(insertOk){
+    ok('Database funzionante! Ricarica la pagina se vedi ancora errori.');
+    // Ricarica i dati
     try{
       await Promise.all([loadStock(),loadIdeal(),loadLog(),loadSessions()]);
       renderDashboard();
       setPill('ok','Supabase ✓');
-    }catch(e){}
+      ok('Dati caricati correttamente!');
+    }catch(e){ err('Errore caricamento dati: '+e.message); }
+  } else {
+    warn('INSERT fallito → l'app non può salvare dati finché non risolvi il problema sopra.');
   }
+
+  if(btn){ btn.textContent='🔌 Diagnosi DB'; btn.disabled=false; }
 }
 
-function setPill(t,l){
-  const el=document.getElementById('db-pill');
-  el.className='db-pill-side '+t;
-  el.innerHTML='<div class="dot"></div><span>'+l+'</span>';
-}
+// Alias per il tasto nella pagina diag
+function runFullDiag(){ runDbTest(); }
+
 
 // ── Navigation ─────────────────────────────────────────────────────────
 const PAGE_TITLES={'dashboard':'Dashboard','stock':'Dispensa','ideal':'Dispensa Ideale',
   'shop':'Lista Spesa','scan':'Scontrino OCR','consume':'Registra Consumo',
-  'history':'Storico Spese','budget':'Gestione Soldi','offers':'Offerte Ipercoop'};
+  'history':'Storico Spese','budget':'Gestione Soldi','offers':'Offerte Ipercoop','diag':'Diagnostica DB'};
 
 function goTo(name){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
