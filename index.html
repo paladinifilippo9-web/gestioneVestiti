@@ -424,20 +424,20 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);displ
     <div class="card" id="step2-card" style="display:none;margin-bottom:14px">
       <div class="ch">
         <div>
-          <div class="ct">✏️ Step 2 — Testo letto (modificabile)</div>
-          <div class="cs">Tesseract ha letto questo testo. Correggilo se ci sono errori, poi analizza.</div>
+          <div class="ct">✏️ Step 2 — Prodotti rilevati</div>
+          <div class="cs">Solo descrizione e prezzo — aggiungi o correggi se necessario, poi analizza</div>
         </div>
       </div>
       <div style="padding:14px 20px">
         <textarea id="ocr-raw-edit"
-          style="width:100%;height:200px;font-family:monospace;font-size:12px;padding:10px;border:1px solid var(--brd2);border-radius:var(--r);background:var(--sur2);color:var(--tx);resize:vertical;outline:none;line-height:1.6"
-          placeholder="Il testo dello scontrino apparirà qui..."></textarea>
+          style="width:100%;height:220px;font-family:monospace;font-size:14px;padding:12px;border:1px solid var(--brd2);border-radius:var(--r);background:var(--sur2);color:var(--tx);resize:vertical;outline:none;line-height:2"
+          placeholder="I prodotti appariranno qui nel formato:&#10;NOME PRODOTTO  1,39&#10;ALTRO PRODOTTO  2,99&#10;&#10;Puoi correggere o aggiungere righe manualmente."></textarea>
         <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
-          <button class="btn pr" onclick="parseFromText()">⚙️ Analizza testo → estrai prodotti</button>
+          <button class="btn pr" onclick="parseFromText()">⚙️ Analizza → estrai prodotti</button>
           <button class="btn" onclick="document.getElementById('step2-card').style.display='none'">← Torna alla foto</button>
         </div>
         <div style="font-size:12px;color:var(--tx3);margin-top:8px">
-          💡 Puoi modificare il testo qui sopra prima di analizzarlo. Ogni riga con NOME e PREZZO (es: <em>PASTA BARILLA 1,39</em>) diventa un prodotto.
+          💡 Formato: <code>NOME PRODOTTO  1,39</code> — ogni riga è un prodotto. Puoi aggiungere righe mancanti.
         </div>
       </div>
     </div>
@@ -981,9 +981,12 @@ async function readIdealOCR(){
     pb.style.width='100%';
     if(!raw.trim()||raw.trim().length<3) throw new Error('Nessun testo rilevato. Riprova con una foto più nitida.');
     const ta=document.getElementById('ideal-raw-edit');
-    if(ta)ta.value=raw;
+    // Pre-processa: mostra solo prodotti puliti (descrizione + prezzo)
+    const cleanedIdeal = rawToCleanLines(raw);
+    if(ta)ta.value = cleanedIdeal || raw;
     if(s2){s2.style.display='block';s2.scrollIntoView({behavior:'smooth',block:'start'});}
-    toast('✓ Testo letto — controlla e premi "Analizza"','ok');
+    const nIdeal = (cleanedIdeal||'').split('\n').filter(l=>l.trim()).length;
+    toast(nIdeal>0?'✓ '+nIdeal+' prodotti rilevati — controlla e premi "Analizza"':'Testo letto — controlla','ok');
   }catch(e){
     // In caso di errore mostra step2 vuoto per inserimento manuale
     if(s2){
@@ -1273,13 +1276,14 @@ async function runOCR(){
       throw new Error('Nessun testo trovato nella foto. Riprova con una foto più nitida.');
     }
 
-    // Mostra il testo grezzo nello STEP 2 — editabile
+    // Pre-processa subito: mostra solo righe prodotto pulite (solo descrizione, qtà, prezzo)
+    const cleaned = rawToCleanLines(raw);
     const textarea=document.getElementById('ocr-raw-edit');
-    if(textarea) textarea.value=raw;
+    if(textarea) textarea.value = cleaned;
     if(s2) s2.style.display='block';
-    // Scroll to step 2
     if(s2) s2.scrollIntoView({behavior:'smooth',block:'start'});
-    toast('✓ Testo letto! Controllalo e premi "Analizza testo"','ok');
+    const nLines = cleaned.split('\n').filter(l=>l.trim()).length;
+    toast(nLines>0 ? '✓ '+nLines+' prodotti rilevati — controlla e premi "Analizza"' : 'Pochi prodotti trovati — controlla il testo','ok');
 
   }catch(e){
     console.error('OCR error:',e);
@@ -1358,6 +1362,55 @@ function guessCategory(n){
   if(/(detersivo|bucato|lavatrice|stoviglie|lavastoviglie|spugna|ammorbident|ammorb|candeggina|sbiancante|pavimenti|vetri|wc|bagno|sgrassatore|scottex|carta casa|tovaglioli|piatti usa|bicchieri usa|pattumiera|sacchetti)/.test(s)) return 'Pulizia';
 
   return 'Altro';
+}
+
+/*
+ * rawToCleanLines — converte il testo grezzo OCR in righe pulite:
+ *   "NOME  QTÀ  PREZZO"
+ * Elimina: intestazione negozio, P.IVA, data/ora, codici IVA (A/B/C/D),
+ *          quantità finali, totali, sconti, tutto ciò che non è un prodotto.
+ * L'utente vede solo quello che gli serve e può correggere.
+ */
+function rawToCleanLines(text){
+  const SK=/^\s*(tot[a-z]*[\s\.:]*[€\d]|sub.?tot|iva[\s\d%]|aliquota|scont[oi]|punti|tessera|fidelit|resto[\s:€\d]|contante|bancoma|carta[\s:€]|visa|master|satispay|paypal|codice fiscale|partita.?iva|p\.?iva|c\.?f\.|scontrino|documento commerciale|ricevuta|n\.[\s\d]|cassa\b|operatore|addetto|num[eo]|data[\s:]|ora[\s:]|giorn[oi]|benvenuto|grazie|arrivederci|a presto|prossima|www\.|http|@|email|negozio|esercizio|sede legale|indirizzo|via |piazza |corso |cap[\s\d]|tel[\s:\.]|fax|cell|importo|pagamento|transazione|approvato|autorizzato|terminal|pos[\s\d]|debito|credito|disponib|saldo|eur[o\s]|€[\s\d]|totale[\s\*]|totale articoli|subtotal|nr\.?[\s\d]|descrizione|quantita)/i;
+
+  // Regex prezzo Coop: NOME  PREZZO  [LETTERA_IVA]  [QTÀ o -]
+  // Es: "TORT.CHIPS INTENSE N 2.99 CC 9"
+  //     "PETTO DI POLLO A FET 13.98 C 3"
+  //     "RED BULL ENE 1.29 D -"
+  const priceRe=/(\d{1,4}[.,]\d{2})\s*(?:[A-F]{1,2})?\s*(?:\d+|[-È]|[A-ZÈÉÀÙÌ])?\s*$/i;
+
+  function tf(s){ return parseFloat(String(s).replace(',','.'))||0; }
+
+  const outLines=[];
+  const lines=text.split('\n');
+
+  for(const raw of lines){
+    const line=raw.trim();
+    if(!line||line.length<3)continue;
+    if(SK.test(line))continue;
+    if(/^\d+$/.test(line))continue; // solo numeri
+    if(line.replace(/[^a-zA-ZàèìòùÀÈÌÒÙ]/g,'').length<2)continue; // niente lettere
+
+    const pm=line.match(priceRe);
+    if(!pm)continue; // nessun prezzo → riga non prodotto
+
+    const price=tf(pm[1]);
+    if(price<=0)continue; // sconti/negativi ignorati
+
+    // Nome = tutto prima del prezzo, tolti codici barcode 5+ cifre
+    const priceIdx=line.lastIndexOf(pm[1]);
+    let name=line.slice(0,priceIdx).trim();
+    name=name.replace(/\b\d{5,}\b/g,'').replace(/\s+/g,' ').trim(); // rimuovi EAN
+    name=name.replace(/[\-_\.,:;]+$/,'').trim(); // punteggiatura finale
+
+    if(name.length<2)continue;
+
+    // Scrivi riga pulita: NOME   PREZZO
+    outLines.push(name+'  '+price.toFixed(2).replace('.',','));
+  }
+
+  return outLines.join('\n');
 }
 
 function parseReceipt(text){
