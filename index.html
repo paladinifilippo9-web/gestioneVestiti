@@ -304,26 +304,60 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);displ
 
   <!-- DISPENSA IDEALE -->
   <div id="pg-ideal" class="pg">
-    <div class="card" style="margin-bottom:16px">
-      <div class="ch"><div><div class="ct">📸 Carica lista scritta</div><div class="cs">Fotografa la lista e l'AI aggiunge i prodotti</div></div></div>
+    <!-- Step 1: Foto -->
+    <div class="card" style="margin-bottom:14px">
+      <div class="ch"><div><div class="ct">📸 Step 1 — Carica la foto della lista</div><div class="cs">Fotografa la tua lista scritta a mano o stampata</div></div></div>
       <div class="dz" id="ideal-dz">
         <input type="file" id="ideal-fi" accept="image/*">
         <div style="font-size:26px;margin-bottom:6px">📝</div>
-        <div style="font-size:13px;color:var(--tx2)"><strong style="color:var(--tx);display:block;margin-bottom:2px">Foto lista o documento</strong>Es: "2 latte 1L, 4 gallette mais..."</div>
+        <div style="font-size:13px;color:var(--tx2)"><strong style="color:var(--tx);display:block;margin-bottom:2px">Foto lista o documento</strong>Es: "2 latte 1L, 4 gallette mais, 1 petto di pollo..."</div>
         <img id="ideal-pv" class="pv" alt="">
       </div>
       <div style="display:none;gap:8px;padding:0 20px 14px;flex-wrap:wrap" id="ideal-acts">
-        <button class="btn pr" id="ideal-btn" onclick="readIdealList()">✨ Leggi con AI</button>
+        <button class="btn pr" id="ideal-btn" onclick="readIdealOCR()">🔍 Leggi testo dalla foto</button>
         <button class="btn" onclick="clearIdealImg()">✕ Rimuovi</button>
       </div>
-      <div class="lb" id="ideal-lb"><div class="sp"></div><span id="ideal-lt">Lettura lista...</span></div>
-      <div id="ideal-res" style="display:none;padding:0 20px 16px">
-        <div style="font-size:12px;font-weight:600;color:var(--tx2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">Prodotti letti — correggi se necessario</div>
-        <div id="ideal-items"></div>
-        <div style="display:flex;gap:8px;margin-top:12px">
-          <button class="btn pr" onclick="confirmIdealList()">✓ Aggiungi alla dispensa ideale</button>
-          <button class="btn" onclick="cancelIdealScan()">✕ Annulla</button>
+      <!-- Scorciatoia: scrivi direttamente senza foto -->
+      <div style="padding:0 20px 14px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <span style="font-size:12px;color:var(--tx3)">oppure</span>
+        <button class="btn sm" onclick="
+          const s2=document.getElementById('ideal-step2');
+          const ta=document.getElementById('ideal-raw-edit');
+          if(s2){s2.style.display='block';s2.scrollIntoView({behavior:'smooth',block:'start'});}
+          if(ta){ta.value='';ta.focus();}
+        ">✏️ Scrivi la lista a mano</button>
+      </div>
+      <div class="lb" id="ideal-lb"><div class="sp"></div><span id="ideal-lt">Lettura OCR...</span><div class="pbw"><div class="pbf" id="ideal-pb" style="width:0%"></div></div></div>
+    </div>
+
+    <!-- Step 2: Testo editabile -->
+    <div class="card" id="ideal-step2" style="display:none;margin-bottom:14px">
+      <div class="ch"><div><div class="ct">✏️ Step 2 — Testo letto (modificabile)</div><div class="cs">Correggi il testo se necessario, poi analizza</div></div></div>
+      <div style="padding:14px 20px">
+        <textarea id="ideal-raw-edit"
+          style="width:100%;height:180px;font-family:monospace;font-size:12px;padding:10px;border:1px solid var(--brd2);border-radius:var(--r);background:var(--sur2);color:var(--tx);resize:vertical;outline:none;line-height:1.6"
+          placeholder="Il testo della lista apparirà qui...&#10;&#10;Puoi anche scrivere direttamente, es:&#10;2 latte 1L&#10;4 gallette di mais&#10;1 petto di pollo 600g&#10;prosci cotto"></textarea>
+        <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+          <button class="btn pr" onclick="parseIdealFromText()">⚙️ Analizza → estrai prodotti</button>
+          <button class="btn" onclick="document.getElementById('ideal-step2').style.display='none'">← Torna alla foto</button>
         </div>
+        <div style="font-size:12px;color:var(--tx3);margin-top:6px">💡 Puoi anche scrivere direttamente nel campo sopra senza usare la foto.</div>
+      </div>
+    </div>
+
+    <!-- Step 3: Tabella prodotti -->
+    <div class="card" id="ideal-step3" style="display:none;margin-bottom:14px">
+      <div class="ch"><div><div class="ct">✅ Step 3 — Prodotti da aggiungere</div><div class="cs">Correggi frequenza e unità, poi salva</div></div><div class="ca"><button class="btn sm" onclick="addIdealRow()">+ Riga</button></div></div>
+      <div style="padding:0 20px 6px;overflow-x:auto">
+        <table class="ot" id="ideal-tbl">
+          <thead><tr><th>Prodotto</th><th>Qtà</th><th>Unità</th><th>Categoria</th><th>Uso</th><th></th></tr></thead>
+          <tbody id="ideal-tbody"></tbody>
+        </table>
+      </div>
+      <div style="padding:12px 20px;border-top:1px solid var(--brd);display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn pr" onclick="confirmIdealList()">✓ Aggiungi tutti alla dispensa ideale</button>
+        <button class="btn" onclick="document.getElementById('ideal-step3').style.display='none';document.getElementById('ideal-step2').style.display='block'">← Modifica testo</button>
+        <button class="btn dr" onclick="document.getElementById('ideal-step3').style.display='none';idealParsed=[]">✕ Annulla</button>
       </div>
     </div>
     <div class="card">
@@ -896,9 +930,9 @@ function loadIdealImg(file){
     idealImg=ev.target.result;
     const pv=document.getElementById('ideal-pv');
     if(pv){pv.src=idealImg;pv.style.display='block';}
-    const ac=document.getElementById('ideal-acts');
-    if(ac)ac.style.display='flex';
-    setHTML('ideal-res','');document.getElementById('ideal-res').style.display='none';
+    const ac=document.getElementById('ideal-acts');if(ac)ac.style.display='flex';
+    const s2=document.getElementById('ideal-step2');if(s2)s2.style.display='none';
+    const s3=document.getElementById('ideal-step3');if(s3)s3.style.display='none';
     idealParsed=[];
   };r.readAsDataURL(file);
 }
@@ -907,80 +941,164 @@ function clearIdealImg(){
   const pv=document.getElementById('ideal-pv');if(pv){pv.src='';pv.style.display='none';}
   const ac=document.getElementById('ideal-acts');if(ac)ac.style.display='none';
   const fi=document.getElementById('ideal-fi');if(fi)fi.value='';
-  document.getElementById('ideal-res').style.display='none';
+  const s2=document.getElementById('ideal-step2');if(s2)s2.style.display='none';
+  const s3=document.getElementById('ideal-step3');if(s3)s3.style.display='none';
+  const ta=document.getElementById('ideal-raw-edit');if(ta)ta.value='';
   idealParsed=[];
 }
-async function readIdealList(){
+
+// OCR per la dispensa ideale — stesso motore dello scontrino
+async function readIdealOCR(){
   if(!idealImg)return;
-  const base64=idealImg.split(',')[1];
-  const mime=(idealImg.match(/data:([^;]+);/)||[])[1]||'image/jpeg';
   const btn=document.getElementById('ideal-btn');
   const lb=document.getElementById('ideal-lb');
   const lt=document.getElementById('ideal-lt');
-  if(btn)btn.disabled=true;if(lb)lb.classList.add('on');if(lt)lt.textContent='Lettura lista con AI...';
+  const pb=document.getElementById('ideal-pb');
+  if(btn)btn.disabled=true;if(lb)lb.classList.add('on');if(pb)pb.style.width='0%';
+  const s2=document.getElementById('ideal-step2');
+  const s3=document.getElementById('ideal-step3');
+  if(s2)s2.style.display='none';if(s3)s3.style.display='none';
+  let worker=null;
   try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
-      model:'claude-sonnet-4-20250514',max_tokens:1500,
-      messages:[{role:'user',content:[
-        {type:'image',source:{type:'base64',media_type:mime,data:base64}},
-        {type:'text',text:`Leggi questa lista della spesa scritta a mano o su documento.
-Rispondi SOLO con JSON valido, niente testo extra.
-Formato: {"items":[{"name":"Nome","qty":1,"unit":"pz","category":"cat","frequency":"occasional"}]}
-Unità disponibili: pz,kg,g,L,ml,conf
-Categorie disponibili: ${CATS.join(', ')}
-frequency: daily (quotidiano: latte, pane, uova, frutta, verdura...) oppure occasional
-
-Regole speciali per categoria:
-- "Tofu e vegetali": tofu, seitan, burger vegetale, legumi, lenticchie, ceci, prodotti vegani/vegetariani
-- "Bio e tisane": prodotti biologici, tisane, camomilla, infusi, integratori, bustine di tè
-- "Carne e pesce": anche abbreviazioni come "pros.", "prsc.", "petto p.", "sal.", "wurs.", "manz."
-
-Interpreta le quantità: "2 latte 1L" → qty:2,unit:L | "4 gallette mais" → qty:4,unit:conf
-Correggi abbreviazioni comuni: "pros.cotto" → "Prosciutto cotto", "motz" → "Mozzarella"
-Se non leggibile: {"items":[],"error":"Non leggibile"}`}
-      ]}]
-    })});
-    if(!res.ok)throw new Error('API '+res.status);
-    const data=await res.json();
-    const text=(data.content||[]).map(b=>b.text||'').join('');
-    let parsed;try{parsed=JSON.parse(text.replace(/```[a-z]*|```/g,'').trim());}catch(e){throw new Error('Risposta non leggibile');}
-    if(parsed.error){toast('⚠️ '+parsed.error,'wn');return;}
-    if(!parsed.items?.length){toast('Nessun prodotto trovato','wn');return;}
-    idealParsed=parsed.items;
-    renderIdealScan();
-  }catch(e){toast('Errore: '+e.message);}
-  finally{if(btn)btn.disabled=false;if(lb)lb.classList.remove('on');}
+    worker=await Tesseract.createWorker({
+      workerPath:'https://cdn.jsdelivr.net/npm/tesseract.js@4.1.4/dist/worker.min.js',
+      langPath:'https://tessdata.projectnaptha.com/4.0.0',
+      corePath:'https://cdn.jsdelivr.net/npm/tesseract.js-core@4.0.4/tesseract-core-simd.wasm.js',
+      logger:m=>{
+        if(!lt||!pb)return;
+        if(m.status==='loading tesseract core'){lt.textContent='Caricamento motore...';pb.style.width='10%';}
+        else if(m.status==='loading language traineddata'){lt.textContent='Caricamento dizionario...';pb.style.width='35%';}
+        else if(m.status==='recognizing text'){
+          const p=Math.round(40+m.progress*60);
+          lt.textContent='Lettura: '+p+'%';pb.style.width=p+'%';
+        }
+      }
+    });
+    await worker.loadLanguage('ita+eng');
+    await worker.initialize('ita+eng');
+    const {data}=await worker.recognize(idealImg);
+    const raw=data.text||'';
+    pb.style.width='100%';
+    if(!raw.trim()||raw.trim().length<3) throw new Error('Nessun testo rilevato. Riprova con una foto più nitida.');
+    const ta=document.getElementById('ideal-raw-edit');
+    if(ta)ta.value=raw;
+    if(s2){s2.style.display='block';s2.scrollIntoView({behavior:'smooth',block:'start'});}
+    toast('✓ Testo letto — controlla e premi "Analizza"','ok');
+  }catch(e){
+    // In caso di errore mostra step2 vuoto per inserimento manuale
+    if(s2){
+      s2.style.display='block';
+      const ta=document.getElementById('ideal-raw-edit');
+      if(ta)ta.value='';
+      toast('OCR non riuscito: '+e.message+' — scrivi la lista manualmente','wn');
+    }
+  }finally{
+    if(worker)try{await worker.terminate();}catch(e){}
+    if(btn)btn.disabled=false;if(lb)lb.classList.remove('on');
+  }
 }
-function renderIdealScan(){
-  const el=document.getElementById('ideal-items');
-  if(!el)return;
-  el.innerHTML=`<table class="ot"><thead><tr><th>Prodotto</th><th>Qtà</th><th>Unità</th><th>Categoria</th><th>Uso</th><th></th></tr></thead><tbody>`+
-    idealParsed.map((it,i)=>`<tr>
-      <td><input value="${esc(it.name)}" onchange="idealParsed[${i}].name=this.value"></td>
-      <td><input type="number" value="${it.qty}" min="0.1" step="0.1" style="width:60px" onchange="idealParsed[${i}].qty=parseFloat(this.value)||1"></td>
-      <td><select onchange="idealParsed[${i}].unit=this.value">${['pz','kg','g','L','ml','conf'].map(u=>`<option${it.unit===u?' selected':''}>${u}</option>`).join('')}</select></td>
-      <td><select onchange="idealParsed[${i}].category=this.value">${CATS.map(c=>`<option${it.category===c?' selected':''}>${c}</option>`).join('')}</select></td>
-      <td><select onchange="idealParsed[${i}].frequency=this.value"><option value="daily"${it.frequency==='daily'?' selected':''}>📅 Quotidiano</option><option value="occasional"${it.frequency!=='daily'?' selected':''}>📆 Occasionale</option></select></td>
-      <td><button class="delr" onclick="idealParsed.splice(${i},1);renderIdealScan()">✕</button></td>
-    </tr>`).join('')+`</tbody></table>`;
-  document.getElementById('ideal-res').style.display='block';
+
+// Analizza il testo della lista ideale e estrae prodotti con qtà e frequenza
+function parseIdealFromText(){
+  const ta=document.getElementById('ideal-raw-edit');
+  if(!ta)return;
+  const raw=ta.value.trim();
+  if(!raw){toast('Scrivi o carica una lista prima','wn');return;}
+
+  // Usa parseReceipt per estrarre prodotti + prezzi (ignoriamo i prezzi per la lista ideale)
+  // Ma la lista ideale è diversa: es "2 latte 1L" o "4 gallette mais" senza prezzi
+  const items=[];
+  const seen=new Set();
+  const lines=raw.split(/\n|,|;/).map(l=>l.trim()).filter(l=>l.length>1);
+
+  for(const line of lines){
+    if(!line||line.length<2)continue;
+
+    let qty=1, unit='pz', name=line;
+
+    // Pattern "2 latte 1L" o "2x latte" o "n. 2 latte"
+    const qmStart=line.match(/^(\d+[.,]?\d*)\s*(?:x|pz|kg|g|L|ml|conf)?\s+(.+)/i);
+    if(qmStart){
+      qty=parseFloat(qmStart[1].replace(',','.'))||1;
+      name=qmStart[2];
+    }
+
+    // Pattern unità nel nome "latte 1L" "yogurt 500g"
+    const uMatch=name.match(/^(.+?)\s+(\d+[.,]?\d*)\s*(kg|g|L|ml|cl|conf)\s*$/i);
+    if(uMatch){
+      name=uMatch[1];
+      // qty già impostato, unit dal pattern
+      unit=uMatch[3].toLowerCase();
+      if(unit==='cl'){qty=parseFloat(uMatch[2])*10;unit='ml';}
+      else if(unit==='l')unit='L';
+    }
+
+    // Pulizia nome
+    name=name.replace(/^[\-\*\.\d]+\s*/,'').replace(/[\s\-_.,;]+$/,'').trim();
+    name=name.charAt(0).toUpperCase()+name.slice(1).toLowerCase();
+    if(name.length<2)continue;
+
+    const key=name.toLowerCase().slice(0,20);
+    if(seen.has(key))continue;seen.add(key);
+
+    const cat=guessCategory(name);
+    const freq=(cat==='Frutta e verdura'||cat==='Latticini'||cat==='Pane e pasta'||cat==='Bevande')?'daily':'occasional';
+    items.push({name,qty,unit,category:cat,frequency:freq});
+  }
+
+  if(!items.length){
+    // Fallback: prova col parser scontrino
+    const receiptRows=parseReceipt(raw);
+    receiptRows.forEach(r=>{
+      items.push({name:r.name,qty:r.qty||1,unit:r.unit||'pz',category:r.category,frequency:'occasional'});
+    });
+  }
+
+  if(!items.length){toast('Nessun prodotto estratto — ricontrolla il testo','wn');return;}
+
+  idealParsed=items;
+  renderIdealTable();
+  const s3=document.getElementById('ideal-step3');
+  if(s3){s3.style.display='block';s3.scrollIntoView({behavior:'smooth',block:'start'});}
+  toast('✓ '+items.length+' prodotti estratti','ok');
 }
+
+function renderIdealTable(){
+  const tb=document.getElementById('ideal-tbody');if(!tb)return;
+  tb.innerHTML=idealParsed.map((it,i)=>`<tr>
+    <td><input value="${esc(it.name)}" onchange="idealParsed[${i}].name=this.value" style="min-width:120px"></td>
+    <td><input type="number" value="${it.qty}" min="0.1" step="0.1" style="width:60px" onchange="idealParsed[${i}].qty=parseFloat(this.value)||1"></td>
+    <td><select onchange="idealParsed[${i}].unit=this.value">${['pz','kg','g','L','ml','conf'].map(u=>`<option${it.unit===u?' selected':''}>${u}</option>`).join('')}</select></td>
+    <td><select onchange="idealParsed[${i}].category=this.value">${CATS.map(c=>`<option${it.category===c?' selected':''}>${c}</option>`).join('')}</select></td>
+    <td><select onchange="idealParsed[${i}].frequency=this.value"><option value="daily"${it.frequency==='daily'?' selected':''}>📅 Quotidiano</option><option value="occasional"${it.frequency!=='daily'?' selected':''}>📆 Occasionale</option></select></td>
+    <td><button class="delr" onclick="idealParsed.splice(${i},1);renderIdealTable()">✕</button></td>
+  </tr>`).join('');
+}
+function addIdealRow(){idealParsed.push({name:'',qty:1,unit:'pz',category:'Altro',frequency:'occasional'});renderIdealTable();}
+
 async function confirmIdealList(){
+  const toSave=idealParsed.filter(it=>it.name&&it.name.trim().length>0);
+  if(!toSave.length){toast('Nessun prodotto da salvare','wn');return;}
   let added=0;
-  for(const it of idealParsed){
+  for(const it of toSave){
     const id=gid();
     try{
-      await sb('/rest/v1/pantry_ideal','POST',{id,name:it.name,category:CATS.includes(it.category)?it.category:'Altro',ideal_qty:it.qty,unit:it.unit||'pz',frequency:it.frequency||'occasional'});
+      await sb('/rest/v1/pantry_ideal','POST',{id,name:it.name.trim(),category:CATS.includes(it.category)?it.category:'Altro',ideal_qty:it.qty||1,unit:it.unit||'pz',frequency:it.frequency||'occasional'});
       const ex=SD.find(s=>s.name.toLowerCase()===it.name.toLowerCase());
-      if(!ex) await sb('/rest/v1/pantry_stock','POST',{id:gid(),ideal_id:id,name:it.name,category:CATS.includes(it.category)?it.category:'Altro',current_qty:0,unit:it.unit||'pz',frequency:it.frequency||'occasional'});
+      if(!ex) await sb('/rest/v1/pantry_stock','POST',{id:gid(),ideal_id:id,name:it.name.trim(),category:CATS.includes(it.category)?it.category:'Altro',current_qty:0,unit:it.unit||'pz',frequency:it.frequency||'occasional'});
       added++;
-    }catch(e){}
+    }catch(e){console.error('addIdeal',it.name,e);}
   }
   await Promise.all([loadIdeal(),loadStock()]);renderDash();
-  toast('✓ '+added+' prodotti aggiunti!','ok');
+  toast('✓ '+added+' prodotti aggiunti alla dispensa ideale!','ok');
   clearIdealImg();
+  const s3=document.getElementById('ideal-step3');if(s3)s3.style.display='none';
+  idealParsed=[];
 }
-function cancelIdealScan(){document.getElementById('ideal-res').style.display='none';idealParsed=[];}
+function cancelIdealScan(){
+  const s3=document.getElementById('ideal-step3');if(s3)s3.style.display='none';
+  idealParsed=[];
+}
 
 // ════════════════════════════════════════════════════════════════════
 //  LISTA SPESA
@@ -1243,41 +1361,111 @@ function guessCategory(n){
 }
 
 function parseReceipt(text){
-  const lines=text.split('\n');const rows=[];const seen=new Set();
-  // Pattern per riconoscere linee NON prodotto (intestazione, footer, metadati)
-  const SK=/^\s*(tot[a-z]*[\s\.:]*[€\d]|sub.?tot|iva[\s\d%]|aliquota|scont[oi]|punti|tessera|fidelit|resto[\s:€\d]|contante|bancoma|carta[\s:€]|visa|master|satispay|paypal|codice fiscale|partita.?iva|p\.?iva|c\.?f\.|scontrino|documento commerciale|ricevuta|n\.[\s\d]|cassa\b|operatore|addetto|num[eo]|data[\s:]|ora[\s:]|giorn[oi]|benvenuto|grazie|arrivederci|buona|a presto|prossima|www\.|http|@|email|negozio|esercizio|sede legale|indirizzo|via |piazza |corso |p\.zza|c\.so |cap[\s\d]|tel[\s:\.]|fax|cell|importo|pagamento|transazione|approvato|autorizzato|terminal|pos[\s\d]|debito|credito|disponib|saldo|eur[o\s]|€[\s\d]|totale[\s\*]|totale articoli|subtotal|nr\.?[\s\d]|articoli[\s:]|prezzo[\s:]|listino|ivato|reparto|rif\.|descrizione|quantita|descri)/i;
-  const EP=/(\d{1,4}[.,]\d{2})\s*[A-F]?\s*$/;
-  const QX=/(\d+)\s*[xX\*]\s*(\d{1,4}[.,]\d{2})/;
-  const KG=/(\d+[.,]\d+)\s*(?:kg|KG|Kg)\s*[xX\*]?\s*(\d{1,4}[.,]\d{2})/;
-  function tf(s){return parseFloat(String(s).replace(',','.'))||0;}
-  function cn(s){return s.replace(/^\*+/,'').replace(/^[0-9]{4,}\s*/,'').replace(/\s+/g,' ').replace(/[_\-\.,:;*]+$/,'').trim().replace(/^(\w)/,c=>c.toUpperCase());}
-  // usa la funzione globale guessCategory()
-  function add(name,qty,price){
-    name=cn(name);
+  /*
+   * Formato scontrino Coop/Ipercoop:
+   *   NOME PRODOTTO   PREZZO   CODICE_IVA   QTÀ
+   * Es: TORT.CHIPS INTENSE N  2.99  C  9
+   *     PETTO DI POLLO A FET  13.98  C  3
+   *     RED BULL ENE  1.29  D  -
+   *
+   * Regola: dopo il prezzo ci sono: lettera IVA (A/B/C/D/E) + numero quantità (o -)
+   * Noi vogliamo SOLO: nome e prezzo. Il resto viene scartato.
+   */
+  const lines=text.split('\n');
+  const rows=[];
+  const seen=new Set();
+
+  // Righe da ignorare completamente
+  const SK=/^\s*(tot[a-z]*[\s\.:]*[€\d]|sub.?tot|iva[\s\d%]|aliquota|scont[oi]|punti|tessera|fidelit|resto[\s:€\d]|contante|bancoma|carta[\s:€]|visa|master|satispay|paypal|codice fiscale|partita.?iva|p\.?iva|c\.?f\.|scontrino|documento commerciale|ricevuta|n\.[\s\d]|cassa\b|operatore|addetto|num[eo]|data[\s:]|ora[\s:]|giorn[oi]|benvenuto|grazie|arrivederci|a presto|prossima|www\.|http|@|email|negozio|esercizio|sede legale|indirizzo|via |piazza |corso |p\.zza|cap[\s\d]|tel[\s:\.]|fax|cell|importo|pagamento|transazione|approvato|autorizzato|terminal|pos[\s\d]|debito|credito|disponib|saldo|eur[o\s]|€[\s\d]|totale[\s\*]|totale articoli|subtotal|nr\.?[\s\d]|articoli[\s:]|descrizione|quantita|descri)/i;
+
+  function tf(s){ return parseFloat(String(s).replace(',','.'))||0; }
+
+  function cleanName(s){
+    return s
+      .replace(/^\*+/,'')           // asterisco iniziale
+      .replace(/^[0-9]{5,}\s*/,'')  // codice EAN/barcode lungo (5+ cifre)
+      .replace(/\s+/g,' ')
+      .replace(/[\-_\.,:;*]+$/,'')  // punteggiatura finale
+      .trim()
+      // Capitalizza prima lettera
+      .replace(/^(\w)/,c=>c.toUpperCase());
+  }
+
+  function add(rawName, qty, price){
+    const name=cleanName(rawName);
     if(!name||name.length<2)return;
     if(price<0||price>500)return;
     if(SK.test(name))return;
+    // Salta righe che sono solo numeri o codici
+    if(/^\d+$/.test(name))return;
+    if(name.replace(/[^a-zA-ZàèìòùÀÈÌÒÙ]/g,'').length<2)return;
     const key=name.toLowerCase().slice(0,20)+'|'+price.toFixed(2);
-    if(seen.has(key))return;seen.add(key);
-    rows.push({name,qty:Math.max(1,qty),price,unit:'pz',category:guessCategory(name)});
+    if(seen.has(key))return;
+    seen.add(key);
+    rows.push({name, qty:Math.max(1,qty), price, unit:'pz', category:guessCategory(name)});
   }
+
   for(let i=0;i<lines.length;i++){
-    const line=lines[i].trim();
-    if(!line||line.length<2||SK.test(line))continue;
+    const raw=lines[i];
+    const line=raw.trim();
+    if(!line||line.length<2)continue;
+    if(SK.test(line))continue;
     if(/^\d+$/.test(line))continue;
     if(line.replace(/[^a-zA-ZàèìòùÀÈÌÒÙ]/g,'').length<2)continue;
-    const km=line.match(KG);
-    if(km){const kg=tf(km[1]);const pu=tf(km[2]);const ep=line.match(EP);add(line.slice(0,line.search(KG)).trim()||'Prodotto a peso',1,ep?tf(ep[1]):kg*pu);continue;}
-    const qm=line.match(QX);
-    if(qm){const qty=parseInt(qm[1]);const rest=line;const pm=rest.match(EP);if(pm){add(rest.slice(0,rest.lastIndexOf(pm[1])).replace(qm[0],'').trim(),qty,tf(pm[1]));}continue;}
-    const ep=line.match(EP);
-    if(ep){
-      const price=tf(ep[1]);let nm=line.slice(0,line.lastIndexOf(ep[1])).trim();
-      const ep2=nm.match(EP);if(ep2)nm=nm.slice(0,nm.lastIndexOf(ep2[1])).trim();
-      if(nm.length<3&&i+1<lines.length){const nx=lines[i+1].trim();if(nx&&!SK.test(nx)&&!/^\d/.test(nx)){nm=nx+' '+nm;i++;}}
-      add(nm,1,price);
+
+    /*
+     * Formato Coop — riconosce:
+     *   NOME  PREZZO  [LETTERA_IVA]  [QTÀ o -]
+     * Il prezzo è sempre X.XX o X,XX con 2 decimali.
+     * Dopo il prezzo ci può essere: lettera singola (A-F) poi numero o trattino.
+     * Tutto ciò che viene dopo il prezzo + lettera + numero viene ignorato.
+     *
+     * Esempi reali dalla foto:
+     *   TORT.CHIPS INTENSE N 2.99 CC 9     → nome="TORT.CHIPS INTENSE N", prezzo=2.99
+     *   PETTO DI POLLO A FET 13.98 C 3     → nome="PETTO DI POLLO A FET", prezzo=13.98
+     *   RED BULL ENE 1.29 D -              → nome="RED BULL ENE", prezzo=1.29
+     *   FETTE SPECIAL TOAST 2,19 A È       → nome="FETTE SPECIAL TOAST", prezzo=2.19
+     *   0S N?9 SST 22/4-5/5 -0,80 A I     → sconto, da ignorare (prezzo negativo)
+     */
+
+    // Trova il prezzo nella riga.
+    // Formato Coop: NOME  PREZZO  [LETTERA_IVA]  [QTÀ o -]
+    // Il prezzo ha sempre 2 decimali: 2.99 / 2,99 / 13.98
+    // Dopo il prezzo: lettera IVA (A-F, a volte 2 lettere tipo "CC"), poi numero o trattino
+    const pricePattern=/(\d{1,4}[.,]\d{2})\s*(?:[A-F]{1,2})?\s*(?:\d+|[-È]|[A-Z])?\s*$/i;
+    const pm=line.match(pricePattern);
+
+    if(pm){
+      const priceStr=pm[1];
+      const price=tf(priceStr);
+      if(price<0)continue; // sconti negativi ignorati
+
+      // Nome = tutto ciò che precede il prezzo (e i caratteri dopo)
+      const priceIdx=line.lastIndexOf(priceStr);
+      let name=line.slice(0,priceIdx).trim();
+
+      // Gestisci KG (es: "MOZZARELLA 0.250 KG 1.99 A 1")
+      const kgPat=/(\d+[.,]\d+)\s*(?:kg|KG|Kg)\s*$/;
+      const kgM=name.match(kgPat);
+      let qty=1;
+      if(kgM){
+        qty=tf(kgM[1]);
+        name=name.slice(0,name.search(kgPat)).trim();
+      } else {
+        // Gestisci "N x PRODOTTO" all'inizio
+        const qxM=name.match(/^(\d+)\s*[xX]\s+(.+)/);
+        if(qxM){qty=parseInt(qxM[1])||1;name=qxM[2];}
+      }
+
+      add(name, qty, price);
+      continue;
     }
+
+    // Riga senza prezzo: potrebbe essere continuazione del nome precedente
+    // (Tesseract a volte spezza le righe)
+    // La ignoriamo — l'utente può correggere nel testo grezzo
   }
+
   return rows;
 }
 
@@ -1516,6 +1704,7 @@ document.addEventListener('DOMContentLoaded', function(){
     idealDz.addEventListener('dragover',e=>{e.preventDefault();idealDz.classList.add('dov');});
     idealDz.addEventListener('dragleave',()=>idealDz.classList.remove('dov'));
     idealDz.addEventListener('drop',e=>{e.preventDefault();idealDz.classList.remove('dov');const f=e.dataTransfer.files[0];if(f)loadIdealImg(f);});
+  }
   }
 
   // File input listeners — scan
