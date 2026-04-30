@@ -1758,7 +1758,6 @@ document.addEventListener('DOMContentLoaded', function(){
     idealDz.addEventListener('dragleave',()=>idealDz.classList.remove('dov'));
     idealDz.addEventListener('drop',e=>{e.preventDefault();idealDz.classList.remove('dov');const f=e.dataTransfer.files[0];if(f)loadIdealImg(f);});
   }
-  }
 
   // File input listeners — scan
   const scanFi=document.getElementById('scan-fi');
