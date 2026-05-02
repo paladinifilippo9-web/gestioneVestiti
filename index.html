@@ -8,192 +8,180 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 :root {
-  --green: #1a6641;
-  --green-mid: #2d8a5a;
-  --green-light: #e8f5ee;
-  --green-border: #b8dfc8;
-  --sand: #f7f4ef;
-  --sand-dark: #ece7de;
-  --white: #ffffff;
-  --ink: #161c14;
-  --ink-mid: #4a5447;
-  --ink-light: #8a9488;
-  --amber: #c97d2a;
-  --amber-light: #fdf3e3;
-  --red: #b83232;
-  --red-light: #fdeaea;
-  --border: #ddd8cf;
-  --radius: 14px;
-  --shadow-sm: 0 1px 4px rgba(0,0,0,.06);
-  --shadow: 0 4px 20px rgba(0,0,0,.08);
-  --shadow-lg: 0 12px 40px rgba(0,0,0,.12);
+  --green:#1a6641;--green-mid:#2d8a5a;--green-light:#e8f5ee;--green-border:#b8dfc8;
+  --sand:#f7f4ef;--sand-dark:#ece7de;--white:#fff;
+  --ink:#161c14;--ink-mid:#4a5447;--ink-light:#8a9488;
+  --amber:#c97d2a;--amber-light:#fdf3e3;
+  --red:#b83232;--red-light:#fdeaea;
+  --purple:#6b3fa0;--purple-light:#f0ebf8;--purple-border:#d4bff0;
+  --border:#ddd8cf;--radius:14px;
+  --shadow-sm:0 1px 4px rgba(0,0,0,.06);--shadow:0 4px 20px rgba(0,0,0,.08);--shadow-lg:0 12px 40px rgba(0,0,0,.12);
 }
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--sand); color: var(--ink); min-height: 100vh; }
-.app { display: flex; min-height: 100vh; }
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--sand);color:var(--ink);min-height:100vh;}
+.app{display:flex;min-height:100vh;}
 
 /* SIDEBAR */
-.sidebar {
-  width: 260px; flex-shrink: 0; background: var(--ink);
-  display: flex; flex-direction: column;
-  position: sticky; top: 0; height: 100vh; overflow: hidden;
-}
-.sidebar::before {
-  content: ''; position: absolute; top: -20px; right: -20px;
-  width: 140px; height: 140px;
-  background: radial-gradient(circle, rgba(45,138,90,.25) 0%, transparent 70%);
-  pointer-events: none;
-}
-.sidebar-top { padding: 28px 24px 22px; border-bottom: 1px solid rgba(255,255,255,.07); }
-.logo-badge { width: 42px; height: 42px; background: var(--green-mid); border-radius: 11px; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; margin-bottom: 14px; }
-.sidebar-top h1 { font-family: 'Playfair Display', serif; font-size: 1.1rem; color: #fff; line-height: 1.35; }
-.sidebar-top p { font-size: .71rem; color: rgba(255,255,255,.38); margin-top: 3px; }
-.nav { padding: 10px 0; flex: 1; }
-.nav-section { padding: 18px 24px 5px; font-size: .63rem; color: rgba(255,255,255,.28); text-transform: uppercase; letter-spacing: .12em; font-weight: 600; }
-.nav-item {
-  display: flex; align-items: center; gap: 12px; padding: 10px 20px 10px 22px;
-  cursor: pointer; font-size: .84rem; font-weight: 500;
-  color: rgba(255,255,255,.5); border-left: 2px solid transparent; transition: all .15s;
-}
-.nav-item:hover { color: rgba(255,255,255,.88); background: rgba(255,255,255,.05); }
-.nav-item.active { color: #fff; background: rgba(255,255,255,.09); border-left-color: var(--green-mid); }
-.nav-icon { width: 30px; height: 30px; border-radius: 8px; background: rgba(255,255,255,.07); display: flex; align-items: center; justify-content: center; font-size: .88rem; flex-shrink: 0; }
-.nav-item.active .nav-icon { background: var(--green); }
+.sidebar{width:260px;flex-shrink:0;background:var(--ink);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow:hidden;}
+.sidebar::before{content:'';position:absolute;top:-20px;right:-20px;width:140px;height:140px;background:radial-gradient(circle,rgba(45,138,90,.25) 0%,transparent 70%);pointer-events:none;}
+.sidebar-top{padding:28px 24px 22px;border-bottom:1px solid rgba(255,255,255,.07);}
+.logo-badge{width:42px;height:42px;background:var(--green-mid);border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:1.25rem;margin-bottom:14px;}
+.sidebar-top h1{font-family:'Playfair Display',serif;font-size:1.1rem;color:#fff;line-height:1.35;}
+.sidebar-top p{font-size:.71rem;color:rgba(255,255,255,.38);margin-top:3px;}
+.nav{padding:10px 0;flex:1;}
+.nav-section{padding:18px 24px 5px;font-size:.63rem;color:rgba(255,255,255,.28);text-transform:uppercase;letter-spacing:.12em;font-weight:600;}
+.nav-item{display:flex;align-items:center;gap:12px;padding:10px 20px 10px 22px;cursor:pointer;font-size:.84rem;font-weight:500;color:rgba(255,255,255,.5);border-left:2px solid transparent;transition:all .15s;}
+.nav-item:hover{color:rgba(255,255,255,.88);background:rgba(255,255,255,.05);}
+.nav-item.active{color:#fff;background:rgba(255,255,255,.09);border-left-color:var(--green-mid);}
+.nav-icon{width:30px;height:30px;border-radius:8px;background:rgba(255,255,255,.07);display:flex;align-items:center;justify-content:center;font-size:.88rem;flex-shrink:0;}
+.nav-item.active .nav-icon{background:var(--green);}
 
 /* MAIN */
-.main { flex: 1; min-width: 0; padding: 40px 44px; }
-
-/* PAGE HEADER */
-.page-header { margin-bottom: 30px; display: flex; align-items: flex-end; justify-content: space-between; }
-.page-header h2 { font-family: 'Playfair Display', serif; font-size: 2rem; }
-.page-header p { color: var(--ink-light); font-size: .875rem; margin-top: 5px; }
+.main{flex:1;min-width:0;padding:40px 44px;}
+.page-header{margin-bottom:30px;display:flex;align-items:flex-end;justify-content:space-between;}
+.page-header h2{font-family:'Playfair Display',serif;font-size:2rem;}
+.page-header p{color:var(--ink-light);font-size:.875rem;margin-top:5px;}
 
 /* STATS */
-.stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-bottom: 26px; }
-.stat-card {
-  background: var(--white); border-radius: var(--radius); padding: 22px 24px;
-  border: 1px solid var(--border); box-shadow: var(--shadow-sm);
-  position: relative; overflow: hidden; transition: transform .2s, box-shadow .2s;
-}
-.stat-card:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
-.stat-card::after { content: ''; position: absolute; bottom: -24px; right: -24px; width: 88px; height: 88px; border-radius: 50%; background: var(--green-light); opacity: .6; }
-.stat-card.amb::after { background: var(--amber-light); }
-.stat-label { font-size: .7rem; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; color: var(--ink-light); }
-.stat-value { font-family: 'Playfair Display', serif; font-size: 2.7rem; color: var(--ink); margin: 7px 0 2px; line-height: 1; }
-.stat-sub { font-size: .74rem; color: var(--ink-light); }
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-bottom:26px;}
+.stat-card{background:var(--white);border-radius:var(--radius);padding:22px 24px;border:1px solid var(--border);box-shadow:var(--shadow-sm);position:relative;overflow:hidden;transition:transform .2s,box-shadow .2s;}
+.stat-card:hover{transform:translateY(-2px);box-shadow:var(--shadow);}
+.stat-card::after{content:'';position:absolute;bottom:-24px;right:-24px;width:88px;height:88px;border-radius:50%;background:var(--green-light);opacity:.6;}
+.stat-card.amb::after{background:var(--amber-light);}
+.stat-label{font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-light);}
+.stat-value{font-family:'Playfair Display',serif;font-size:2.7rem;color:var(--ink);margin:7px 0 2px;line-height:1;}
+.stat-sub{font-size:.74rem;color:var(--ink-light);}
 
-/* GRID */
-.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
+/* GRID / LAYOUT */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start;}
 
 /* CARD */
-.card { background: var(--white); border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow-sm); overflow: hidden; }
-.card-header { padding: 16px 22px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
-.card-title { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: var(--ink-light); }
-.card-body { padding: 20px 22px; }
+.card{background:var(--white);border-radius:var(--radius);border:1px solid var(--border);box-shadow:var(--shadow-sm);overflow:hidden;}
+.card-header{padding:16px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.card-title{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-light);}
+.card-body{padding:20px 22px;}
 
 /* TABLE */
-.table-wrap { overflow-x: auto; }
-table { width: 100%; border-collapse: collapse; font-size: .84rem; }
-thead tr { background: var(--sand); }
-th { padding: 11px 16px; text-align: left; font-size: .68rem; font-weight: 700; color: var(--ink-light); text-transform: uppercase; letter-spacing: .07em; white-space: nowrap; }
-td { padding: 13px 16px; border-top: 1px solid var(--border); vertical-align: middle; }
-tbody tr { transition: background .1s; }
-tbody tr:hover td { background: #faf8f5; }
+.table-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:.84rem;}
+thead tr{background:var(--sand);}
+th{padding:11px 16px;text-align:left;font-size:.68rem;font-weight:700;color:var(--ink-light);text-transform:uppercase;letter-spacing:.07em;white-space:nowrap;}
+td{padding:13px 16px;border-top:1px solid var(--border);vertical-align:middle;}
+tbody tr{transition:background .1s;}
+tbody tr:hover td{background:#faf8f5;}
 
 /* BADGE */
-.badge { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 20px; font-size: .71rem; font-weight: 700; white-space: nowrap; }
-.bg { background: var(--green-light); color: var(--green); border: 1px solid var(--green-border); }
-.ba { background: var(--amber-light); color: var(--amber); border: 1px solid #f5d9a8; }
-.br { background: var(--red-light); color: var(--red); border: 1px solid #f5c0c0; }
-.bk { background: var(--sand-dark); color: var(--ink-mid); border: 1px solid var(--border); }
+.badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:.71rem;font-weight:700;white-space:nowrap;}
+.bg{background:var(--green-light);color:var(--green);border:1px solid var(--green-border);}
+.ba{background:var(--amber-light);color:var(--amber);border:1px solid #f5d9a8;}
+.br{background:var(--red-light);color:var(--red);border:1px solid #f5c0c0;}
+.bk{background:var(--sand-dark);color:var(--ink-mid);border:1px solid var(--border);}
+.bp{background:var(--purple-light);color:var(--purple);border:1px solid var(--purple-border);}
 
 /* BUTTONS */
-.btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 9px; border: none; font-family: 'Plus Jakarta Sans', sans-serif; font-size: .84rem; font-weight: 600; cursor: pointer; transition: all .15s; }
-.btn-p { background: var(--green); color: #fff; box-shadow: 0 2px 8px rgba(26,102,65,.25); }
-.btn-p:hover { background: var(--green-mid); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(26,102,65,.35); }
-.btn-g { background: transparent; color: var(--ink-mid); border: 1.5px solid var(--border); }
-.btn-g:hover { background: var(--sand); }
-.btn-d { background: var(--red-light); color: var(--red); border: 1px solid #f5c0c0; }
-.btn-d:hover { background: #fbd5d5; }
-.btn-sm { padding: 6px 12px; font-size: .76rem; border-radius: 7px; }
-.btn:disabled { opacity: .4; cursor: not-allowed; transform: none !important; }
-.wfull { width: 100%; justify-content: center; }
-.row-gap { display: flex; gap: 10px; margin-top: 14px; }
+.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:9px;border:none;font-family:'Plus Jakarta Sans',sans-serif;font-size:.84rem;font-weight:600;cursor:pointer;transition:all .15s;}
+.btn-p{background:var(--green);color:#fff;box-shadow:0 2px 8px rgba(26,102,65,.25);}
+.btn-p:hover{background:var(--green-mid);transform:translateY(-1px);box-shadow:0 4px 16px rgba(26,102,65,.35);}
+.btn-purple{background:var(--purple);color:#fff;box-shadow:0 2px 8px rgba(107,63,160,.25);}
+.btn-purple:hover{background:#5a348a;transform:translateY(-1px);box-shadow:0 4px 16px rgba(107,63,160,.35);}
+.btn-g{background:transparent;color:var(--ink-mid);border:1.5px solid var(--border);}
+.btn-g:hover{background:var(--sand);}
+.btn-d{background:var(--red-light);color:var(--red);border:1px solid #f5c0c0;}
+.btn-d:hover{background:#fbd5d5;}
+.btn-sm{padding:6px 12px;font-size:.76rem;border-radius:7px;}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none!important;}
+.wfull{width:100%;justify-content:center;}
+.row-gap{display:flex;gap:10px;margin-top:14px;}
 
 /* FORM */
-.fg { margin-bottom: 14px; }
-label { display: block; font-size: .76rem; font-weight: 600; margin-bottom: 5px; color: var(--ink-mid); }
-input, select, textarea { width: 100%; padding: 10px 14px; border: 1.5px solid var(--border); border-radius: 9px; font-family: 'Plus Jakarta Sans', sans-serif; font-size: .875rem; background: var(--white); color: var(--ink); transition: border .15s, box-shadow .15s; }
-input:focus, select:focus, textarea:focus { outline: none; border-color: var(--green-mid); box-shadow: 0 0 0 3px rgba(45,138,90,.1); }
-textarea { resize: vertical; min-height: 80px; }
+.fg{margin-bottom:14px;}
+label{display:block;font-size:.76rem;font-weight:600;margin-bottom:5px;color:var(--ink-mid);}
+input,select,textarea{width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:9px;font-family:'Plus Jakarta Sans',sans-serif;font-size:.875rem;background:var(--white);color:var(--ink);transition:border .15s,box-shadow .15s;}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--green-mid);box-shadow:0 0 0 3px rgba(45,138,90,.1);}
+textarea{resize:vertical;min-height:80px;}
 
 /* UPLOAD */
-.upload-zone { border: 2px dashed var(--border); border-radius: var(--radius); padding: 38px 24px; text-align: center; cursor: pointer; transition: all .2s; background: var(--sand); }
-.upload-zone:hover, .upload-zone.over { border-color: var(--green-mid); background: var(--green-light); }
-.upload-icon { font-size: 2.3rem; margin-bottom: 10px; }
-.upload-zone h4 { font-size: .9rem; font-weight: 600; margin-bottom: 4px; }
-.upload-zone p { font-size: .77rem; color: var(--ink-light); }
-.upload-zone strong { color: var(--green); }
+.upload-zone{border:2px dashed var(--border);border-radius:var(--radius);padding:38px 24px;text-align:center;cursor:pointer;transition:all .2s;background:var(--sand);}
+.upload-zone:hover,.upload-zone.over{border-color:var(--green-mid);background:var(--green-light);}
+.upload-icon{font-size:2.3rem;margin-bottom:10px;}
+.upload-zone h4{font-size:.9rem;font-weight:600;margin-bottom:4px;}
+.upload-zone p{font-size:.77rem;color:var(--ink-light);}
+.upload-zone strong{color:var(--green);}
 
-/* AI */
-.ai-box { background: var(--green-light); border: 1px solid var(--green-border); border-radius: var(--radius); padding: 18px 20px; margin-top: 16px; }
-.ai-box-title { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: var(--green); margin-bottom: 12px; }
-.ai-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid rgba(26,102,65,.1); }
-.ai-row:last-child { border: none; }
-.ai-name { flex: 1; font-weight: 500; font-size: .875rem; }
-.ai-qty { font-size: .79rem; font-weight: 700; background: #fff; color: var(--green); padding: 2px 10px; border-radius: 20px; border: 1px solid var(--green-border); }
-.ai-exp { font-size: .72rem; color: var(--ink-light); min-width: 84px; text-align: right; }
+/* AI CARICA */
+.ai-box{background:var(--green-light);border:1px solid var(--green-border);border-radius:var(--radius);padding:18px 20px;margin-top:16px;}
+.ai-box-title{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--green);margin-bottom:12px;}
+.ai-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid rgba(26,102,65,.1);}
+.ai-row:last-child{border:none;}
+.ai-name{flex:1;font-weight:500;font-size:.875rem;}
+.ai-qty{font-size:.79rem;font-weight:700;background:#fff;color:var(--green);padding:2px 10px;border-radius:20px;border:1px solid var(--green-border);}
+.ai-exp{font-size:.72rem;color:var(--ink-light);min-width:84px;text-align:right;}
+
+/* AI PROPOSTA */
+.proposta-box{background:var(--purple-light);border:1px solid var(--purple-border);border-radius:var(--radius);padding:20px;}
+.proposta-title{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--purple);margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+.proposta-info{font-size:.84rem;color:var(--ink-mid);margin-bottom:16px;line-height:1.5;}
+.proposta-thinking{background:rgba(107,63,160,.07);border-radius:10px;padding:14px;margin-bottom:16px;font-size:.8rem;color:var(--ink-mid);font-style:italic;line-height:1.6;max-height:200px;overflow-y:auto;}
 
 /* TOOLBAR */
-.toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
-.srch { position: relative; }
-.srch input { padding-left: 34px; width: 240px; }
-.srch::before { content: '🔍'; position: absolute; left: 11px; top: 50%; transform: translateY(-50%); font-size: .8rem; pointer-events: none; }
+.toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;}
+.srch{position:relative;}
+.srch input{padding-left:34px;width:240px;}
+.srch::before{content:'🔍';position:absolute;left:11px;top:50%;transform:translateY(-50%);font-size:.8rem;pointer-events:none;}
 
 /* PAGES */
-.page { display: none; }
-.page.active { display: block; animation: fi .22s ease; }
-@keyframes fi { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.page{display:none;}
+.page.active{display:block;animation:fi .22s ease;}
+@keyframes fi{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
 
 /* MODAL */
-.modal-bg { display: none; position: fixed; inset: 0; background: rgba(22,28,20,.55); backdrop-filter: blur(5px); z-index: 200; align-items: center; justify-content: center; }
-.modal-bg.open { display: flex; }
-.modal { background: var(--white); border-radius: 18px; padding: 30px; width: 92%; max-width: 480px; box-shadow: var(--shadow-lg); animation: mi .18s ease; }
-@keyframes mi { from { opacity: 0; transform: scale(.95) translateY(10px); } to { opacity: 1; transform: none; } }
-.modal-hd { display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px; }
-.modal-hd h3 { font-family: 'Playfair Display', serif; font-size: 1.4rem; }
-.modal-x { background: var(--sand); border: none; width: 32px; height: 32px; border-radius: 8px; cursor: pointer; font-size: .95rem; display: flex; align-items: center; justify-content: center; color: var(--ink-mid); }
-.modal-x:hover { background: var(--sand-dark); }
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(22,28,20,.55);backdrop-filter:blur(5px);z-index:200;align-items:center;justify-content:center;}
+.modal-bg.open{display:flex;}
+.modal{background:var(--white);border-radius:18px;padding:30px;width:92%;max-width:520px;box-shadow:var(--shadow-lg);animation:mi .18s ease;}
+@keyframes mi{from{opacity:0;transform:scale(.95) translateY(10px);}to{opacity:1;transform:none;}}
+.modal-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px;}
+.modal-hd h3{font-family:'Playfair Display',serif;font-size:1.4rem;}
+.modal-x{background:var(--sand);border:none;width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:.95rem;display:flex;align-items:center;justify-content:center;color:var(--ink-mid);}
+.modal-x:hover{background:var(--sand-dark);}
 
 /* ALERT */
-.alert { padding: 11px 15px; border-radius: 9px; font-size: .83rem; font-weight: 500; margin-bottom: 12px; }
-.aok { background: var(--green-light); color: var(--green); border: 1px solid var(--green-border); }
-.aerr { background: var(--red-light); color: var(--red); border: 1px solid #f5c0c0; }
+.alert{padding:11px 15px;border-radius:9px;font-size:.83rem;font-weight:500;margin-bottom:12px;}
+.aok{background:var(--green-light);color:var(--green);border:1px solid var(--green-border);}
+.aerr{background:var(--red-light);color:var(--red);border:1px solid #f5c0c0;}
 
 /* EMPTY */
-.empty { padding: 44px 20px; text-align: center; color: var(--ink-light); }
-.empty-e { font-size: 2.4rem; margin-bottom: 10px; }
-.empty p { font-size: .875rem; }
+.empty{padding:44px 20px;text-align:center;color:var(--ink-light);}
+.empty-e{font-size:2.4rem;margin-bottom:10px;}
+.empty p{font-size:.875rem;}
 
 /* SPIN */
-.spin { display: inline-block; width: 20px; height: 20px; border: 2.5px solid rgba(0,0,0,.08); border-top-color: var(--green); border-radius: 50%; animation: sp .7s linear infinite; }
-@keyframes sp { to { transform: rotate(360deg); } }
+.spin{display:inline-block;width:20px;height:20px;border:2.5px solid rgba(0,0,0,.08);border-top-color:var(--green);border-radius:50%;animation:sp .7s linear infinite;}
+.spin-purple{border-top-color:var(--purple);}
+@keyframes sp{to{transform:rotate(360deg);}}
 
 /* ROW ACCENT */
-.ls td:first-child { border-left: 3px solid var(--amber); }
-.ns td:first-child { border-left: 3px solid var(--red); }
+.ls td:first-child{border-left:3px solid var(--amber);}
+.ns td:first-child{border-left:3px solid var(--red);}
 
-/* DASH LIST */
-.dash-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border); }
-.dash-row:last-child { border: none; }
-.dash-name { font-weight: 500; font-size: .875rem; }
-.dash-sub { font-size: .72rem; color: var(--ink-light); margin-top: 2px; }
+/* DASH */
+.dash-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);}
+.dash-row:last-child{border:none;}
+.dash-name{font-weight:500;font-size:.875rem;}
+.dash-sub{font-size:.72rem;color:var(--ink-light);margin-top:2px;}
+
+/* STEP */
+.step-list{display:flex;flex-direction:column;gap:12px;margin-bottom:20px;}
+.step{display:flex;align-items:flex-start;gap:12px;background:var(--sand);border-radius:10px;padding:14px;}
+.step-num{width:26px;height:26px;border-radius:50%;background:var(--purple);color:#fff;font-size:.75rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.step-text{font-size:.84rem;color:var(--ink-mid);line-height:1.5;}
+.step-text strong{color:var(--ink);display:block;margin-bottom:2px;}
 </style>
 </head>
 <body>
 <div class="app">
 
+<!-- SIDEBAR -->
 <nav class="sidebar">
   <div class="sidebar-top">
     <div class="logo-badge">🤝</div>
@@ -207,12 +195,14 @@ textarea { resize: vertical; min-height: 80px; }
     <div class="nav-section">Operazioni</div>
     <div class="nav-item" onclick="go('carica-ai')"><div class="nav-icon">🤖</div>Carica con AI</div>
     <div class="nav-item" onclick="go('distribuzione')"><div class="nav-icon">📋</div>Distribuzione</div>
+    <div class="nav-item" onclick="go('proposta-ai')"><div class="nav-icon">✨</div>Proposta AI</div>
     <div class="nav-section">Anagrafica</div>
     <div class="nav-item" onclick="go('famiglie')"><div class="nav-icon">👥</div>Famiglie</div>
     <div class="nav-item" onclick="go('storico')"><div class="nav-icon">📊</div>Storico</div>
   </div>
 </nav>
 
+<!-- MAIN -->
 <main class="main">
 
   <!-- DASHBOARD -->
@@ -220,7 +210,7 @@ textarea { resize: vertical; min-height: 80px; }
     <div class="page-header"><div><h2>Buongiorno 👋</h2><p>Situazione aggiornata del centro</p></div></div>
     <div class="stats-row">
       <div class="stat-card"><div class="stat-label">Prodotti a magazzino</div><div class="stat-value" id="st-p">—</div><div class="stat-sub">tipi diversi</div></div>
-      <div class="stat-card amb"><div class="stat-label">Famiglie registrate</div><div class="stat-value" id="st-f">—</div><div class="stat-sub">attive</div></div>
+      <div class="stat-card amb"><div class="stat-label">Famiglie attive</div><div class="stat-value" id="st-f">—</div><div class="stat-sub">registrate</div></div>
       <div class="stat-card"><div class="stat-label">Distribuzioni effettuate</div><div class="stat-value" id="st-d">—</div><div class="stat-sub">totali</div></div>
     </div>
     <div class="grid-2">
@@ -307,6 +297,52 @@ textarea { resize: vertical; min-height: 80px; }
     </div>
   </div>
 
+  <!-- PROPOSTA AI -->
+  <div class="page" id="page-proposta-ai">
+    <div class="page-header"><div><h2>Proposta distribuzione ✨</h2><p>L'AI analizza lo storico e genera il file Excel per la prossima distribuzione</p></div></div>
+    <div class="two-col">
+      <div>
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-header"><span class="card-title">Come funziona</span></div>
+          <div class="card-body">
+            <div class="step-list">
+              <div class="step"><div class="step-num">1</div><div class="step-text"><strong>Analisi storico</strong>L'AI legge tutte le distribuzioni passate e capisce le tendenze per ogni prodotto.</div></div>
+              <div class="step"><div class="step-num">2</div><div class="step-text"><strong>Famiglie attive</strong>Considera solo le famiglie attualmente attive, con il loro numero di componenti e bambini.</div></div>
+              <div class="step"><div class="step-num">3</div><div class="step-text"><strong>Magazzino disponibile</strong>Tiene conto di quello che hai adesso — non propone cose che non hai.</div></div>
+              <div class="step"><div class="step-num">4</div><div class="step-text"><strong>Excel pronto</strong>Genera un file Excel che puoi rivedere e caricare direttamente nella sezione Distribuzione.</div></div>
+            </div>
+            <button class="btn btn-purple wfull" id="btn-proposta" onclick="generaProposta()">✨ Genera proposta con AI</button>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div id="prop-spin" style="display:none;text-align:center;padding:40px">
+          <div class="spin spin-purple" style="width:36px;height:36px;margin:0 auto 14px"></div>
+          <p style="font-weight:600;margin-bottom:6px">L'AI sta analizzando lo storico...</p>
+          <p style="font-size:.8rem;color:var(--ink-light)">Ci vogliono 10-20 secondi</p>
+        </div>
+        <div id="prop-out" style="display:none">
+          <div class="proposta-box">
+            <div class="proposta-title">✨ Proposta generata</div>
+            <div class="proposta-info" id="prop-info"></div>
+            <div id="prop-thinking" class="proposta-thinking" style="display:none"></div>
+            <div class="table-wrap" style="max-height:320px;overflow-y:auto;border-radius:10px;border:1px solid var(--purple-border);margin-bottom:16px">
+              <table><thead><tr><th>Famiglia</th><th>Componenti</th><th>Bambini</th><th>Prodotto</th><th>Quantità</th><th>Unità</th></tr></thead>
+              <tbody id="tb-prop"></tbody></table>
+            </div>
+            <div class="row-gap">
+              <button class="btn btn-purple" style="flex:1" onclick="scaricaPropostaXL()">⬇️ Scarica Excel</button>
+              <button class="btn btn-g" onclick="resetProposta()">Rigenera</button>
+            </div>
+          </div>
+        </div>
+        <div id="prop-ph" class="card" style="min-height:300px;display:flex;align-items:center;justify-content:center">
+          <div class="empty"><div class="empty-e">✨</div><p>Clicca "Genera proposta" per iniziare</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- FAMIGLIE -->
   <div class="page" id="page-famiglie">
     <div class="page-header"><div><h2>Famiglie</h2><p>Anagrafica famiglie registrate</p></div></div>
@@ -315,7 +351,7 @@ textarea { resize: vertical; min-height: 80px; }
       <button class="btn btn-p" onclick="openM('mf')">+ Aggiungi famiglia</button>
     </div>
     <div class="card"><div class="table-wrap">
-      <table><thead><tr><th>Codice</th><th>Referente</th><th>Componenti</th><th>Stato</th><th>Note</th><th></th></tr></thead>
+      <table><thead><tr><th>Codice</th><th>Referente</th><th>Componenti</th><th>Bambini</th><th>Stato</th><th>Note</th><th></th></tr></thead>
       <tbody id="tb-f"></tbody></table>
     </div></div>
   </div>
@@ -354,8 +390,11 @@ textarea { resize: vertical; min-height: 80px; }
     <div class="modal-hd"><h3>Aggiungi famiglia</h3><button class="modal-x" onclick="closeM('mf')">✕</button></div>
     <div class="fg"><label>Codice univoco *</label><input id="fc" placeholder="Es. FAM001"></div>
     <div class="fg"><label>Nome referente *</label><input id="fn" placeholder="Es. Mario Rossi"></div>
-    <div class="fg"><label>Numero componenti *</label><input id="fco" type="number" min="1" value="1"></div>
-    <div class="fg"><label>Note / esigenze particolari</label><textarea id="fn2" placeholder="Es. Allergia al glutine, bambini piccoli..."></textarea></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="fg"><label>Componenti totali *</label><input id="fco" type="number" min="1" value="1"></div>
+      <div class="fg"><label>Di cui bambini</label><input id="fba" type="number" min="0" value="0" placeholder="0"></div>
+    </div>
+    <div class="fg"><label>Note / esigenze particolari</label><textarea id="fn2" placeholder="Es. Allergia al glutine, vegani..."></textarea></div>
     <div id="fa"></div>
     <button class="btn btn-p wfull" onclick="saveFam()">Salva famiglia</button>
   </div>
@@ -364,14 +403,15 @@ textarea { resize: vertical; min-height: 80px; }
 <script>
 const SB='https://nfwzorbnlrudtpbnlmpt.supabase.co';
 const KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5md3pvcmJubHJ1ZHRwYm5sbXB0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4MTU2NjgsImV4cCI6MjA5MjM5MTY2OH0.S59qMU1vfQtSYVIe8P0lfz6hp4bXKnhJRCPKXqliAlo';
-let magD=[],famD=[],aiIt=[],xlRw=[],b64=null;
+const PROXY='https://nfwzorbnlrudtpbnlmpt.supabase.co/functions/v1/ai-proxy';
+let magD=[],famD=[],aiIt=[],xlRw=[],b64=null,propostaRighe=[];
 
 async function db(p,o={}){
   const r=await fetch(SB+'/rest/v1/'+p,{headers:{'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json','Prefer':'return=representation',...(o.headers||{})}, ...o});
   const t=await r.text();return t?JSON.parse(t):[];
 }
 
-const pages={dashboard:0,magazzino:1,'carica-ai':2,distribuzione:3,famiglie:4,storico:5};
+const pages={dashboard:0,magazzino:1,'carica-ai':2,distribuzione:3,'proposta-ai':4,famiglie:5,storico:6};
 function go(n){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('active'));
@@ -380,7 +420,7 @@ function go(n){
   ({magazzino:loadMag,famiglie:loadFam,dashboard:loadDash,storico:loadStor})[n]?.();
 }
 
-// DASHBOARD
+// ── DASHBOARD ──
 async function loadDash(){
   const [m,f,d]=await Promise.all([db('magazzino?select=id,quantita,nome,unita&order=quantita.asc'),db('famiglie?select=id&attiva=eq.true'),db('distribuzioni?select=id')]);
   document.getElementById('st-p').textContent=m.length;
@@ -396,7 +436,7 @@ async function loadDash(){
   else dd.innerHTML=rec.map(d=>`<div class="dash-row"><div><div class="dash-name">${new Date(d.data_distribuzione).toLocaleDateString('it-IT')}</div><div class="dash-sub">${d.note||'—'}</div></div><span class="badge ${d.stato==='completata'?'bg':'bk'}">${d.stato}</span></div>`).join('');
 }
 
-// MAGAZZINO
+// ── MAGAZZINO ──
 async function loadMag(){magD=await db('magazzino?order=nome.asc');renMag(magD);}
 function renMag(data){
   const tb=document.getElementById('tb-m');
@@ -418,7 +458,7 @@ async function saveProd(){
 }
 async function delProd(id){if(!confirm('Eliminare?'))return;await db('magazzino?id=eq.'+id,{method:'DELETE'});loadMag();}
 
-// AI
+// ── AI CARICA FOTO ──
 function dg(e,on){e.preventDefault();document.getElementById('az').classList.toggle('over',on);}
 function dp(e){e.preventDefault();dg(e,0);const f=e.dataTransfer.files[0];if(f)pf(f);}
 function af(e){const f=e.target.files[0];if(f)pf(f);}
@@ -427,7 +467,7 @@ async function runAI(){
   if(!b64)return;
   document.getElementById('aisp').style.display='block';document.getElementById('bai').disabled=true;document.getElementById('ao').style.display='none';
   try{
-    const res=await fetch('https://nfwzorbnlrudtpbnlmpt.supabase.co/functions/v1/ai-proxy',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:'image/jpeg',data:b64}},{type:'text',text:`Sei un assistente per un centro d'ascolto. Leggi il foglio scritto a mano ed estrai ogni prodotto con: nome, quantità, unità, scadenza_stimata (data ISO stimata per tipo: pasta secca +18 mesi, tonno scatola +24 mesi, latte UHT +6 mesi, freschi +7gg). Rispondi SOLO JSON senza markdown: {"prodotti":[{"nome":"Pasta","quantita":10,"unita":"kg","scadenza_stimata":"2027-12-01"}]}`}]}]})});
+    const res=await fetch(PROXY,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:'image/jpeg',data:b64}},{type:'text',text:`Sei un assistente per un centro d'ascolto. Leggi il foglio scritto a mano ed estrai ogni prodotto con: nome, quantità, unità, scadenza_stimata (data ISO stimata per tipo: pasta secca +18 mesi, tonno scatola +24 mesi, latte UHT +6 mesi, freschi +7gg). Rispondi SOLO JSON senza markdown: {"prodotti":[{"nome":"Pasta","quantita":10,"unita":"kg","scadenza_stimata":"2027-12-01"}]}`}]}]})});
     const d=await res.json();
     const txt=d.content?.find(b=>b.type==='text')?.text||'{}';
     aiIt=JSON.parse(txt.replace(/```json|```/g,'').trim()).prodotti||[];
@@ -447,7 +487,7 @@ async function saveAI(){
 }
 function resetAI(){b64=null;aiIt=[];document.getElementById('ap').style.display='none';document.getElementById('ao').style.display='none';document.getElementById('aph').style.display='flex';document.getElementById('bai').disabled=true;document.getElementById('ai').value='';}
 
-// DISTRIBUZIONE
+// ── DISTRIBUZIONE EXCEL ──
 async function loadXL(e){
   const f=e.target.files[0];if(!f)return;
   const buf=await f.arrayBuffer();const wb=XLSX.read(buf);const ws=wb.Sheets[wb.SheetNames[0]];
@@ -477,23 +517,168 @@ async function confDist(){
 }
 function resetXL(){xlRw=[];document.getElementById('xlo').style.display='none';document.getElementById('xph').style.display='flex';document.getElementById('xl').value='';}
 
-// FAMIGLIE
+// ── PROPOSTA AI ──
+async function generaProposta(){
+  document.getElementById('btn-proposta').disabled=true;
+  document.getElementById('prop-spin').style.display='block';
+  document.getElementById('prop-out').style.display='none';
+  document.getElementById('prop-ph').style.display='none';
+
+  try{
+    // Carica dati
+    const [famiglie, magazzino, distribuzioni] = await Promise.all([
+      db('famiglie?attiva=eq.true&order=codice.asc'),
+      db('magazzino?order=nome.asc'),
+      db('distribuzioni?stato=eq.completata&order=created_at.desc&limit=20')
+    ]);
+
+    // Carica movimenti per ogni distribuzione
+    let storicoTesto = '';
+    for(const dist of distribuzioni.slice(0,10)){
+      const mov = await db('movimenti_magazzino?distribuzione_id=eq.'+dist.id+'&tipo=eq.uscita');
+      if(mov.length){
+        storicoTesto += `\nDistribuzione ${new Date(dist.data_distribuzione).toLocaleDateString('it-IT')}:\n`;
+        storicoTesto += mov.map(m=>`  - ${m.prodotto_nome}: ${m.quantita} ${m.unita}`).join('\n');
+      }
+    }
+
+    const famiglieTesto = famiglie.map(f=>
+      `- ${f.codice} (${f.nome_referente}): ${f.num_componenti} componenti, ${f.num_bambini||0} bambini${f.note?', note: '+f.note:''}`
+    ).join('\n');
+
+    const magazzinoTesto = magazzino.filter(p=>p.quantita>0).map(p=>
+      `- ${p.nome}: ${p.quantita} ${p.unita}`
+    ).join('\n');
+
+    const prompt = `Sei un assistente per un centro d'ascolto italiano. Devi generare una proposta di distribuzione per la prossima sessione.
+
+FAMIGLIE ATTIVE (${famiglie.length} famiglie):
+${famiglieTesto}
+
+MAGAZZINO DISPONIBILE:
+${magazzinoTesto || 'Magazzino vuoto'}
+
+STORICO ULTIME DISTRIBUZIONI:
+${storicoTesto || 'Nessuna distribuzione precedente'}
+
+ISTRUZIONI:
+- Distribuisci i prodotti disponibili tra le famiglie attive
+- Considera il numero di componenti e bambini: famiglie più grandi ricevono di più
+- Per le famiglie con bambini prioritizza prodotti adatti (latte, pastina, omogeneizzati se disponibili)
+- Non superare mai le quantità disponibili in magazzino
+- Basati sullo storico per capire le proporzioni tipiche
+- Arrotonda a numeri interi o mezzo (es. 0.5, 1, 1.5, 2...)
+- Se il magazzino è vuoto, genera comunque una proposta ragionevole basata sullo storico
+
+Rispondi SOLO con JSON valido senza markdown in questo formato esatto:
+{
+  "riepilogo": "Breve descrizione della logica usata (2-3 righe)",
+  "righe": [
+    {"famiglia_codice": "FAM001", "famiglia_nome": "Mario Rossi", "prodotto": "Pasta", "quantita": 2, "unita": "kg"},
+    {"famiglia_codice": "FAM001", "famiglia_nome": "Mario Rossi", "prodotto": "Olio", "quantita": 1, "unita": "L"}
+  ]
+}`;
+
+    const res=await fetch(PROXY,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+      model:'claude-sonnet-4-20250514',max_tokens:4000,
+      messages:[{role:'user',content:prompt}]
+    })});
+    const data=await res.json();
+    const txt=data.content?.find(b=>b.type==='text')?.text||'{}';
+    const parsed=JSON.parse(txt.replace(/```json|```/g,'').trim());
+
+    propostaRighe=parsed.righe||[];
+
+    // Mostra riepilogo
+    document.getElementById('prop-info').textContent=parsed.riepilogo||'Proposta generata con successo.';
+
+    // Mostra tabella
+    document.getElementById('tb-prop').innerHTML=propostaRighe.map(r=>`
+      <tr>
+        <td><span class="badge bk">${r.famiglia_codice}</span> <span style="font-size:.8rem">${r.famiglia_nome}</span></td>
+        <td style="color:var(--ink-light);font-size:.8rem">${famiglie.find(f=>f.codice===r.famiglia_codice)?.num_componenti||'—'}</td>
+        <td style="color:var(--ink-light);font-size:.8rem">${famiglie.find(f=>f.codice===r.famiglia_codice)?.num_bambini||0} 👶</td>
+        <td><strong>${r.prodotto}</strong></td>
+        <td><span class="badge bp">${r.quantita}</span></td>
+        <td style="color:var(--ink-light)">${r.unita}</td>
+      </tr>`).join('');
+
+    document.getElementById('prop-out').style.display='block';
+  }catch(e){
+    alert('Errore nella generazione: '+e.message);
+    document.getElementById('prop-ph').style.display='flex';
+  }finally{
+    document.getElementById('prop-spin').style.display='none';
+    document.getElementById('btn-proposta').disabled=false;
+  }
+}
+
+function scaricaPropostaXL(){
+  if(!propostaRighe.length)return;
+
+  // Crea un foglio con colonne Famiglia | Prodotto | Quantità | Unità
+  const wsData=[['Famiglia','Referente','Componenti','Bambini','Prodotto','Quantità','Unità']];
+  propostaRighe.forEach(r=>{
+    const fam=famD.find(f=>f.codice===r.famiglia_codice);
+    wsData.push([r.famiglia_codice,r.famiglia_nome,fam?.num_componenti||'',fam?.num_bambini||0,r.prodotto,r.quantita,r.unita]);
+  });
+
+  const wb=XLSX.utils.book_new();
+  const ws=XLSX.utils.aoa_to_sheet(wsData);
+
+  // Larghezze colonne
+  ws['!cols']=[{wch:10},{wch:20},{wch:12},{wch:10},{wch:20},{wch:10},{wch:8}];
+
+  XLSX.utils.book_append_sheet(wb,ws,'Proposta Distribuzione');
+
+  // Secondo foglio: formato per upload (Prodotto | Quantità totale | Unità)
+  const totali={};
+  propostaRighe.forEach(r=>{
+    const k=r.prodotto+'__'+r.unita;
+    totali[k]=(totali[k]||0)+r.quantita;
+  });
+  const ws2Data=[['Prodotto','Quantità totale','Unità']];
+  Object.entries(totali).forEach(([k,q])=>{const [prod,unit]=k.split('__');ws2Data.push([prod,q,unit]);});
+  const ws2=XLSX.utils.aoa_to_sheet(ws2Data);
+  ws2['!cols']=[{wch:20},{wch:15},{wch:8}];
+  XLSX.utils.book_append_sheet(wb,ws2,'Totali per upload');
+
+  const data=new Date().toLocaleDateString('it-IT').replace(/\//g,'-');
+  XLSX.writeFile(wb,`proposta-distribuzione-${data}.xlsx`);
+}
+
+function resetProposta(){
+  propostaRighe=[];
+  document.getElementById('prop-out').style.display='none';
+  document.getElementById('prop-ph').style.display='flex';
+}
+
+// ── FAMIGLIE ──
 async function loadFam(){famD=await db('famiglie?order=codice.asc');renFam(famD);}
 function renFam(data){
   const tb=document.getElementById('tb-f');
-  if(!data.length){tb.innerHTML='<tr><td colspan="6"><div class="empty"><div class="empty-e">👥</div><p>Nessuna famiglia registrata</p></div></td></tr>';return;}
-  tb.innerHTML=data.map(f=>`<tr><td><span class="badge bk">${f.codice}</span></td><td><strong>${f.nome_referente}</strong></td><td>${f.num_componenti} <span style="color:var(--ink-light);font-size:.76rem">pers.</span></td><td><span class="badge ${f.attiva?'bg':'br'}">${f.attiva?'Attiva':'Inattiva'}</span></td><td style="font-size:.77rem;color:var(--ink-light);max-width:180px">${f.note||'—'}</td><td><button class="btn btn-d btn-sm" onclick="delFam('${f.id}')">🗑</button></td></tr>`).join('');
+  if(!data.length){tb.innerHTML='<tr><td colspan="7"><div class="empty"><div class="empty-e">👥</div><p>Nessuna famiglia registrata</p></div></td></tr>';return;}
+  tb.innerHTML=data.map(f=>`<tr>
+    <td><span class="badge bk">${f.codice}</span></td>
+    <td><strong>${f.nome_referente}</strong></td>
+    <td>${f.num_componenti} <span style="color:var(--ink-light);font-size:.76rem">pers.</span></td>
+    <td>${f.num_bambini||0} <span style="font-size:.76rem">👶</span></td>
+    <td><span class="badge ${f.attiva?'bg':'br'}">${f.attiva?'Attiva':'Inattiva'}</span></td>
+    <td style="font-size:.77rem;color:var(--ink-light);max-width:180px">${f.note||'—'}</td>
+    <td><button class="btn btn-d btn-sm" onclick="delFam('${f.id}')">🗑</button></td>
+  </tr>`).join('');
 }
 function ffam(){const q=document.getElementById('sf').value.toLowerCase();renFam(famD.filter(f=>f.nome_referente.toLowerCase().includes(q)||f.codice.toLowerCase().includes(q)));}
 async function saveFam(){
-  const c=document.getElementById('fc').value.trim(),n=document.getElementById('fn').value.trim(),co=parseInt(document.getElementById('fco').value);
+  const c=document.getElementById('fc').value.trim(),n=document.getElementById('fn').value.trim(),co=parseInt(document.getElementById('fco').value),ba=parseInt(document.getElementById('fba').value)||0;
   if(!c||!n||!co){al2('fa','Compila tutti i campi obbligatori','e');return;}
-  await db('famiglie',{method:'POST',body:JSON.stringify({codice:c,nome_referente:n,num_componenti:co,note:document.getElementById('fn2').value||null})});
+  if(ba>co){al2('fa','I bambini non possono essere più dei componenti totali','e');return;}
+  await db('famiglie',{method:'POST',body:JSON.stringify({codice:c,nome_referente:n,num_componenti:co,num_bambini:ba,note:document.getElementById('fn2').value||null})});
   closeM('mf');loadFam();
 }
 async function delFam(id){if(!confirm('Eliminare questa famiglia?'))return;await db('famiglie?id=eq.'+id,{method:'DELETE'});loadFam();}
 
-// STORICO
+// ── STORICO ──
 async function loadStor(){
   const data=await db('distribuzioni?order=created_at.desc');
   const tb=document.getElementById('tb-s');
@@ -505,7 +690,7 @@ async function loadStor(){
   }))).join('');
 }
 
-// HELPERS
+// ── HELPERS ──
 function openM(id){document.getElementById(id).classList.add('open');}
 function closeM(id){document.getElementById(id).classList.remove('open');}
 function al2(id,msg,t){const el=document.getElementById(id);el.innerHTML=`<div class="alert ${t==='o'?'aok':'aerr'}">${msg}</div>`;setTimeout(()=>el.innerHTML='',4000);}
