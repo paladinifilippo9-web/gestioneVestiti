@@ -11,7 +11,825 @@
 :root{
   --bg:#F7F5F0;--sur:#FFF;--sur2:#F0EDE6;--brd:#E2DDD5;--brd2:#CCC7BC;
   --tx:#1A1714;--tx2:#6B6560;--tx3:#A8A39C;
-  --gr:#2D5A27;--gr2:#3A7232;--grl:#EBF3E9;
+  --gr:#2D5A27;--gr2:#3A7232;--grl:#EBF3E9;<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Centro d'Ascolto — Gestione</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f2ee;
+    --surface: #ffffff;
+    --surface2: #f0ece6;
+    --border: #e0d9d0;
+    --accent: #2d6a4f;
+    --accent-light: #e8f5ef;
+    --accent2: #d4a373;
+    --danger: #c1440e;
+    --danger-light: #fdf0ec;
+    --text: #1a1a18;
+    --muted: #7a7268;
+    --radius: 12px;
+    --shadow: 0 2px 12px rgba(0,0,0,0.07);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  /* LAYOUT */
+  .shell { display: flex; min-height: 100vh; }
+  .sidebar {
+    width: 220px; background: var(--text); color: #fff;
+    display: flex; flex-direction: column; padding: 28px 0; flex-shrink: 0;
+    position: sticky; top: 0; height: 100vh;
+  }
+  .sidebar-logo { padding: 0 24px 28px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+  .sidebar-logo h1 { font-family: 'DM Serif Display', serif; font-size: 1.15rem; color: #fff; line-height: 1.3; }
+  .sidebar-logo span { font-size: 0.75rem; color: rgba(255,255,255,0.5); font-weight: 300; }
+  .nav { padding: 16px 0; flex: 1; }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 11px 24px; cursor: pointer; transition: all .15s;
+    font-size: 0.875rem; font-weight: 500; color: rgba(255,255,255,0.65);
+    border-left: 3px solid transparent;
+  }
+  .nav-item:hover { color: #fff; background: rgba(255,255,255,0.06); }
+  .nav-item.active { color: #fff; background: rgba(255,255,255,0.1); border-left-color: var(--accent2); }
+  .nav-item .icon { font-size: 1rem; width: 20px; text-align: center; }
+  .main { flex: 1; padding: 36px 40px; overflow-y: auto; }
+
+  /* HEADER */
+  .page-header { margin-bottom: 28px; }
+  .page-header h2 { font-family: 'DM Serif Display', serif; font-size: 1.8rem; }
+  .page-header p { color: var(--muted); font-size: 0.875rem; margin-top: 4px; }
+
+  /* CARDS */
+  .card { background: var(--surface); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow); border: 1px solid var(--border); }
+  .card-title { font-weight: 600; font-size: 0.9rem; margin-bottom: 16px; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+
+  /* GRID */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+
+  /* STAT CARDS */
+  .stat { background: var(--surface); border-radius: var(--radius); padding: 20px 24px; border: 1px solid var(--border); box-shadow: var(--shadow); }
+  .stat-label { font-size: 0.78rem; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; font-weight: 500; }
+  .stat-value { font-family: 'DM Serif Display', serif; font-size: 2.2rem; margin-top: 6px; }
+  .stat-sub { font-size: 0.78rem; color: var(--muted); margin-top: 2px; }
+
+  /* BUTTONS */
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 20px; border-radius: 8px; border: none;
+    font-family: 'DM Sans', sans-serif; font-size: 0.875rem; font-weight: 500;
+    cursor: pointer; transition: all .15s;
+  }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { background: #235c42; }
+  .btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+  .btn-secondary:hover { background: var(--border); }
+  .btn-danger { background: var(--danger-light); color: var(--danger); border: 1px solid #f3d0c3; }
+  .btn-danger:hover { background: #f8ddd5; }
+  .btn-sm { padding: 6px 14px; font-size: 0.8rem; }
+  .btn:disabled { opacity: .5; cursor: not-allowed; }
+
+  /* TABLE */
+  .table-wrap { overflow-x: auto; border-radius: 10px; border: 1px solid var(--border); }
+  table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+  th { background: var(--surface2); padding: 12px 16px; text-align: left; font-size: 0.75rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+  td { padding: 12px 16px; border-top: 1px solid var(--border); }
+  tr:hover td { background: var(--surface2); }
+
+  /* BADGE */
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 0.73rem; font-weight: 600; }
+  .badge-green { background: var(--accent-light); color: var(--accent); }
+  .badge-orange { background: #fff3e0; color: #e65100; }
+  .badge-red { background: var(--danger-light); color: var(--danger); }
+  .badge-gray { background: var(--surface2); color: var(--muted); }
+
+  /* FORM */
+  .form-group { margin-bottom: 16px; }
+  label { display: block; font-size: 0.82rem; font-weight: 500; margin-bottom: 6px; color: var(--muted); }
+  input, select, textarea {
+    width: 100%; padding: 10px 14px; border: 1px solid var(--border);
+    border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 0.875rem;
+    background: var(--surface); color: var(--text); transition: border .15s;
+  }
+  input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent); }
+  textarea { resize: vertical; min-height: 80px; }
+
+  /* UPLOAD AREA */
+  .upload-area {
+    border: 2px dashed var(--border); border-radius: var(--radius);
+    padding: 36px; text-align: center; cursor: pointer; transition: all .2s;
+    background: var(--surface2);
+  }
+  .upload-area:hover, .upload-area.dragover { border-color: var(--accent); background: var(--accent-light); }
+  .upload-area .upload-icon { font-size: 2.5rem; margin-bottom: 10px; }
+  .upload-area p { color: var(--muted); font-size: 0.875rem; }
+  .upload-area strong { color: var(--accent); }
+
+  /* AI RESPONSE BOX */
+  .ai-box { background: var(--accent-light); border: 1px solid #b7deca; border-radius: var(--radius); padding: 20px; margin-top: 16px; }
+  .ai-box-title { font-weight: 600; font-size: 0.85rem; color: var(--accent); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+  .ai-parsed-item { display: flex; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 1px solid rgba(0,0,0,0.05); }
+  .ai-parsed-item:last-child { border-bottom: none; }
+  .ai-parsed-item .pname { font-weight: 500; flex: 1; }
+  .ai-parsed-item .pqty { font-size: 0.85rem; color: var(--accent); font-weight: 600; background: #fff; padding: 2px 10px; border-radius: 20px; }
+  .ai-parsed-item .pexp { font-size: 0.78rem; color: var(--muted); }
+
+  /* TABS */
+  .tabs { display: flex; gap: 4px; margin-bottom: 24px; background: var(--surface2); padding: 4px; border-radius: 10px; width: fit-content; }
+  .tab { padding: 8px 18px; border-radius: 7px; cursor: pointer; font-size: 0.875rem; font-weight: 500; color: var(--muted); transition: all .15s; }
+  .tab.active { background: var(--surface); color: var(--text); box-shadow: var(--shadow); }
+
+  /* PAGE VIEWS */
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* LOADING */
+  .spinner { display: inline-block; width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin .7s linear infinite; }
+  .spinner-dark { border-color: rgba(0,0,0,0.1); border-top-color: var(--accent); }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* MODAL */
+  .modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 100; align-items: center; justify-content: center; }
+  .modal-bg.open { display: flex; }
+  .modal { background: var(--surface); border-radius: 16px; padding: 28px; width: 90%; max-width: 500px; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
+  .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+  .modal-header h3 { font-family: 'DM Serif Display', serif; font-size: 1.3rem; }
+  .modal-close { background: none; border: none; font-size: 1.3rem; cursor: pointer; color: var(--muted); }
+
+  /* ALERT */
+  .alert { padding: 12px 16px; border-radius: 8px; font-size: 0.875rem; margin-bottom: 16px; }
+  .alert-success { background: var(--accent-light); color: var(--accent); border: 1px solid #b7deca; }
+  .alert-error { background: var(--danger-light); color: var(--danger); border: 1px solid #f3c5b0; }
+
+  /* EMPTY STATE */
+  .empty { text-align: center; padding: 48px 24px; color: var(--muted); }
+  .empty-icon { font-size: 3rem; margin-bottom: 12px; }
+  .empty p { font-size: 0.9rem; }
+
+  /* TOOLBAR */
+  .toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; gap: 12px; }
+  .search-input { padding: 9px 14px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.875rem; width: 240px; }
+
+  /* SCORTE LOW */
+  .scorta-bassa td:first-child { border-left: 3px solid var(--danger); }
+
+  @media(max-width: 768px) {
+    .sidebar { width: 60px; }
+    .sidebar-logo, .nav-item span { display: none; }
+    .main { padding: 20px 16px; }
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="sidebar-logo">
+      <h1>Centro d'Ascolto</h1>
+      <span>Gestione Distribuzione</span>
+    </div>
+    <div class="nav">
+      <div class="nav-item active" onclick="showPage('dashboard')">
+        <span class="icon">🏠</span><span>Dashboard</span>
+      </div>
+      <div class="nav-item" onclick="showPage('magazzino')">
+        <span class="icon">📦</span><span>Magazzino</span>
+      </div>
+      <div class="nav-item" onclick="showPage('carica-ai')">
+        <span class="icon">🤖</span><span>Carica con AI</span>
+      </div>
+      <div class="nav-item" onclick="showPage('distribuzione')">
+        <span class="icon">📋</span><span>Distribuzione</span>
+      </div>
+      <div class="nav-item" onclick="showPage('famiglie')">
+        <span class="icon">👥</span><span>Famiglie</span>
+      </div>
+      <div class="nav-item" onclick="showPage('storico')">
+        <span class="icon">📊</span><span>Storico</span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- DASHBOARD -->
+    <div class="page active" id="page-dashboard">
+      <div class="page-header">
+        <h2>Buongiorno 👋</h2>
+        <p>Situazione aggiornata del centro</p>
+      </div>
+      <div class="grid-3" style="margin-bottom:24px">
+        <div class="stat">
+          <div class="stat-label">Prodotti a magazzino</div>
+          <div class="stat-value" id="stat-prodotti">—</div>
+          <div class="stat-sub">tipi diversi</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Famiglie registrate</div>
+          <div class="stat-value" id="stat-famiglie">—</div>
+          <div class="stat-sub">attive</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Distribuzioni effettuate</div>
+          <div class="stat-value" id="stat-distrib">—</div>
+          <div class="stat-sub">totali</div>
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">⚠️ Scorte in esaurimento</div>
+          <div id="scorte-basse-list"><div class="empty"><div class="empty-icon">✅</div><p>Tutte le scorte sono ok</p></div></div>
+        </div>
+        <div class="card">
+          <div class="card-title">📅 Ultime distribuzioni</div>
+          <div id="ultime-distrib-list"><div class="empty"><div class="empty-icon">📋</div><p>Nessuna distribuzione ancora</p></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAGAZZINO -->
+    <div class="page" id="page-magazzino">
+      <div class="page-header">
+        <h2>Magazzino</h2>
+        <p>Tutti i prodotti disponibili</p>
+      </div>
+      <div class="toolbar">
+        <input class="search-input" type="text" placeholder="🔍  Cerca prodotto..." id="search-mag" oninput="filterMagazzino()">
+        <button class="btn btn-primary" onclick="openAddProdotto()">+ Aggiungi prodotto</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Prodotto</th><th>Categoria</th><th>Quantità</th><th>Unità</th><th>Scadenza stimata</th><th>Azioni</th></tr></thead>
+          <tbody id="magazzino-tbody"><tr><td colspan="6" style="text-align:center;padding:32px;color:var(--muted)">Caricamento...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- CARICA CON AI -->
+    <div class="page" id="page-carica-ai">
+      <div class="page-header">
+        <h2>Carica con AI 🤖</h2>
+        <p>Fotografa o carica un foglio scritto a mano — l'AI legge i prodotti e li aggiunge al magazzino</p>
+      </div>
+      <div class="grid-2">
+        <div>
+          <div class="card" style="margin-bottom:20px">
+            <div class="card-title">Carica immagine o foto</div>
+            <div class="upload-area" id="ai-upload-area" onclick="document.getElementById('ai-file-input').click()" ondragover="handleDrag(event,true)" ondragleave="handleDrag(event,false)" ondrop="handleDrop(event)">
+              <div class="upload-icon">📷</div>
+              <p><strong>Clicca o trascina</strong> una foto del foglio</p>
+              <p style="margin-top:4px;font-size:0.8rem">JPG, PNG, PDF</p>
+            </div>
+            <input type="file" id="ai-file-input" accept="image/*,.pdf" style="display:none" onchange="handleAiFile(event)">
+            <div id="ai-preview" style="margin-top:12px;display:none">
+              <img id="ai-preview-img" style="max-width:100%;border-radius:8px;border:1px solid var(--border)" alt="Anteprima">
+            </div>
+          </div>
+          <button class="btn btn-primary" style="width:100%" id="btn-analizza" onclick="analizzaConAI()" disabled>
+            🤖 Analizza con AI
+          </button>
+          <div id="ai-loading" style="display:none;text-align:center;padding:20px">
+            <div class="spinner spinner-dark" style="width:28px;height:28px;margin:0 auto 10px"></div>
+            <p style="color:var(--muted);font-size:0.875rem">L'AI sta leggendo il foglio...</p>
+          </div>
+        </div>
+        <div>
+          <div id="ai-risultato" style="display:none">
+            <div class="ai-box">
+              <div class="ai-box-title">✅ Prodotti riconosciuti</div>
+              <div id="ai-items-list"></div>
+            </div>
+            <div style="margin-top:16px;display:flex;gap:10px">
+              <button class="btn btn-primary" style="flex:1" onclick="confermaSalvataggio()">💾 Salva nel magazzino</button>
+              <button class="btn btn-secondary" onclick="resetAI()">✕ Annulla</button>
+            </div>
+            <div id="ai-save-alert" style="margin-top:12px"></div>
+          </div>
+          <div id="ai-placeholder" class="card" style="height:200px;display:flex;align-items:center;justify-content:center">
+            <div style="text-align:center;color:var(--muted)">
+              <div style="font-size:2rem;margin-bottom:8px">👈</div>
+              <p>Carica un'immagine per iniziare</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DISTRIBUZIONE -->
+    <div class="page" id="page-distribuzione">
+      <div class="page-header">
+        <h2>Distribuzione</h2>
+        <p>Carica il file Excel — le quantità vengono scalate dal magazzino in automatico</p>
+      </div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">Carica file Excel</div>
+          <div class="upload-area" onclick="document.getElementById('excel-input').click()">
+            <div class="upload-icon">📊</div>
+            <p><strong>Clicca</strong> per caricare il file Excel</p>
+            <p style="margin-top:4px;font-size:0.8rem">Il file deve avere: Prodotto | Quantità | Unità</p>
+          </div>
+          <input type="file" id="excel-input" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleExcel(event)">
+          <div class="form-group" style="margin-top:16px">
+            <label>Note distribuzione (opzionale)</label>
+            <textarea id="distrib-note" placeholder="Es. Distribuzione settimanale 03/05/2026"></textarea>
+          </div>
+        </div>
+        <div>
+          <div id="excel-preview" style="display:none">
+            <div class="card">
+              <div class="card-title">Anteprima — verifica prima di confermare</div>
+              <div class="table-wrap" style="max-height:300px;overflow-y:auto">
+                <table>
+                  <thead><tr><th>Prodotto</th><th>Quantità uscente</th><th>Unità</th><th>Stato</th></tr></thead>
+                  <tbody id="excel-tbody"></tbody>
+                </table>
+              </div>
+              <div style="margin-top:16px;display:flex;gap:10px">
+                <button class="btn btn-primary" style="flex:1" id="btn-conferma-distrib" onclick="confermDistribuzione()">✅ Conferma e aggiorna magazzino</button>
+                <button class="btn btn-secondary" onclick="resetExcel()">✕ Annulla</button>
+              </div>
+              <div id="distrib-alert" style="margin-top:12px"></div>
+            </div>
+          </div>
+          <div id="excel-placeholder" class="card" style="min-height:200px;display:flex;align-items:center;justify-content:center">
+            <div style="text-align:center;color:var(--muted)">
+              <div style="font-size:2rem;margin-bottom:8px">📋</div>
+              <p>Carica l'Excel per vedere l'anteprima</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FAMIGLIE -->
+    <div class="page" id="page-famiglie">
+      <div class="page-header">
+        <h2>Famiglie</h2>
+        <p>Famiglie registrate al centro d'ascolto</p>
+      </div>
+      <div class="toolbar">
+        <input class="search-input" type="text" placeholder="🔍  Cerca famiglia..." id="search-fam" oninput="filterFamiglie()">
+        <button class="btn btn-primary" onclick="openAddFamiglia()">+ Aggiungi famiglia</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Codice</th><th>Referente</th><th>Componenti</th><th>Stato</th><th>Note</th><th>Azioni</th></tr></thead>
+          <tbody id="famiglie-tbody"><tr><td colspan="6" style="text-align:center;padding:32px;color:var(--muted)">Caricamento...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- STORICO -->
+    <div class="page" id="page-storico">
+      <div class="page-header">
+        <h2>Storico distribuzioni</h2>
+        <p>Tutte le distribuzioni completate</p>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Data</th><th>Prodotti distribuiti</th><th>Stato</th><th>Note</th></tr></thead>
+          <tbody id="storico-tbody"><tr><td colspan="4" style="text-align:center;padding:32px;color:var(--muted)">Caricamento...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- MODAL AGGIUNGI PRODOTTO -->
+<div class="modal-bg" id="modal-prodotto">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Aggiungi prodotto</h3>
+      <button class="modal-close" onclick="closeModal('modal-prodotto')">✕</button>
+    </div>
+    <div class="form-group"><label>Nome prodotto *</label><input id="p-nome" placeholder="Es. Pasta"></div>
+    <div class="form-group"><label>Categoria</label>
+      <select id="p-cat">
+        <option>Alimentari</option><option>Bevande</option><option>Igiene</option><option>Pulizia</option><option>Infanzia</option><option>Altro</option>
+      </select>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="form-group"><label>Quantità *</label><input id="p-qty" type="number" min="0" step="0.1" placeholder="0"></div>
+      <div class="form-group"><label>Unità</label>
+        <select id="p-unit"><option>pz</option><option>kg</option><option>g</option><option>L</option><option>ml</option><option>conf</option><option>scatola</option><option>busta</option></select>
+      </div>
+    </div>
+    <div class="form-group"><label>Scadenza stimata (opzionale)</label><input id="p-scad" type="date"></div>
+    <div id="modal-prodotto-alert" style="margin-bottom:8px"></div>
+    <button class="btn btn-primary" style="width:100%" onclick="salvaProdotto()">Salva</button>
+  </div>
+</div>
+
+<!-- MODAL AGGIUNGI FAMIGLIA -->
+<div class="modal-bg" id="modal-famiglia">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Aggiungi famiglia</h3>
+      <button class="modal-close" onclick="closeModal('modal-famiglia')">✕</button>
+    </div>
+    <div class="form-group"><label>Codice univoco *</label><input id="f-codice" placeholder="Es. FAM001"></div>
+    <div class="form-group"><label>Nome referente *</label><input id="f-nome" placeholder="Es. Mario Rossi"></div>
+    <div class="form-group"><label>Numero componenti *</label><input id="f-comp" type="number" min="1" value="1"></div>
+    <div class="form-group"><label>Note / esigenze particolari</label><textarea id="f-note" placeholder="Es. Allergia al glutine, bambini piccoli..."></textarea></div>
+    <div id="modal-famiglia-alert" style="margin-bottom:8px"></div>
+    <button class="btn btn-primary" style="width:100%" onclick="salvaFamiglia()">Salva</button>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://nfwzorbnlrudtpbnlmpt.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5md3pvcmJubHJ1ZHRwYm5sbXB0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4MTU2NjgsImV4cCI6MjA5MjM5MTY2OH0.S59qMU1vfQtSYVIe8P0lfz6hp4bXKnhJRCPKXqliAlo';
+const ANTHROPIC_URL = 'https://api.anthropic.com/v1/messages';
+
+let magattinoData = [];
+let famiglieData = [];
+let aiParsedItems = [];
+let excelParsedRows = [];
+let currentImageBase64 = null;
+
+// ═══════════════════════════════════════════
+//  NAVIGATION
+// ═══════════════════════════════════════════
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  const items = document.querySelectorAll('.nav-item');
+  const map = { dashboard:0, magazzino:1, 'carica-ai':2, distribuzione:3, famiglie:4, storico:5 };
+  items[map[name]]?.classList.add('active');
+  if (name === 'magazzino') loadMagazzino();
+  if (name === 'famiglie') loadFamiglie();
+  if (name === 'dashboard') loadDashboard();
+  if (name === 'storico') loadStorico();
+}
+
+// ═══════════════════════════════════════════
+//  SUPABASE HELPER
+// ═══════════════════════════════════════════
+async function sb(path, opts = {}) {
+  const res = await fetch(SUPABASE_URL + '/rest/v1/' + path, {
+    headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=representation', ...opts.headers },
+    ...opts
+  });
+  const text = await res.text();
+  return text ? JSON.parse(text) : [];
+}
+
+// ═══════════════════════════════════════════
+//  DASHBOARD
+// ═══════════════════════════════════════════
+async function loadDashboard() {
+  const [mag, fam, dist] = await Promise.all([
+    sb('magazzino?select=id,nome,quantita,unita&order=quantita.asc'),
+    sb('famiglie?select=id&attiva=eq.true'),
+    sb('distribuzioni?select=id')
+  ]);
+  document.getElementById('stat-prodotti').textContent = mag.length;
+  document.getElementById('stat-famiglie').textContent = fam.length;
+  document.getElementById('stat-distrib').textContent = dist.length;
+
+  // scorte basse (< 3)
+  const basse = mag.filter(p => p.quantita < 3 && p.quantita > 0);
+  const esaurite = mag.filter(p => p.quantita === 0);
+  const criticali = [...esaurite, ...basse].slice(0, 6);
+  const sbList = document.getElementById('scorte-basse-list');
+  if (!criticali.length) { sbList.innerHTML = '<div class="empty"><div class="empty-icon">✅</div><p>Tutte le scorte sono ok</p></div>'; }
+  else {
+    sbList.innerHTML = criticali.map(p => `
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)">
+        <span style="font-weight:500">${p.nome}</span>
+        <span class="badge ${p.quantita === 0 ? 'badge-red' : 'badge-orange'}">${p.quantita === 0 ? 'Esaurito' : p.quantita + ' ' + p.unita}</span>
+      </div>`).join('');
+  }
+
+  // ultime distribuzioni
+  const recent = await sb('distribuzioni?select=id,data_distribuzione,stato,note&order=created_at.desc&limit=5');
+  const udList = document.getElementById('ultime-distrib-list');
+  if (!recent.length) { udList.innerHTML = '<div class="empty"><div class="empty-icon">📋</div><p>Nessuna distribuzione ancora</p></div>'; }
+  else {
+    udList.innerHTML = recent.map(d => `
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)">
+        <div><div style="font-weight:500">${new Date(d.data_distribuzione).toLocaleDateString('it-IT')}</div><div style="font-size:0.78rem;color:var(--muted)">${d.note || '—'}</div></div>
+        <span class="badge ${d.stato === 'completata' ? 'badge-green' : 'badge-gray'}">${d.stato}</span>
+      </div>`).join('');
+  }
+}
+
+// ═══════════════════════════════════════════
+//  MAGAZZINO
+// ═══════════════════════════════════════════
+async function loadMagazzino() {
+  const data = await sb('magazzino?order=nome.asc');
+  magattinoData = data;
+  renderMagazzino(data);
+}
+
+function renderMagazzino(data) {
+  const tbody = document.getElementById('magazzino-tbody');
+  if (!data.length) { tbody.innerHTML = '<tr><td colspan="6"><div class="empty"><div class="empty-icon">📦</div><p>Nessun prodotto ancora. Carica un foglio con l\'AI!</p></div></td></tr>'; return; }
+  tbody.innerHTML = data.map(p => {
+    const badge = p.quantita === 0 ? 'badge-red' : p.quantita < 3 ? 'badge-orange' : 'badge-green';
+    const label = p.quantita === 0 ? 'Esaurito' : `${p.quantita} ${p.unita}`;
+    const scad = p.scadenza_stimata ? new Date(p.scadenza_stimata).toLocaleDateString('it-IT') : '—';
+    return `<tr class="${p.quantita < 3 ? 'scorta-bassa' : ''}">
+      <td><strong>${p.nome}</strong></td>
+      <td><span class="badge badge-gray">${p.categoria || 'Altro'}</span></td>
+      <td><span class="badge ${badge}">${label}</span></td>
+      <td>${p.unita}</td>
+      <td>${scad}</td>
+      <td><button class="btn btn-danger btn-sm" onclick="eliminaProdotto('${p.id}')">🗑</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function filterMagazzino() {
+  const q = document.getElementById('search-mag').value.toLowerCase();
+  renderMagazzino(magattinoData.filter(p => p.nome.toLowerCase().includes(q)));
+}
+
+function openAddProdotto() { openModal('modal-prodotto'); }
+
+async function salvaProdotto() {
+  const nome = document.getElementById('p-nome').value.trim();
+  const qty = parseFloat(document.getElementById('p-qty').value);
+  if (!nome || isNaN(qty)) { showAlert('modal-prodotto-alert', 'Compila nome e quantità', 'error'); return; }
+  await sb('magazzino', { method: 'POST', body: JSON.stringify({ nome, categoria: document.getElementById('p-cat').value, quantita: qty, unita: document.getElementById('p-unit').value, scadenza_stimata: document.getElementById('p-scad').value || null }) });
+  closeModal('modal-prodotto');
+  loadMagazzino();
+}
+
+async function eliminaProdotto(id) {
+  if (!confirm('Eliminare questo prodotto?')) return;
+  await sb('magazzino?id=eq.' + id, { method: 'DELETE' });
+  loadMagazzino();
+}
+
+// ═══════════════════════════════════════════
+//  AI — LETTURA FOGLIO
+// ═══════════════════════════════════════════
+function handleDrag(e, on) { e.preventDefault(); document.getElementById('ai-upload-area').classList.toggle('dragover', on); }
+function handleDrop(e) { e.preventDefault(); handleDrag(e, false); const f = e.dataTransfer.files[0]; if (f) processAiFile(f); }
+function handleAiFile(e) { const f = e.target.files[0]; if (f) processAiFile(f); }
+
+function processAiFile(file) {
+  const reader = new FileReader();
+  reader.onload = ev => {
+    currentImageBase64 = ev.target.result.split(',')[1];
+    document.getElementById('ai-preview-img').src = ev.target.result;
+    document.getElementById('ai-preview').style.display = 'block';
+    document.getElementById('btn-analizza').disabled = false;
+    document.getElementById('ai-risultato').style.display = 'none';
+    document.getElementById('ai-placeholder').style.display = 'none';
+  };
+  reader.readAsDataURL(file);
+}
+
+async function analizzaConAI() {
+  if (!currentImageBase64) return;
+  document.getElementById('ai-loading').style.display = 'block';
+  document.getElementById('btn-analizza').disabled = true;
+  document.getElementById('ai-risultato').style.display = 'none';
+  document.getElementById('ai-placeholder').style.display = 'none';
+
+  try {
+    const res = await fetch(ANTHROPIC_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{
+          role: 'user',
+          content: [
+            { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: currentImageBase64 } },
+            { type: 'text', text: `Sei un assistente per un centro d'ascolto. Leggi questo foglio scritto a mano con un elenco di prodotti alimentari/beni. Estrai OGNI prodotto con: nome, quantità, unità di misura, e stima della scadenza media del prodotto (data approssimativa basata sul tipo di prodotto, es. pasta secca = +18 mesi, tonno in scatola = +24 mesi, latte UHT = +6 mesi, prodotti freschi = +7 giorni). Rispondi SOLO con JSON valido, nessun testo prima o dopo, in questo formato esatto: {"prodotti":[{"nome":"Pasta","quantita":10,"unita":"kg","scadenza_stimata":"2027-12-01","note_scadenza":"Stima per pasta secca"},{"nome":"Tonno","quantita":24,"unita":"scatola","scadenza_stimata":"2028-05-01","note_scadenza":"Stima per tonno in scatola"}]}` }
+          ]
+        }]
+      })
+    });
+    const data = await res.json();
+    const text = data.content?.find(b => b.type === 'text')?.text || '{}';
+    const clean = text.replace(/```json|```/g, '').trim();
+    const parsed = JSON.parse(clean);
+    aiParsedItems = parsed.prodotti || [];
+    renderAiRisultato();
+  } catch (err) {
+    alert('Errore durante l\'analisi AI: ' + err.message);
+  } finally {
+    document.getElementById('ai-loading').style.display = 'none';
+    document.getElementById('btn-analizza').disabled = false;
+  }
+}
+
+function renderAiRisultato() {
+  const list = document.getElementById('ai-items-list');
+  list.innerHTML = aiParsedItems.map((p, i) => `
+    <div class="ai-parsed-item">
+      <span class="pname">${p.nome}</span>
+      <span class="pqty">${p.quantita} ${p.unita}</span>
+      <span class="pexp">⏱ ${p.scadenza_stimata ? new Date(p.scadenza_stimata).toLocaleDateString('it-IT') : '?'}</span>
+    </div>`).join('');
+  document.getElementById('ai-risultato').style.display = 'block';
+}
+
+async function confermaSalvataggio() {
+  for (const p of aiParsedItems) {
+    // cerca se esiste già
+    const existing = await sb(`magazzino?nome=ilike.${encodeURIComponent(p.nome)}&limit=1`);
+    if (existing.length) {
+      // aggiorna quantità
+      await sb('magazzino?id=eq.' + existing[0].id, {
+        method: 'PATCH',
+        body: JSON.stringify({ quantita: existing[0].quantita + p.quantita, scadenza_stimata: p.scadenza_stimata || existing[0].scadenza_stimata })
+      });
+    } else {
+      await sb('magazzino', {
+        method: 'POST',
+        body: JSON.stringify({ nome: p.nome, quantita: p.quantita, unita: p.unita || 'pz', scadenza_stimata: p.scadenza_stimata || null, categoria: 'Alimentari' })
+      });
+    }
+    // log movimento
+    await sb('movimenti_magazzino', {
+      method: 'POST',
+      body: JSON.stringify({ prodotto_nome: p.nome, tipo: 'entrata', quantita: p.quantita, unita: p.unita || 'pz', note: 'Caricato via AI' })
+    });
+  }
+  showAlert('ai-save-alert', `✅ ${aiParsedItems.length} prodotti salvati nel magazzino!`, 'success');
+  setTimeout(resetAI, 2000);
+}
+
+function resetAI() {
+  currentImageBase64 = null; aiParsedItems = [];
+  document.getElementById('ai-preview').style.display = 'none';
+  document.getElementById('ai-risultato').style.display = 'none';
+  document.getElementById('ai-placeholder').style.display = 'flex';
+  document.getElementById('btn-analizza').disabled = true;
+  document.getElementById('ai-file-input').value = '';
+}
+
+// ═══════════════════════════════════════════
+//  DISTRIBUZIONE EXCEL
+// ═══════════════════════════════════════════
+async function handleExcel(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const buf = await file.arrayBuffer();
+  const wb = XLSX.read(buf);
+  const ws = wb.Sheets[wb.SheetNames[0]];
+  const rows = XLSX.utils.sheet_to_json(ws, { header: 1 });
+  // prendi righe non vuote, salta header se la prima riga sembra un'intestazione
+  const start = (typeof rows[0][0] === 'string' && isNaN(rows[0][1])) ? 1 : 0;
+  excelParsedRows = rows.slice(start).filter(r => r[0]).map(r => ({
+    nome: String(r[0]).trim(),
+    quantita: parseFloat(r[1]) || 0,
+    unita: String(r[2] || 'pz').trim()
+  }));
+  await renderExcelPreview();
+}
+
+async function renderExcelPreview() {
+  const mag = await sb('magazzino?select=nome,quantita,unita');
+  const tbody = document.getElementById('excel-tbody');
+  tbody.innerHTML = excelParsedRows.map(r => {
+    const found = mag.find(m => m.nome.toLowerCase() === r.nome.toLowerCase());
+    let stato = '', badge = '';
+    if (!found) { stato = 'Non trovato'; badge = 'badge-red'; }
+    else if (found.quantita < r.quantita) { stato = `⚠️ Solo ${found.quantita} ${r.unita} disponibili`; badge = 'badge-orange'; }
+    else { stato = '✅ OK'; badge = 'badge-green'; }
+    return `<tr><td><strong>${r.nome}</strong></td><td>${r.quantita}</td><td>${r.unita}</td><td><span class="badge ${badge}">${stato}</span></td></tr>`;
+  }).join('');
+  document.getElementById('excel-preview').style.display = 'block';
+  document.getElementById('excel-placeholder').style.display = 'none';
+}
+
+async function confermDistribuzione() {
+  const btn = document.getElementById('btn-conferma-distrib');
+  btn.disabled = true;
+
+  // crea sessione distribuzione
+  const [distrib] = await sb('distribuzioni', {
+    method: 'POST',
+    body: JSON.stringify({ note: document.getElementById('distrib-note').value || null, stato: 'completata' })
+  });
+
+  for (const r of excelParsedRows) {
+    const found = magattinoData.find ? null : null;
+    const existing = await sb(`magazzino?nome=ilike.${encodeURIComponent(r.nome)}&limit=1`);
+    if (existing.length) {
+      const nuova = Math.max(0, existing[0].quantita - r.quantita);
+      await sb('magazzino?id=eq.' + existing[0].id, { method: 'PATCH', body: JSON.stringify({ quantita: nuova }) });
+      await sb('movimenti_magazzino', {
+        method: 'POST',
+        body: JSON.stringify({ prodotto_nome: r.nome, tipo: 'uscita', quantita: r.quantita, unita: r.unita, distribuzione_id: distrib?.id || null })
+      });
+    }
+  }
+
+  showAlert('distrib-alert', `✅ Distribuzione completata! Magazzino aggiornato.`, 'success');
+  setTimeout(resetExcel, 2000);
+  btn.disabled = false;
+}
+
+function resetExcel() {
+  excelParsedRows = [];
+  document.getElementById('excel-preview').style.display = 'none';
+  document.getElementById('excel-placeholder').style.display = 'flex';
+  document.getElementById('excel-input').value = '';
+}
+
+// ═══════════════════════════════════════════
+//  FAMIGLIE
+// ═══════════════════════════════════════════
+async function loadFamiglie() {
+  const data = await sb('famiglie?order=codice.asc');
+  famiglieData = data;
+  renderFamiglie(data);
+}
+
+function renderFamiglie(data) {
+  const tbody = document.getElementById('famiglie-tbody');
+  if (!data.length) { tbody.innerHTML = '<tr><td colspan="6"><div class="empty"><div class="empty-icon">👥</div><p>Nessuna famiglia registrata</p></div></td></tr>'; return; }
+  tbody.innerHTML = data.map(f => `<tr>
+    <td><strong>${f.codice}</strong></td>
+    <td>${f.nome_referente}</td>
+    <td><span class="badge badge-gray">${f.num_componenti} pers.</span></td>
+    <td><span class="badge ${f.attiva ? 'badge-green' : 'badge-red'}">${f.attiva ? 'Attiva' : 'Inattiva'}</span></td>
+    <td style="max-width:200px;font-size:0.8rem;color:var(--muted)">${f.note || '—'}</td>
+    <td><button class="btn btn-danger btn-sm" onclick="eliminaFamiglia('${f.id}')">🗑</button></td>
+  </tr>`).join('');
+}
+
+function filterFamiglie() {
+  const q = document.getElementById('search-fam').value.toLowerCase();
+  renderFamiglie(famiglieData.filter(f => f.nome_referente.toLowerCase().includes(q) || f.codice.toLowerCase().includes(q)));
+}
+
+function openAddFamiglia() { openModal('modal-famiglia'); }
+
+async function salvaFamiglia() {
+  const codice = document.getElementById('f-codice').value.trim();
+  const nome = document.getElementById('f-nome').value.trim();
+  const comp = parseInt(document.getElementById('f-comp').value);
+  if (!codice || !nome || !comp) { showAlert('modal-famiglia-alert', 'Compila tutti i campi obbligatori', 'error'); return; }
+  await sb('famiglie', { method: 'POST', body: JSON.stringify({ codice, nome_referente: nome, num_componenti: comp, note: document.getElementById('f-note').value || null }) });
+  closeModal('modal-famiglia');
+  loadFamiglie();
+}
+
+async function eliminaFamiglia(id) {
+  if (!confirm('Eliminare questa famiglia?')) return;
+  await sb('famiglie?id=eq.' + id, { method: 'DELETE' });
+  loadFamiglie();
+}
+
+// ═══════════════════════════════════════════
+//  STORICO
+// ═══════════════════════════════════════════
+async function loadStorico() {
+  const data = await sb('distribuzioni?order=created_at.desc');
+  const tbody = document.getElementById('storico-tbody');
+  if (!data.length) { tbody.innerHTML = '<tr><td colspan="4"><div class="empty"><div class="empty-icon">📊</div><p>Nessuna distribuzione ancora</p></div></td></tr>'; return; }
+  // per ogni distribuzione carica i movimenti
+  tbody.innerHTML = await Promise.all(data.map(async d => {
+    const mov = await sb('movimenti_magazzino?distribuzione_id=eq.' + d.id + '&tipo=eq.uscita');
+    const riep = mov.map(m => `${m.prodotto_nome} (${m.quantita} ${m.unita})`).join(', ') || '—';
+    return `<tr>
+      <td><strong>${new Date(d.data_distribuzione).toLocaleDateString('it-IT')}</strong></td>
+      <td style="font-size:0.8rem;color:var(--muted);max-width:300px">${riep}</td>
+      <td><span class="badge ${d.stato === 'completata' ? 'badge-green' : 'badge-gray'}">${d.stato}</span></td>
+      <td style="font-size:0.82rem;color:var(--muted)">${d.note || '—'}</td>
+    </tr>`;
+  })).then(rows => rows.join(''));
+}
+
+// ═══════════════════════════════════════════
+//  HELPERS
+// ═══════════════════════════════════════════
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function showAlert(id, msg, type) {
+  const el = document.getElementById(id);
+  el.innerHTML = `<div class="alert alert-${type}">${msg}</div>`;
+  setTimeout(() => el.innerHTML = '', 4000);
+}
+document.querySelectorAll('.modal-bg').forEach(m => m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); }));
+
+// Init
+loadDashboard();
+</script>
+</body>
+</html>
   --or:#8B4513;--orl:#FDF0E8;--orb:#D4914A;
   --rd:#8B1A1A;--rdl:#FDF0F0;--rdb:#D9A0A0;
   --yl:#7A6000;--yll:#FFF8E1;--ylb:#D4B400;
