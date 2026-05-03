@@ -32,9 +32,9 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--sand);color:var
 .login-card>p{text-align:center;color:var(--ink-light);font-size:.83rem;margin-bottom:26px;}
 .lfg{margin-bottom:13px;}
 .lfg label{display:block;font-size:.75rem;font-weight:600;color:var(--ink-mid);margin-bottom:5px;}
-.lfg input{width:100%;padding:12px 15px;border:1.5px solid var(--border);border-radius:10px;font-family:'Plus Jakarta Sans',sans-serif;font-size:1rem;transition:border .15s,box-shadow .15s;}
+.lfg input{width:100%;padding:12px 15px;border:1.5px solid var(--border);border-radius:10px;font-family:'Plus Jakarta Sans',sans-serif;font-size:1rem;transition:border .15s;}
 .lfg input:focus{outline:none;border-color:var(--green-mid);box-shadow:0 0 0 3px rgba(45,138,90,.1);}
-.login-btn{width:100%;padding:13px;background:var(--green);color:#fff;border:none;border-radius:10px;font-family:'Plus Jakarta Sans',sans-serif;font-size:.95rem;font-weight:600;cursor:pointer;margin-top:4px;}
+.login-btn{width:100%;padding:13px;background:var(--green);color:#fff;border:none;border-radius:10px;font-family:'Plus Jakarta Sans',sans-serif;font-size:.95rem;font-weight:600;cursor:pointer;}
 .login-btn:active{transform:scale(.98);}
 .login-err{background:var(--red-light);color:var(--red);border:1px solid #f5c0c0;border-radius:8px;padding:10px 14px;font-size:.82rem;margin-top:12px;display:none;}
 .login-hint{text-align:center;font-size:.74rem;color:var(--ink-light);margin-top:14px;}
@@ -44,7 +44,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--sand);color:var
 .app{display:flex;min-height:100vh;}
 
 /* SIDEBAR */
-.sidebar{width:var(--sidebar-w);flex-shrink:0;background:var(--ink);display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;overflow:hidden;z-index:100;transition:transform .25s;}
+.sidebar{width:var(--sidebar-w);flex-shrink:0;background:var(--ink);display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;overflow:hidden;z-index:100;}
 .sidebar::before{content:'';position:absolute;top:-20px;right:-20px;width:140px;height:140px;background:radial-gradient(circle,rgba(45,138,90,.25),transparent 70%);pointer-events:none;}
 .sidebar-top{padding:22px 20px 18px;border-bottom:1px solid rgba(255,255,255,.07);}
 .logo-badge{width:38px;height:38px;background:var(--green-mid);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;margin-bottom:11px;}
@@ -94,6 +94,22 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--sand);color:var
 .card-title{font-size:.69rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-light);}
 .card-body{padding:16px 18px;}
 
+/* MAGAZZINO - ALIMENTO GROUPS */
+.alimento-group{border:1px solid var(--border);border-radius:12px;margin-bottom:12px;overflow:hidden;}
+.alimento-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--sand);cursor:pointer;transition:background .15s;gap:12px;}
+.alimento-header:hover{background:var(--sand-dark);}
+.alimento-name{font-weight:700;font-size:.92rem;display:flex;align-items:center;gap:8px;}
+.alimento-totale{font-size:.78rem;color:var(--ink-mid);margin-left:auto;}
+.alimento-chevron{font-size:.8rem;color:var(--ink-light);transition:transform .2s;flex-shrink:0;}
+.alimento-chevron.open{transform:rotate(180deg);}
+.alimento-varianti{display:none;border-top:1px solid var(--border);}
+.alimento-varianti.open{display:block;}
+.variante-row{display:flex;align-items:center;gap:12px;padding:10px 16px;border-bottom:1px solid var(--border);background:var(--white);}
+.variante-row:last-child{border-bottom:none;}
+.variante-nome{flex:1;font-size:.84rem;}
+.variante-conf{font-size:.78rem;color:var(--ink-light);}
+.variante-qty{font-size:.84rem;font-weight:600;}
+
 /* TABLE */
 .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
 table{width:100%;border-collapse:collapse;font-size:.83rem;}
@@ -132,10 +148,11 @@ tbody tr:hover td{background:#faf8f5;}
 /* FORM */
 .fg{margin-bottom:13px;}
 label{display:block;font-size:.75rem;font-weight:600;margin-bottom:5px;color:var(--ink-mid);}
-input,select,textarea{width:100%;padding:11px 13px;border:1.5px solid var(--border);border-radius:9px;font-family:'Plus Jakarta Sans',sans-serif;font-size:1rem;background:var(--white);color:var(--ink);transition:border .15s,box-shadow .15s;-webkit-appearance:none;appearance:none;}
+input,select,textarea{width:100%;padding:11px 13px;border:1.5px solid var(--border);border-radius:9px;font-family:'Plus Jakarta Sans',sans-serif;font-size:1rem;background:var(--white);color:var(--ink);transition:border .15s;-webkit-appearance:none;appearance:none;}
 input:focus,select:focus,textarea:focus{outline:none;border-color:var(--green-mid);box-shadow:0 0 0 3px rgba(45,138,90,.1);}
 textarea{resize:vertical;min-height:75px;}
 .col2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.col3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
 
 /* UPLOAD */
 .upload-zone{border:2px dashed var(--border);border-radius:var(--radius);padding:32px 20px;text-align:center;cursor:pointer;transition:all .2s;background:var(--sand);}
@@ -154,7 +171,26 @@ textarea{resize:vertical;min-height:75px;}
 .ai-qty{font-size:.77rem;font-weight:700;background:#fff;color:var(--green);padding:2px 9px;border-radius:20px;border:1px solid var(--green-border);}
 .ai-exp{font-size:.7rem;color:var(--ink-light);min-width:76px;text-align:right;}
 
-/* RICHIESTE */
+/* RICHIESTE - FAMIGLIA CARD */
+.fam-req-card{background:var(--white);border:1px solid var(--border);border-radius:12px;margin-bottom:10px;overflow:hidden;transition:box-shadow .15s;}
+.fam-req-card:hover{box-shadow:var(--shadow);}
+.fam-req-header{display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer;transition:background .15s;}
+.fam-req-header:hover{background:var(--sand);}
+.fam-req-avatar{width:40px;height:40px;border-radius:10px;background:var(--green-light);display:flex;align-items:center;justify-content:center;font-size:.76rem;font-weight:700;color:var(--green);flex-shrink:0;}
+.fam-req-info{flex:1;}
+.fam-req-name{font-weight:700;font-size:.9rem;}
+.fam-req-sub{font-size:.72rem;color:var(--ink-light);margin-top:2px;}
+.fam-req-count{flex-shrink:0;}
+.fam-req-body{border-top:1px solid var(--border);display:none;}
+.fam-req-body.open{display:block;}
+.req-item{display:flex;align-items:flex-start;gap:10px;padding:12px 16px;border-bottom:1px solid var(--border);}
+.req-item:last-child{border-bottom:none;}
+.req-item-main{flex:1;}
+.req-item-prod{font-weight:600;font-size:.84rem;}
+.req-item-meta{font-size:.71rem;color:var(--ink-light);margin-top:2px;}
+.req-item-actions{display:flex;gap:6px;align-items:center;flex-shrink:0;}
+
+/* RICHIESTA SINGOLA (vista totale) */
 .richiesta-card{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:9px;display:flex;align-items:flex-start;gap:12px;}
 .richiesta-fam{width:40px;height:40px;border-radius:9px;background:var(--green-light);display:flex;align-items:center;justify-content:center;font-size:.74rem;font-weight:700;color:var(--green);flex-shrink:0;}
 .richiesta-body{flex:1;min-width:0;}
@@ -196,9 +232,10 @@ textarea{resize:vertical;min-height:75px;}
 .srch input{padding-left:32px;font-size:.875rem;}
 .srch::before{content:'🔍';position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:.78rem;pointer-events:none;}
 
-/* IMPORT PREVIEW */
-.import-preview-box{background:var(--green-light);border:1px solid var(--green-border);border-radius:var(--radius);padding:16px 18px;margin-top:14px;}
-.import-preview-title{font-size:.69rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--green);margin-bottom:10px;}
+/* TABS */
+.tabs{display:flex;gap:4px;background:var(--sand-dark);padding:4px;border-radius:10px;width:fit-content;margin-bottom:18px;flex-wrap:wrap;}
+.tab{padding:7px 16px;border-radius:7px;cursor:pointer;font-size:.81rem;font-weight:500;color:var(--ink-mid);transition:all .15s;white-space:nowrap;}
+.tab.active{background:var(--white);color:var(--ink);box-shadow:var(--shadow-sm);}
 
 /* PAGES */
 .page{display:none;}
@@ -209,7 +246,7 @@ textarea{resize:vertical;min-height:75px;}
 .modal-bg{display:none;position:fixed;inset:0;background:rgba(22,28,20,.55);backdrop-filter:blur(5px);z-index:300;align-items:center;justify-content:center;padding:16px;}
 .modal-bg.open{display:flex;}
 .modal{background:var(--white);border-radius:18px;padding:26px;width:100%;max-width:500px;box-shadow:var(--shadow-lg);animation:mi .18s ease;max-height:90vh;overflow-y:auto;}
-.modal-wide{max-width:660px;}
+.modal-wide{max-width:680px;}
 @keyframes mi{from{opacity:0;transform:scale(.95) translateY(8px);}to{opacity:1;transform:none;}}
 .modal-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;}
 .modal-hd h3{font-family:'Playfair Display',serif;font-size:1.3rem;}
@@ -232,8 +269,8 @@ textarea{resize:vertical;min-height:75px;}
 @keyframes sp{to{transform:rotate(360deg);}}
 
 /* MISC */
-.ls td:first-child{border-left:3px solid var(--amber);}
-.ns td:first-child{border-left:3px solid var(--red);}
+.ls .alimento-header{border-left:3px solid var(--amber);}
+.ns .alimento-header{border-left:3px solid var(--red);}
 .dash-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border);}
 .dash-row:last-child{border:none;}
 .dash-name{font-weight:500;font-size:.83rem;}
@@ -256,9 +293,8 @@ textarea{resize:vertical;min-height:75px;}
 .fam-inp:focus{outline:2px solid rgba(255,255,255,.4);}
 .fam-row-inp{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
 .fam-btn{background:#fff;color:var(--purple);border:none;padding:12px 20px;border-radius:9px;font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:.86rem;cursor:pointer;width:100%;}
-.fam-btn:active{transform:scale(.98);}
 
-/* MOBILE BOTTOM NAV */
+/* MOBILE */
 .mobile-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--ink);height:var(--mob-bar);z-index:200;border-top:1px solid rgba(255,255,255,.08);}
 .mobile-nav-inner{display:flex;height:100%;align-items:center;}
 .mob-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:6px 2px;cursor:pointer;color:rgba(255,255,255,.45);transition:color .15s;position:relative;}
@@ -268,25 +304,15 @@ textarea{resize:vertical;min-height:75px;}
 .mob-badge{position:absolute;top:4px;right:50%;transform:translateX(10px);background:var(--red);color:#fff;font-size:.58rem;font-weight:700;padding:1px 5px;border-radius:20px;}
 .mob-more-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:6px 2px;cursor:pointer;color:rgba(255,255,255,.45);}
 .mob-more-btn.active{color:#fff;}
-
-/* MOBILE MORE MENU */
 .mob-menu{display:none;position:fixed;bottom:var(--mob-bar);left:0;right:0;background:var(--ink);z-index:199;border-top:1px solid rgba(255,255,255,.08);padding:8px 0;border-radius:16px 16px 0 0;}
 .mob-menu.open{display:block;}
 .mob-menu-item{display:flex;align-items:center;gap:12px;padding:13px 20px;color:rgba(255,255,255,.7);font-size:.86rem;font-weight:500;cursor:pointer;}
 .mob-menu-item:hover{background:rgba(255,255,255,.05);color:#fff;}
 .mob-menu-icon{width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;font-size:.9rem;}
-
-/* MOBILE TOP BAR */
 .mobile-topbar{display:none;background:var(--ink);height:52px;align-items:center;padding:0 16px;position:sticky;top:0;z-index:50;gap:12px;}
 .mobile-topbar h2{font-family:'Playfair Display',serif;color:#fff;font-size:1.1rem;flex:1;}
 .mob-logout{background:none;border:none;color:rgba(255,255,255,.5);font-size:.8rem;cursor:pointer;padding:6px;font-family:'Plus Jakarta Sans',sans-serif;}
 
-/* TABS */
-.tabs{display:flex;gap:4px;background:var(--sand-dark);padding:4px;border-radius:10px;width:fit-content;margin-bottom:18px;}
-.tab{padding:7px 16px;border-radius:7px;cursor:pointer;font-size:.81rem;font-weight:500;color:var(--ink-mid);transition:all .15s;}
-.tab.active{background:var(--white);color:var(--ink);box-shadow:var(--shadow-sm);}
-
-/* RESPONSIVE */
 @media(max-width:768px){
   .sidebar{transform:translateX(-100%);}
   .main{margin-left:0;padding:0 14px 80px;}
@@ -300,18 +326,19 @@ textarea{resize:vertical;min-height:75px;}
   .page-header h2{font-size:1.5rem;}
   table{font-size:.79rem;}
   th,td{padding:9px 10px;}
-  .richiesta-actions{flex-direction:column;}
+  .richiesta-actions,.req-item-actions{flex-direction:column;}
   .section-card{padding:18px;}
   .tipo-selector{grid-template-columns:1fr 1fr;}
   .toolbar{flex-direction:column;align-items:stretch;}
   .srch{max-width:100%;}
-  .col2{grid-template-columns:1fr 1fr;}
+  .col2,.col3{grid-template-columns:1fr 1fr;}
   .fam-row-inp{grid-template-columns:1fr;}
+  .tabs{width:100%;}
 }
 @media(max-width:420px){
   .stats-row{grid-template-columns:1fr;}
   .stats-row .stat-card:last-child{grid-column:auto;}
-  .col2{grid-template-columns:1fr;}
+  .col2,.col3{grid-template-columns:1fr;}
 }
 </style>
 </head>
@@ -334,7 +361,7 @@ textarea{resize:vertical;min-height:75px;}
 <!-- APP ADMIN -->
 <div id="app-screen">
 <div class="app">
-<nav class="sidebar" id="sidebar">
+<nav class="sidebar">
   <div class="sidebar-top">
     <div class="logo-badge">🤝</div>
     <h1>Centro d'Ascolto</h1>
@@ -363,7 +390,7 @@ textarea{resize:vertical;min-height:75px;}
   </div>
 </nav>
 
-<main class="main" id="main-content">
+<main class="main">
   <div class="mobile-topbar">
     <h2 id="mob-page-title">Dashboard</h2>
     <button class="mob-logout" onclick="logout()">Esci ↩</button>
@@ -385,53 +412,49 @@ textarea{resize:vertical;min-height:75px;}
 
   <!-- MAGAZZINO -->
   <div class="page" id="page-magazzino">
-    <div class="page-header"><div><h2>Magazzino</h2><p>Gestisci i prodotti disponibili</p></div></div>
+    <div class="page-header"><div><h2>Magazzino</h2><p>Prodotti raggruppati per alimento</p></div></div>
     <div class="tabs">
-      <div class="tab active" id="tab-lista" onclick="switchMagTab('lista')">📋 Lista prodotti</div>
-      <div class="tab" id="tab-importa" onclick="switchMagTab('importa')">📥 Importa da Excel</div>
-      <div class="tab" id="tab-aggiungi" onclick="switchMagTab('aggiungi')">➕ Aggiungi manuale</div>
+      <div class="tab active" id="tab-lista" onclick="switchMagTab('lista')">📋 Per alimento</div>
+      <div class="tab" id="tab-importa" onclick="switchMagTab('importa')">📥 Importa Excel</div>
+      <div class="tab" id="tab-aggiungi" onclick="switchMagTab('aggiungi')">➕ Aggiungi</div>
     </div>
 
-    <!-- LISTA -->
+    <!-- LISTA ALIMENTI -->
     <div id="mag-lista">
       <div class="toolbar">
-        <div class="srch"><input type="text" placeholder="Cerca prodotto..." id="sm" oninput="fmag()"></div>
+        <div class="srch"><input type="text" placeholder="Cerca alimento..." id="sm" oninput="fmag()"></div>
       </div>
-      <div class="card"><div class="table-wrap">
-        <table><thead><tr><th>Prodotto</th><th>Cat.</th><th>Disponibile</th><th>Scadenza</th><th></th></tr></thead>
-        <tbody id="tb-m"></tbody></table>
-      </div></div>
+      <div id="mag-alimenti-list"></div>
     </div>
 
     <!-- IMPORTA EXCEL -->
     <div id="mag-importa" style="display:none">
       <div class="two-col">
         <div class="card"><div class="card-body">
-          <p style="font-size:.84rem;color:var(--ink-mid);margin-bottom:16px;line-height:1.6">
-            Carica un file Excel con l'elenco dei prodotti che hai già. Il file deve avere queste colonne (nell'ordine):<br><br>
-            <strong>Prodotto | Quantità | Unità | Categoria (opz.) | Scadenza (opz.)</strong><br><br>
-            Se un prodotto esiste già nel magazzino, la quantità verrà <strong>aggiunta</strong> a quella esistente.
+          <p style="font-size:.84rem;color:var(--ink-mid);margin-bottom:16px;line-height:1.65">
+            Carica un Excel con i prodotti che hai già. Colonne:<br><br>
+            <strong>Alimento | Nome prodotto | N° confezioni | Volume/peso per conf. | Unità conf. | Categoria | Scadenza</strong><br><br>
+            Es: <code style="background:var(--sand);padding:2px 6px;border-radius:4px;font-size:.8rem">Latte | Latte Granarolo 1L | 12 | 1 | L | Alimentari |</code><br><br>
+            Se non specifichi "Alimento", viene usato il "Nome prodotto".
           </p>
           <div class="upload-zone" onclick="document.getElementById('xl-mag-inp').click()">
             <div class="upload-icon">📥</div>
-            <h4><strong>Clicca</strong> per caricare il tuo Excel</h4>
+            <h4><strong>Clicca</strong> per caricare l'Excel</h4>
             <p>xlsx, xls, csv</p>
           </div>
-          <input type="file" id="xl-mag-inp" accept=".xlsx,.xls,.csv" style="display:none" onchange="loadXLMagazzino(event)">
+          <input type="file" id="xl-mag-inp" accept=".xlsx,.xls,.csv" style="display:none" onchange="loadXLMag(event)">
           <div id="xl-mag-alert" style="margin-top:12px"></div>
         </div></div>
         <div>
           <div id="xl-mag-preview" style="display:none">
             <div class="card">
-              <div class="card-header">
-                <span class="card-title">Anteprima — <span id="xl-mag-count">0</span> prodotti trovati</span>
-              </div>
+              <div class="card-header"><span class="card-title">Anteprima — <span id="xl-mag-count">0</span> prodotti</span></div>
               <div class="table-wrap" style="max-height:320px;overflow-y:auto">
-                <table><thead><tr><th>Prodotto</th><th>Qtà</th><th>Unità</th><th>Cat.</th><th>Stato</th></tr></thead>
+                <table><thead><tr><th>Alimento</th><th>Prodotto</th><th>N° conf.</th><th>Per conf.</th><th>Stato</th></tr></thead>
                 <tbody id="tb-xl-mag"></tbody></table>
               </div>
               <div style="padding:14px 18px;display:flex;gap:10px;border-top:1px solid var(--border)">
-                <button class="btn btn-p" style="flex:1" id="btn-xl-mag-conf" onclick="confermaImportMagazzino()">💾 Importa nel magazzino</button>
+                <button class="btn btn-p" style="flex:1" id="btn-xl-mag-conf" onclick="confermaImportMag()">💾 Importa</button>
                 <button class="btn btn-g" onclick="resetXLMag()">Annulla</button>
               </div>
             </div>
@@ -445,19 +468,19 @@ textarea{resize:vertical;min-height:75px;}
 
     <!-- AGGIUNGI MANUALE -->
     <div id="mag-aggiungi" style="display:none">
-      <div class="card" style="max-width:500px">
-        <div class="card-body">
-          <div class="fg"><label>Nome prodotto *</label><input id="pn" placeholder="Es. Pasta"></div>
-          <div class="fg"><label>Categoria</label><select id="pc"><option>Alimentari</option><option>Bevande</option><option>Igiene</option><option>Pulizia</option><option>Infanzia/Neonati</option><option>Altro</option></select></div>
-          <div class="col2">
-            <div class="fg"><label>Quantità *</label><input id="pq" type="number" min="0" step="0.1" placeholder="0"></div>
-            <div class="fg"><label>Unità</label><select id="pu"><option>pz</option><option>kg</option><option>g</option><option>L</option><option>ml</option><option>conf</option><option>scatola</option><option>busta</option></select></div>
-          </div>
-          <div class="fg"><label>Scadenza stimata</label><input id="ps" type="date"></div>
-          <div id="pa"></div>
-          <button class="btn btn-p wfull" onclick="saveProd()">Aggiungi prodotto</button>
+      <div class="card" style="max-width:540px"><div class="card-body">
+        <div class="fg"><label>Alimento * <span style="font-weight:400;color:var(--ink-light)">(es. Latte, Biscotti, Uova)</span></label><input id="p-alimento" placeholder="Es. Latte" list="alimenti-list-dl"><datalist id="alimenti-list-dl"></datalist></div>
+        <div class="fg"><label>Nome prodotto * <span style="font-weight:400;color:var(--ink-light)">(es. Latte Granarolo 1L)</span></label><input id="pn" placeholder="Es. Latte Granarolo 1L"></div>
+        <div class="fg"><label>Categoria</label><select id="pc"><option>Alimentari</option><option>Bevande</option><option>Latticini</option><option>Igiene</option><option>Pulizia</option><option>Infanzia/Neonati</option><option>Altro</option></select></div>
+        <div class="col3">
+          <div class="fg"><label>N° confezioni *</label><input id="pq" type="number" min="0" step="1" placeholder="Es. 12"></div>
+          <div class="fg"><label>Contenuto per conf.</label><input id="p-vol" type="number" min="0" step="0.01" placeholder="Es. 1"></div>
+          <div class="fg"><label>Unità conf.</label><select id="p-unit-conf"><option>L</option><option>ml</option><option>kg</option><option>g</option><option>pz</option><option>conf</option></select></div>
         </div>
-      </div>
+        <div class="fg"><label>Scadenza stimata</label><input id="ps" type="date"></div>
+        <div id="pa"></div>
+        <button class="btn btn-p wfull" onclick="saveProd()">Aggiungi al magazzino</button>
+      </div></div>
     </div>
   </div>
 
@@ -502,7 +525,7 @@ textarea{resize:vertical;min-height:75px;}
         <div class="upload-zone" onclick="document.getElementById('xl-inp').click()">
           <div class="upload-icon">📊</div>
           <h4><strong>Clicca</strong> per caricare Excel</h4>
-          <p>Colonne: Prodotto | Quantità | Unità</p>
+          <p>Colonne: Prodotto | N° confezioni | Unità</p>
         </div>
         <input type="file" id="xl-inp" accept=".xlsx,.xls,.csv" style="display:none" onchange="loadXL(event)">
         <div class="fg" style="margin-top:14px"><label>Note (opzionale)</label><textarea id="dn" placeholder="Es. Distribuzione 03/05/2026"></textarea></div>
@@ -511,7 +534,7 @@ textarea{resize:vertical;min-height:75px;}
         <div id="xlo" style="display:none"><div class="card">
           <div class="card-header"><span class="card-title">Anteprima</span></div>
           <div class="table-wrap" style="max-height:280px;overflow-y:auto">
-            <table><thead><tr><th>Prodotto</th><th>Esce</th><th>Unità</th><th>Stato</th></tr></thead><tbody id="tb-x"></tbody></table>
+            <table><thead><tr><th>Prodotto</th><th>Confezioni</th><th>Unità</th><th>Stato</th></tr></thead><tbody id="tb-x"></tbody></table>
           </div>
           <div style="padding:13px 16px;display:flex;gap:9px;border-top:1px solid var(--border)">
             <button class="btn btn-p" style="flex:1" id="bcd" onclick="confDist()">✅ Conferma</button>
@@ -528,13 +551,13 @@ textarea{resize:vertical;min-height:75px;}
 
   <!-- PROPOSTA AI -->
   <div class="page" id="page-proposta-ai">
-    <div class="page-header"><div><h2>Proposta distribuzione ✨</h2><p>AI analizza storico, magazzino e richieste</p></div></div>
+    <div class="page-header"><div><h2>Proposta distribuzione ✨</h2><p>AI analizza storico, magazzino e richieste — risponde in confezioni reali</p></div></div>
     <div class="two-col">
       <div class="card"><div class="card-body">
         <div class="step-list">
           <div class="step"><div class="step-num">1</div><div class="step-text"><strong>Legge lo storico</strong>Analizza le ultime distribuzioni per capire le proporzioni tipiche.</div></div>
           <div class="step"><div class="step-num">2</div><div class="step-text"><strong>Considera le famiglie</strong>Componenti, bambini, neonati e richieste attive.</div></div>
-          <div class="step"><div class="step-num">3</div><div class="step-text"><strong>Controlla il magazzino</strong>Non propone mai più di quello disponibile.</div></div>
+          <div class="step"><div class="step-num">3</div><div class="step-text"><strong>Distribuisce per confezioni</strong>Es. "2 bottiglie da 1L + 1 da 0.5L" invece di "2.5L".</div></div>
           <div class="step"><div class="step-num">4</div><div class="step-text"><strong>Genera l'Excel</strong>Pronto da rivedere e caricare nella sezione Distribuzione.</div></div>
         </div>
         <button class="btn btn-purple wfull" id="btn-proposta" onclick="generaProposta()">✨ Genera proposta con AI</button>
@@ -543,14 +566,14 @@ textarea{resize:vertical;min-height:75px;}
         <div id="prop-spin" style="display:none;text-align:center;padding:36px">
           <div class="spin spin-p" style="width:32px;height:32px;margin:0 auto 12px"></div>
           <p style="font-weight:600;margin-bottom:4px">Analisi in corso...</p>
-          <p style="font-size:.77rem;color:var(--ink-light)">Storico + richieste + magazzino</p>
+          <p style="font-size:.77rem;color:var(--ink-light)">Storico + richieste + confezioni magazzino</p>
         </div>
         <div id="prop-out" style="display:none">
           <div class="proposta-box">
             <div class="proposta-title">✨ Proposta generata</div>
             <div class="proposta-info" id="prop-info"></div>
-            <div class="table-wrap" style="max-height:280px;overflow-y:auto;border-radius:9px;border:1px solid var(--purple-border);margin-bottom:13px">
-              <table><thead><tr><th>Famiglia</th><th>👥</th><th>🍼</th><th>Prodotto</th><th>Qtà</th><th>Un.</th></tr></thead>
+            <div class="table-wrap" style="max-height:300px;overflow-y:auto;border-radius:9px;border:1px solid var(--purple-border);margin-bottom:13px">
+              <table><thead><tr><th>Famiglia</th><th>Prodotto</th><th>Confezioni</th><th>Totale</th><th>Rich.</th></tr></thead>
               <tbody id="tb-prop"></tbody></table>
             </div>
             <div class="row-gap">
@@ -569,13 +592,26 @@ textarea{resize:vertical;min-height:75px;}
   <!-- RICHIESTE -->
   <div class="page" id="page-richieste">
     <div class="page-header"><div><h2>Richieste famiglie 💬</h2><p>Preferenze inviate dalle famiglie</p></div></div>
-    <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
-      <button class="btn btn-g btn-sm" onclick="filtroRichieste('tutte')">Tutte</button>
-      <button class="btn btn-g btn-sm" onclick="filtroRichieste('nuova')">🔴 Nuove</button>
-      <button class="btn btn-g btn-sm" onclick="filtroRichieste('letta')">🟡 Lette</button>
-      <button class="btn btn-g btn-sm" onclick="filtroRichieste('soddisfatta')">🟢 Soddisfatte</button>
+    <div class="tabs">
+      <div class="tab active" id="req-tab-fam" onclick="switchReqTab('famiglia')">👥 Per famiglia</div>
+      <div class="tab" id="req-tab-all" onclick="switchReqTab('tutte')">📋 Tutte le richieste</div>
     </div>
-    <div id="richieste-list"></div>
+
+    <!-- VISTA PER FAMIGLIA -->
+    <div id="req-per-famiglia">
+      <div id="req-fam-list"></div>
+    </div>
+
+    <!-- VISTA TUTTE -->
+    <div id="req-tutte" style="display:none">
+      <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+        <button class="btn btn-g btn-sm" onclick="filtroRichieste('tutte')">Tutte</button>
+        <button class="btn btn-g btn-sm" onclick="filtroRichieste('nuova')">🔴 Nuove</button>
+        <button class="btn btn-g btn-sm" onclick="filtroRichieste('letta')">🟡 Lette</button>
+        <button class="btn btn-g btn-sm" onclick="filtroRichieste('soddisfatta')">🟢 Soddisfatte</button>
+      </div>
+      <div id="richieste-list"></div>
+    </div>
   </div>
 
   <!-- FAMIGLIE -->
@@ -610,22 +646,10 @@ textarea{resize:vertical;min-height:75px;}
           <div class="fg"><label>Nome (opzionale)</label><input id="mb-nome" placeholder="Es. Anna"></div>
           <div class="fg"><label>Tipo membro</label>
             <div class="tipo-selector">
-              <div class="tipo-option sel" id="tipo-adulto" onclick="selTipo('adulto')">
-                <span class="tipo-icon">🧑</span>Adulto
-                <div class="tipo-note">18+ anni</div>
-              </div>
-              <div class="tipo-option" id="tipo-anziano" onclick="selTipo('anziano')">
-                <span class="tipo-icon">👴</span>Anziano
-                <div class="tipo-note">65+ anni</div>
-              </div>
-              <div class="tipo-option" id="tipo-bambino" onclick="selTipo('bambino')">
-                <span class="tipo-icon">👧</span>Bambino
-                <div class="tipo-note">3–17 anni</div>
-              </div>
-              <div class="tipo-option" id="tipo-neonato" onclick="selTipo('neonato')">
-                <span class="tipo-icon">🍼</span>Neonato
-                <div class="tipo-note">0–2 anni · prodotti specifici</div>
-              </div>
+              <div class="tipo-option sel" id="tipo-adulto" onclick="selTipo('adulto')"><span class="tipo-icon">🧑</span>Adulto<div class="tipo-note">18+ anni</div></div>
+              <div class="tipo-option" id="tipo-anziano" onclick="selTipo('anziano')"><span class="tipo-icon">👴</span>Anziano<div class="tipo-note">65+ anni</div></div>
+              <div class="tipo-option" id="tipo-bambino" onclick="selTipo('bambino')"><span class="tipo-icon">👧</span>Bambino<div class="tipo-note">3–17 anni</div></div>
+              <div class="tipo-option" id="tipo-neonato" onclick="selTipo('neonato')"><span class="tipo-icon">🍼</span>Neonato<div class="tipo-note">0–2 anni</div></div>
             </div>
           </div>
           <div class="fg" id="eta-row" style="display:none"><label>Età (anni)</label><input id="mb-eta" type="number" min="0" max="120" placeholder="Es. 8"></div>
@@ -633,23 +657,13 @@ textarea{resize:vertical;min-height:75px;}
           <button class="btn btn-p wfull" onclick="aggiungiMembro()">+ Aggiungi membro</button>
         </div>
       </div>
-
       <div class="section-card">
         <h3>Composizione famiglia</h3>
         <p>Riepilogo dei membri. Controlla prima di salvare.</p>
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px">
-          <div style="background:var(--sand);border-radius:10px;padding:12px;text-align:center">
-            <div style="font-size:.62rem;color:var(--ink-light);text-transform:uppercase;font-weight:600;margin-bottom:3px">Totale</div>
-            <div style="font-family:'Playfair Display',serif;font-size:2rem" id="cnt-tot">0</div>
-          </div>
-          <div style="background:var(--purple-light);border:1px solid var(--purple-border);border-radius:10px;padding:12px;text-align:center">
-            <div style="font-size:.62rem;color:var(--purple);text-transform:uppercase;font-weight:600;margin-bottom:3px">Bambini</div>
-            <div style="font-family:'Playfair Display',serif;font-size:2rem;color:var(--purple)" id="cnt-bam">0</div>
-          </div>
-          <div style="background:var(--amber-light);border:1px solid #f5d9a8;border-radius:10px;padding:12px;text-align:center">
-            <div style="font-size:.62rem;color:var(--amber);text-transform:uppercase;font-weight:600;margin-bottom:3px">Neonati</div>
-            <div style="font-family:'Playfair Display',serif;font-size:2rem;color:var(--amber)" id="cnt-neo">0</div>
-          </div>
+          <div style="background:var(--sand);border-radius:10px;padding:12px;text-align:center"><div style="font-size:.62rem;color:var(--ink-light);text-transform:uppercase;font-weight:600">Totale</div><div style="font-family:'Playfair Display',serif;font-size:2rem" id="cnt-tot">0</div></div>
+          <div style="background:var(--purple-light);border:1px solid var(--purple-border);border-radius:10px;padding:12px;text-align:center"><div style="font-size:.62rem;color:var(--purple);text-transform:uppercase;font-weight:600">Bambini</div><div style="font-family:'Playfair Display',serif;font-size:2rem;color:var(--purple)" id="cnt-bam">0</div></div>
+          <div style="background:var(--amber-light);border:1px solid #f5d9a8;border-radius:10px;padding:12px;text-align:center"><div style="font-size:.62rem;color:var(--amber);text-transform:uppercase;font-weight:600">Neonati</div><div style="font-family:'Playfair Display',serif;font-size:2rem;color:var(--amber)" id="cnt-neo">0</div></div>
         </div>
         <div id="membri-list" style="margin-bottom:16px">
           <div class="empty" style="padding:20px"><div class="empty-e">👥</div><p>Nessun membro aggiunto</p></div>
@@ -671,28 +685,16 @@ textarea{resize:vertical;min-height:75px;}
 </main>
 </div>
 
-<!-- MOBILE BOTTOM NAV -->
+<!-- MOBILE NAV -->
 <div class="mobile-nav">
   <div class="mobile-nav-inner">
-    <div class="mob-item active" id="mob-dashboard" onclick="go('dashboard');closeMobMenu()">
-      <span class="mob-icon">🏠</span><span class="mob-label">Home</span>
-    </div>
-    <div class="mob-item" id="mob-magazzino" onclick="go('magazzino');closeMobMenu()">
-      <span class="mob-icon">📦</span><span class="mob-label">Magazzino</span>
-    </div>
-    <div class="mob-item" id="mob-richieste" onclick="go('richieste');closeMobMenu()">
-      <span class="mob-icon">💬</span><span class="mob-label">Richieste</span>
-      <span class="mob-badge" id="mob-badge" style="display:none">0</span>
-    </div>
-    <div class="mob-item" id="mob-addfam" onclick="go('aggiungi-famiglia');closeMobMenu()">
-      <span class="mob-icon">➕</span><span class="mob-label">Aggiungi</span>
-    </div>
-    <div class="mob-more-btn" id="mob-more-btn" onclick="toggleMobMenu()">
-      <span class="mob-icon">⋯</span><span class="mob-label">Altro</span>
-    </div>
+    <div class="mob-item active" id="mob-dashboard" onclick="go('dashboard');closeMobMenu()"><span class="mob-icon">🏠</span><span class="mob-label">Home</span></div>
+    <div class="mob-item" id="mob-magazzino" onclick="go('magazzino');closeMobMenu()"><span class="mob-icon">📦</span><span class="mob-label">Magazzino</span></div>
+    <div class="mob-item" id="mob-richieste" onclick="go('richieste');closeMobMenu()"><span class="mob-icon">💬</span><span class="mob-label">Richieste</span><span class="mob-badge" id="mob-badge" style="display:none">0</span></div>
+    <div class="mob-item" id="mob-addfam" onclick="go('aggiungi-famiglia');closeMobMenu()"><span class="mob-icon">➕</span><span class="mob-label">Aggiungi</span></div>
+    <div class="mob-more-btn" id="mob-more-btn" onclick="toggleMobMenu()"><span class="mob-icon">⋯</span><span class="mob-label">Altro</span></div>
   </div>
 </div>
-
 <div class="mob-menu" id="mob-menu">
   <div class="mob-menu-item" onclick="go('carica-ai');closeMobMenu()"><div class="mob-menu-icon">🤖</div>Carica con AI</div>
   <div class="mob-menu-item" onclick="go('distribuzione');closeMobMenu()"><div class="mob-menu-icon">📋</div>Distribuzione</div>
@@ -708,18 +710,12 @@ textarea{resize:vertical;min-height:75px;}
   <div class="fam-header">
     <div class="fam-header-brand">
       <div class="logo-badge" style="width:32px;height:32px;font-size:.95rem;flex-shrink:0">🤝</div>
-      <div>
-        <div style="font-family:'Playfair Display',serif;color:#fff;font-size:.95rem" id="fam-title">Centro d'Ascolto</div>
-        <div style="font-size:.66rem;color:rgba(255,255,255,.38)">Area famiglia</div>
-      </div>
+      <div><div style="font-family:'Playfair Display',serif;color:#fff;font-size:.95rem" id="fam-title">Centro d'Ascolto</div><div style="font-size:.66rem;color:rgba(255,255,255,.38)">Area famiglia</div></div>
     </div>
     <button class="logout-btn" onclick="logout()">↩</button>
   </div>
   <div class="fam-main">
-    <div class="fam-welcome">
-      <h2 id="fam-welcome-name">Ciao 👋</h2>
-      <p>Qui puoi vedere le tue distribuzioni e inviare preferenze per la prossima.</p>
-    </div>
+    <div class="fam-welcome"><h2 id="fam-welcome-name">Ciao 👋</h2><p>Qui puoi vedere le tue distribuzioni e inviare preferenze.</p></div>
     <div class="req-box">
       <h3>📝 Invia una preferenza</h3>
       <p>Indica un prodotto che ti servirebbe per la prossima distribuzione.</p>
@@ -733,12 +729,10 @@ textarea{resize:vertical;min-height:75px;}
       <button class="fam-btn" onclick="inviaRichiesta()">Invia preferenza →</button>
       <div id="req-alert" style="margin-top:9px;font-size:.82rem;color:#fff;font-weight:500"></div>
     </div>
-    <div class="card">
-      <div class="card-header"><span class="card-title">📦 Distribuzioni ricevute</span></div>
+    <div class="card"><div class="card-header"><span class="card-title">📦 Distribuzioni ricevute</span></div>
       <div class="table-wrap"><table><thead><tr><th>Data</th><th>Prodotto</th><th>Qtà</th><th>Unità</th></tr></thead><tbody id="tb-fam-storico"></tbody></table></div>
     </div>
-    <div class="card" style="margin-top:14px">
-      <div class="card-header"><span class="card-title">💬 Le tue richieste</span></div>
+    <div class="card" style="margin-top:14px"><div class="card-header"><span class="card-title">💬 Le tue richieste</span></div>
       <div id="fam-richieste-list" class="card-body"></div>
     </div>
   </div>
@@ -757,8 +751,8 @@ const SB='https://nfwzorbnlrudtpbnlmpt.supabase.co';
 const KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5md3pvcmJubHJ1ZHRwYm5sbXB0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4MTU2NjgsImV4cCI6MjA5MjM5MTY2OH0.S59qMU1vfQtSYVIe8P0lfz6hp4bXKnhJRCPKXqliAlo';
 const PROXY='https://nfwzorbnlrudtpbnlmpt.supabase.co/functions/v1/ai-proxy';
 
-let magD=[],famD=[],aiIt=[],xlRw=[],xlMagRw=[],b64=null,propostaRighe=[],tutteRichieste=[];
-let sessione=null,nuoviFamiliari=[],tipoSel='adulto';
+let magD=[],famD=[],aiIt=[],xlRw=[],xlMagP=[],b64=null,propostaRighe=[],tutteRichieste=[];
+let sessione=null,nuoviFamiliari=[],tipoSel='adulto',reqTabAttivo='famiglia';
 
 async function db(p,o={}){
   const r=await fetch(SB+'/rest/v1/'+p,{headers:{'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json','Prefer':'return=representation',...(o.headers||{})}, ...o});
@@ -779,7 +773,7 @@ async function login(){
     document.getElementById('login-screen').style.display='none';mostraVistaFamiglia();
   }
 }
-function logout(){sessione=null;document.getElementById('app-screen').style.display='none';document.getElementById('famiglia-screen').style.display='none';document.getElementById('login-screen').style.display='flex';document.getElementById('l-user').value='';document.getElementById('l-pass').value='';}
+function logout(){sessione=null;['app-screen','famiglia-screen'].forEach(id=>document.getElementById(id).style.display='none');document.getElementById('login-screen').style.display='flex';document.getElementById('l-user').value='';document.getElementById('l-pass').value='';}
 
 // ── FAMIGLIA SCREEN ──
 async function mostraVistaFamiglia(){
@@ -795,8 +789,8 @@ async function mostraVistaFamiglia(){
 async function caricaRichiesteFamiglia(){
   const rr=await db(`richieste_famiglie?famiglia_id=eq.${sessione.famiglia_id}&order=created_at.desc`);
   const el=document.getElementById('fam-richieste-list');
-  if(!rr.length){el.innerHTML='<div class="empty"><div class="empty-e">💬</div><p>Nessuna richiesta ancora</p></div>';return;}
   const lbl={nuova:'🔴 Nuova',letta:'🟡 Letta',soddisfatta:'🟢 Soddisfatta',non_disponibile:'⚫ Non disp.'};
+  if(!rr.length){el.innerHTML='<div class="empty"><div class="empty-e">💬</div><p>Nessuna richiesta ancora</p></div>';return;}
   el.innerHTML=rr.map(r=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border)"><div><div style="font-weight:600;font-size:.84rem">${r.prodotto}${r.quantita?' — '+r.quantita+' '+(r.unita||''):''}</div><div style="font-size:.71rem;color:var(--ink-light)">${new Date(r.created_at).toLocaleDateString('it-IT')}${r.note?' · '+r.note:''}</div></div><span class="badge bk">${lbl[r.stato]||r.stato}</span></div>`).join('');
 }
 async function inviaRichiesta(){
@@ -822,20 +816,24 @@ function go(n){
   else if(n==='magazzino')document.getElementById('mob-magazzino').classList.add('active');
   else if(n==='richieste')document.getElementById('mob-richieste').classList.add('active');
   else if(n==='aggiungi-famiglia')document.getElementById('mob-addfam').classList.add('active');
-  ({magazzino:()=>loadMag(),famiglie:()=>loadFam(),dashboard:()=>loadDash(),storico:()=>loadStor(),richieste:()=>loadRichieste(),'aggiungi-famiglia':()=>resetNuovaFamiglia()})[n]?.();
+  ({magazzino:loadMag,famiglie:loadFam,dashboard:loadDash,storico:loadStor,richieste:loadRichieste,'aggiungi-famiglia':resetNuovaFamiglia})[n]?.();
 }
 function toggleMobMenu(){document.getElementById('mob-menu').classList.toggle('open');document.getElementById('mob-more-btn').classList.toggle('active');}
 function closeMobMenu(){document.getElementById('mob-menu').classList.remove('open');document.getElementById('mob-more-btn').classList.remove('active');}
-document.addEventListener('click',e=>{const m=document.getElementById('mob-menu'),b=document.getElementById('mob-more-btn');if(m&&!m.contains(e.target)&&b&&!b.contains(e.target))closeMobMenu();});
+document.addEventListener('click',e=>{const m=document.getElementById('mob-menu'),b=document.getElementById('mob-more-btn');if(m&&b&&!m.contains(e.target)&&!b.contains(e.target))closeMobMenu();});
 
 // ── DASHBOARD ──
 async function loadDash(){
-  const [m,f,r]=await Promise.all([db('magazzino?select=id,quantita,nome,unita&order=quantita.asc'),db('famiglie?select=id&attiva=eq.true'),db('richieste_famiglie?select=id&stato=eq.nuova')]);
-  document.getElementById('st-p').textContent=m.length;document.getElementById('st-f').textContent=f.length;document.getElementById('st-r').textContent=r.length;
+  const[m,f,r]=await Promise.all([db('magazzino?select=id,quantita,nome,alimento&order=quantita.asc'),db('famiglie?select=id&attiva=eq.true'),db('richieste_famiglie?select=id&stato=eq.nuova')]);
+  // conta alimenti unici
+  const alimUnici=new Set(m.map(p=>p.alimento||p.nome)).size;
+  document.getElementById('st-p').textContent=alimUnici;
+  document.getElementById('st-f').textContent=f.length;
+  document.getElementById('st-r').textContent=r.length;
   const crit=m.filter(p=>p.quantita<=3);
   const sc=document.getElementById('d-sc');
   if(!crit.length){sc.innerHTML='<div class="empty"><div class="empty-e">✅</div><p>Tutto ok</p></div>';}
-  else sc.innerHTML=crit.slice(0,5).map(p=>`<div class="dash-row"><span class="dash-name">${p.nome}</span><span class="badge ${p.quantita===0?'br':'ba'}">${p.quantita===0?'Esaurito':p.quantita+' '+p.unita}</span></div>`).join('');
+  else sc.innerHTML=crit.slice(0,5).map(p=>`<div class="dash-row"><span class="dash-name">${p.nome}</span><span class="badge ${p.quantita===0?'br':'ba'}">${p.quantita===0?'Esaurito':p.quantita+' pz'}</span></div>`).join('');
   const rec=await db('distribuzioni?order=created_at.desc&limit=4');
   const dd=document.getElementById('d-di');
   if(!rec.length){dd.innerHTML='<div class="empty"><div class="empty-e">📋</div><p>Nessuna distribuzione ancora</p></div>';}
@@ -850,81 +848,141 @@ async function caricaBadgeRichieste(){
 
 // ── MAGAZZINO TABS ──
 function switchMagTab(t){
-  ['lista','importa','aggiungi'].forEach(k=>{
-    document.getElementById('mag-'+k).style.display=k===t?'block':'none';
-    document.getElementById('tab-'+k).classList.toggle('active',k===t);
-  });
+  ['lista','importa','aggiungi'].forEach(k=>{document.getElementById('mag-'+k).style.display=k===t?'block':'none';document.getElementById('tab-'+k).classList.toggle('active',k===t);});
   if(t==='lista')loadMag();
 }
 
-// ── MAGAZZINO ──
-async function loadMag(){magD=await db('magazzino?order=nome.asc');renMag(magD);}
-function renMag(data){
-  const tb=document.getElementById('tb-m');
-  if(!data.length){tb.innerHTML=`<tr><td colspan="5"><div class="empty"><div class="empty-e">📦</div><p>Nessun prodotto. Usa "Carica con AI" o "Importa da Excel"!</p></div></td></tr>`;return;}
-  tb.innerHTML=data.map(p=>{
-    const cls=p.quantita===0?'ns':p.quantita<3?'ls':'';
-    const b=p.quantita===0?'br':p.quantita<3?'ba':'bg';
-    const sc=p.scadenza_stimata?new Date(p.scadenza_stimata).toLocaleDateString('it-IT'):'—';
-    return `<tr class="${cls}"><td><strong>${p.nome}</strong></td><td><span class="badge bk" style="font-size:.64rem">${p.categoria||'Altro'}</span></td><td><span class="badge ${b}">${p.quantita===0?'Esaurito':p.quantita+' '+p.unita}</span></td><td style="color:var(--ink-light);font-size:.77rem">${sc}</td><td><button class="btn btn-d btn-sm" onclick="delProd('${p.id}')">🗑</button></td></tr>`;
+// ── MAGAZZINO (raggruppato per alimento) ──
+async function loadMag(){
+  magD=await db('magazzino?order=alimento.asc,nome.asc');
+  // aggiorna datalist alimenti
+  const alimUnici=[...new Set(magD.map(p=>p.alimento||p.nome).filter(Boolean))];
+  const dl=document.getElementById('alimenti-list-dl');
+  if(dl)dl.innerHTML=alimUnici.map(a=>`<option value="${a}">`).join('');
+  renMagAlimenti(magD);
+}
+
+function renMagAlimenti(data){
+  const el=document.getElementById('mag-alimenti-list');
+  if(!data.length){el.innerHTML='<div class="empty"><div class="empty-e">📦</div><p>Nessun prodotto. Aggiungi o importa da Excel!</p></div>';return;}
+  // Raggruppa per alimento
+  const gruppi={};
+  data.forEach(p=>{
+    const key=p.alimento||p.nome;
+    if(!gruppi[key])gruppi[key]={varianti:[],totVolume:0,unita:p.unita_confezione||p.unita||'pz',min_qty:Infinity};
+    gruppi[key].varianti.push(p);
+    // calcola volume totale
+    const volPerConf=p.volume_confezione||1;
+    gruppi[key].totVolume+=p.quantita*volPerConf;
+    if(p.quantita<gruppi[key].min_qty)gruppi[key].min_qty=p.quantita;
+  });
+
+  const q=document.getElementById('sm')?.value.toLowerCase()||'';
+  const chiavi=Object.keys(gruppi).filter(k=>!q||k.toLowerCase().includes(q));
+
+  el.innerHTML=chiavi.map(key=>{
+    const g=gruppi[key];
+    const tutteEsaurite=g.varianti.every(v=>v.quantita===0);
+    const qualcunaBassa=g.varianti.some(v=>v.quantita>0&&v.quantita<=3);
+    const cls=tutteEsaurite?'ns':qualcunaBassa?'ls':'';
+    const totLabel=g.varianti.length>1?formatTotale(g,key):`${g.varianti[0].quantita} confezioni`;
+    return `
+      <div class="alimento-group ${cls}">
+        <div class="alimento-header" onclick="toggleAlimento('${key.replace(/'/g,"\\'")}')">
+          <div class="alimento-name">
+            ${tutteEsaurite?'🔴':qualcunaBassa?'🟡':'🟢'}
+            ${key}
+            ${g.varianti.length>1?`<span class="badge bk" style="font-size:.64rem">${g.varianti.length} varianti</span>`:''}
+          </div>
+          <span class="alimento-totale">${totLabel}</span>
+          <span class="alimento-chevron" id="chev-${btoa(key).replace(/[^a-z0-9]/gi,'').slice(0,8)}">▼</span>
+        </div>
+        <div class="alimento-varianti" id="var-${btoa(key).replace(/[^a-z0-9]/gi,'').slice(0,8)}">
+          ${g.varianti.map(p=>{
+            const b=p.quantita===0?'br':p.quantita<=3?'ba':'bg';
+            const confLabel=p.volume_confezione?`${p.volume_confezione} ${p.unita_confezione||''}`:p.unita||'pz';
+            const scad=p.scadenza_stimata?new Date(p.scadenza_stimata).toLocaleDateString('it-IT'):'—';
+            return `<div class="variante-row">
+              <div class="variante-nome"><strong>${p.nome}</strong><div style="font-size:.72rem;color:var(--ink-light);margin-top:2px">Conf. da ${confLabel} · Scad. ${scad}</div></div>
+              <span class="badge ${b} variante-qty">${p.quantita===0?'Esaurito':p.quantita+' conf.'}</span>
+              <button class="btn btn-d btn-sm" onclick="delProd('${p.id}')">🗑</button>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>`;
   }).join('');
 }
-function fmag(){const q=document.getElementById('sm').value.toLowerCase();renMag(magD.filter(p=>p.nome.toLowerCase().includes(q)));}
+
+function formatTotale(g,key){
+  if(g.varianti.every(v=>!v.volume_confezione))return `${g.varianti.reduce((s,v)=>s+v.quantita,0)} conf. totali`;
+  const unita=g.varianti[0].unita_confezione||'';
+  const tot=g.varianti.reduce((s,v)=>s+(v.quantita*(v.volume_confezione||1)),0);
+  const parts=g.varianti.filter(v=>v.quantita>0).map(v=>`${v.quantita}×${v.volume_confezione||1}${unita}`);
+  return `Tot. ${tot.toFixed(1).replace('.0','')}${unita} (${parts.join(' + ')})`;
+}
+
+function toggleAlimento(key){
+  const id=btoa(key).replace(/[^a-z0-9]/gi,'').slice(0,8);
+  const var_el=document.getElementById('var-'+id);
+  const chev=document.getElementById('chev-'+id);
+  if(!var_el)return;
+  const open=var_el.classList.toggle('open');
+  if(chev)chev.classList.toggle('open',open);
+}
+
+function fmag(){renMagAlimenti(magD);}
+
 async function saveProd(){
-  const n=document.getElementById('pn').value.trim(),q=parseFloat(document.getElementById('pq').value);
-  if(!n||isNaN(q)){al2('pa','Compila nome e quantità','e');return;}
-  await db('magazzino',{method:'POST',body:JSON.stringify({nome:n,categoria:document.getElementById('pc').value,quantita:q,unita:document.getElementById('pu').value,scadenza_stimata:document.getElementById('ps').value||null})});
-  document.getElementById('pn').value='';document.getElementById('pq').value='';document.getElementById('ps').value='';
-  al2('pa','✅ Prodotto aggiunto!','o');
+  const alimento=document.getElementById('p-alimento').value.trim();
+  const nome=document.getElementById('pn').value.trim();
+  const qty=parseFloat(document.getElementById('pq').value);
+  if(!nome||isNaN(qty)){al2('pa','Compila nome prodotto e numero confezioni','e');return;}
+  const volConf=parseFloat(document.getElementById('p-vol').value)||null;
+  await db('magazzino',{method:'POST',body:JSON.stringify({alimento:alimento||nome,nome,categoria:document.getElementById('pc').value,quantita:qty,unita:'conf',volume_confezione:volConf,unita_confezione:document.getElementById('p-unit-conf').value,scadenza_stimata:document.getElementById('ps').value||null})});
+  document.getElementById('pn').value='';document.getElementById('pq').value='';document.getElementById('p-vol').value='';document.getElementById('ps').value='';
+  al2('pa','✅ Prodotto aggiunto!','o');loadMag();
 }
 async function delProd(id){if(!confirm('Eliminare?'))return;await db('magazzino?id=eq.'+id,{method:'DELETE'});loadMag();}
 
 // ── IMPORT EXCEL MAGAZZINO ──
-let xlMagParsed=[];
-async function loadXLMagazzino(e){
+async function loadXLMag(e){
   const f=e.target.files[0];if(!f)return;
   const buf=await f.arrayBuffer();const wb=XLSX.read(buf);const ws=wb.Sheets[wb.SheetNames[0]];
   const rows=XLSX.utils.sheet_to_json(ws,{header:1});
-  // salta riga intestazione se c'è
   const start=(typeof rows[0]?.[0]==='string'&&isNaN(rows[0]?.[1]))?1:0;
-  xlMagParsed=rows.slice(start).filter(r=>r[0]).map(r=>({
-    nome:String(r[0]||'').trim(),
-    quantita:parseFloat(r[1])||0,
-    unita:String(r[2]||'pz').trim(),
-    categoria:String(r[3]||'Alimentari').trim(),
-    scadenza:r[4]?String(r[4]).trim():null
+  xlMagP=rows.slice(start).filter(r=>r[0]||r[1]).map(r=>({
+    alimento:String(r[0]||r[1]||'').trim(),
+    nome:String(r[1]||r[0]||'').trim(),
+    quantita:parseFloat(r[2])||0,
+    volume_confezione:parseFloat(r[3])||null,
+    unita_confezione:String(r[4]||'pz').trim(),
+    categoria:String(r[5]||'Alimentari').trim(),
+    scadenza:r[6]?String(r[6]).trim():null
   })).filter(r=>r.nome);
-
-  // carica magazzino attuale per confronto
-  const magAttuali=await db('magazzino?select=nome,quantita');
-  document.getElementById('xl-mag-count').textContent=xlMagParsed.length;
-  document.getElementById('tb-xl-mag').innerHTML=xlMagParsed.map(r=>{
+  const magAttuali=await db('magazzino?select=nome,quantita,alimento');
+  document.getElementById('xl-mag-count').textContent=xlMagP.length;
+  document.getElementById('tb-xl-mag').innerHTML=xlMagP.map(r=>{
     const exist=magAttuali.find(m=>m.nome.toLowerCase()===r.nome.toLowerCase());
-    const stato=exist?`➕ Aggiunge a ${exist.quantita} ${r.unita}`:'🆕 Nuovo prodotto';
-    const b=exist?'ba':'bg';
-    return `<tr><td><strong>${r.nome}</strong></td><td>${r.quantita}</td><td>${r.unita}</td><td><span class="badge bk" style="font-size:.64rem">${r.categoria}</span></td><td><span class="badge ${b}" style="font-size:.68rem">${stato}</span></td></tr>`;
+    const confLabel=r.volume_confezione?`${r.volume_confezione}${r.unita_confezione}`:'—';
+    const stato=exist?`➕ Aggiunge a ${exist.quantita} conf.`:'🆕 Nuovo';
+    return `<tr><td><span class="badge bk" style="font-size:.65rem">${r.alimento}</span></td><td><strong>${r.nome}</strong></td><td>${r.quantita}</td><td>${confLabel}</td><td><span class="badge ${exist?'ba':'bg'}" style="font-size:.68rem">${stato}</span></td></tr>`;
   }).join('');
   document.getElementById('xl-mag-preview').style.display='block';
   document.getElementById('xl-mag-ph').style.display='none';
 }
-async function confermaImportMagazzino(){
+async function confermaImportMag(){
   const btn=document.getElementById('btn-xl-mag-conf');btn.disabled=true;
-  let aggiornati=0,nuovi=0;
-  for(const r of xlMagParsed){
+  let ag=0,nw=0;
+  for(const r of xlMagP){
     const ex=await db(`magazzino?nome=ilike.${encodeURIComponent(r.nome)}&limit=1`);
-    if(ex.length){
-      await db('magazzino?id=eq.'+ex[0].id,{method:'PATCH',body:JSON.stringify({quantita:ex[0].quantita+r.quantita})});
-      aggiornati++;
-    } else {
-      await db('magazzino',{method:'POST',body:JSON.stringify({nome:r.nome,quantita:r.quantita,unita:r.unita,categoria:r.categoria,scadenza_stimata:null})});
-      nuovi++;
-    }
-    await db('movimenti_magazzino',{method:'POST',body:JSON.stringify({prodotto_nome:r.nome,tipo:'entrata',quantita:r.quantita,unita:r.unita,note:'Importato da Excel'})});
+    if(ex.length){await db('magazzino?id=eq.'+ex[0].id,{method:'PATCH',body:JSON.stringify({quantita:ex[0].quantita+r.quantita})});ag++;}
+    else{await db('magazzino',{method:'POST',body:JSON.stringify({alimento:r.alimento,nome:r.nome,quantita:r.quantita,unita:'conf',volume_confezione:r.volume_confezione,unita_confezione:r.unita_confezione,categoria:r.categoria,scadenza_stimata:null})});nw++;}
+    await db('movimenti_magazzino',{method:'POST',body:JSON.stringify({prodotto_nome:r.nome,tipo:'entrata',quantita:r.quantita,unita:'conf',note:'Importato da Excel'})});
   }
-  al2('xl-mag-alert',`✅ Importati ${nuovi} nuovi prodotti, aggiornati ${aggiornati} esistenti.`,'o');
-  resetXLMag();btn.disabled=false;
+  al2('xl-mag-alert',`✅ ${nw} nuovi prodotti, ${ag} aggiornati.`,'o');
+  resetXLMag();btn.disabled=false;switchMagTab('lista');
 }
-function resetXLMag(){xlMagParsed=[];document.getElementById('xl-mag-preview').style.display='none';document.getElementById('xl-mag-ph').style.display='flex';document.getElementById('xl-mag-inp').value='';}
+function resetXLMag(){xlMagP=[];document.getElementById('xl-mag-preview').style.display='none';document.getElementById('xl-mag-ph').style.display='flex';document.getElementById('xl-mag-inp').value='';}
 
 // ── AI FOTO ──
 function dg(e,on){e.preventDefault();document.getElementById('az').classList.toggle('over',on);}
@@ -933,13 +991,13 @@ function af(e){const f=e.target.files[0];if(f)pf(f);}
 function pf(f){const r=new FileReader();r.onload=ev=>{b64=ev.target.result.split(',')[1];document.getElementById('api-img').src=ev.target.result;document.getElementById('ap').style.display='block';document.getElementById('bai').disabled=false;document.getElementById('ao').style.display='none';document.getElementById('aph').style.display='none';};r.readAsDataURL(f);}
 async function runAI(){
   if(!b64)return;
-  document.getElementById('aisp').style.display='block';document.getElementById('bai').disabled=true;document.getElementById('ao').style.display='none';
+  document.getElementById('aisp').style.display='block';document.getElementById('bai').disabled=true;
   try{
-    const res=await fetch(PROXY,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:'image/jpeg',data:b64}},{type:'text',text:`Sei un assistente per un centro d'ascolto. Leggi il foglio scritto a mano ed estrai ogni prodotto con: nome, quantità, unità, scadenza_stimata (ISO: pasta secca +18 mesi, tonno +24 mesi, latte UHT +6 mesi, freschi +7gg). Rispondi SOLO JSON senza markdown: {"prodotti":[{"nome":"Pasta","quantita":10,"unita":"kg","scadenza_stimata":"2027-12-01"}]}`}]}]})});
+    const res=await fetch(PROXY,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1500,messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:'image/jpeg',data:b64}},{type:'text',text:`Sei un assistente per un centro d'ascolto. Leggi il foglio scritto a mano. Per ogni prodotto estrai: alimento (es. Latte), nome completo (es. Latte Granarolo 1L), numero confezioni, volume_per_confezione (numero), unita_confezione (L/kg/g/ml/pz), scadenza_stimata ISO. Rispondi SOLO JSON: {"prodotti":[{"alimento":"Latte","nome":"Latte Granarolo 1L","quantita":12,"volume_confezione":1,"unita_confezione":"L","scadenza_stimata":"2026-12-01"}]}`}]}]})});
     const d=await res.json();
     const txt=d.content?.find(b=>b.type==='text')?.text||'{}';
     aiIt=JSON.parse(txt.replace(/```json|```/g,'').trim()).prodotti||[];
-    document.getElementById('al').innerHTML=aiIt.map(p=>`<div class="ai-row"><span class="ai-name">${p.nome}</span><span class="ai-qty">${p.quantita} ${p.unita}</span><span class="ai-exp">📅 ${p.scadenza_stimata?new Date(p.scadenza_stimata).toLocaleDateString('it-IT'):'?'}</span></div>`).join('');
+    document.getElementById('al').innerHTML=aiIt.map(p=>`<div class="ai-row"><span class="ai-name">${p.nome}<div style="font-size:.7rem;color:var(--ink-light)">${p.alimento||''}</div></span><span class="ai-qty">${p.quantita} conf.${p.volume_confezione?' ('+p.volume_confezione+p.unita_confezione+')':''}</span><span class="ai-exp">📅 ${p.scadenza_stimata?new Date(p.scadenza_stimata).toLocaleDateString('it-IT'):'?'}</span></div>`).join('');
     document.getElementById('ao').style.display='block';
   }catch(e){alert('Errore AI: '+e.message);}
   finally{document.getElementById('aisp').style.display='none';document.getElementById('bai').disabled=false;}
@@ -947,9 +1005,9 @@ async function runAI(){
 async function saveAI(){
   for(const p of aiIt){
     const ex=await db(`magazzino?nome=ilike.${encodeURIComponent(p.nome)}&limit=1`);
-    if(ex.length){await db('magazzino?id=eq.'+ex[0].id,{method:'PATCH',body:JSON.stringify({quantita:ex[0].quantita+p.quantita,scadenza_stimata:p.scadenza_stimata||ex[0].scadenza_stimata})});}
-    else{await db('magazzino',{method:'POST',body:JSON.stringify({nome:p.nome,quantita:p.quantita,unita:p.unita||'pz',scadenza_stimata:p.scadenza_stimata||null,categoria:'Alimentari'})});}
-    await db('movimenti_magazzino',{method:'POST',body:JSON.stringify({prodotto_nome:p.nome,tipo:'entrata',quantita:p.quantita,unita:p.unita||'pz',note:'Caricato via AI'})});
+    if(ex.length){await db('magazzino?id=eq.'+ex[0].id,{method:'PATCH',body:JSON.stringify({quantita:ex[0].quantita+p.quantita})});}
+    else{await db('magazzino',{method:'POST',body:JSON.stringify({alimento:p.alimento||p.nome,nome:p.nome,quantita:p.quantita,unita:'conf',volume_confezione:p.volume_confezione||null,unita_confezione:p.unita_confezione||'pz',scadenza_stimata:p.scadenza_stimata||null,categoria:'Alimentari'})});}
+    await db('movimenti_magazzino',{method:'POST',body:JSON.stringify({prodotto_nome:p.nome,tipo:'entrata',quantita:p.quantita,unita:'conf',note:'Caricato via AI'})});
   }
   al2('aa',`✅ ${aiIt.length} prodotti salvati!`,'o');setTimeout(resetAI,2000);
 }
@@ -961,13 +1019,14 @@ async function loadXL(e){
   const buf=await f.arrayBuffer();const wb=XLSX.read(buf);const ws=wb.Sheets[wb.SheetNames[0]];
   const rows=XLSX.utils.sheet_to_json(ws,{header:1});
   const s=(typeof rows[0]?.[0]==='string'&&isNaN(rows[0]?.[1]))?1:0;
-  xlRw=rows.slice(s).filter(r=>r[0]).map(r=>({nome:String(r[0]).trim(),quantita:parseFloat(r[1])||0,unita:String(r[2]||'pz').trim()}));
-  const mag=await db('magazzino?select=nome,quantita,unita');
+  xlRw=rows.slice(s).filter(r=>r[0]).map(r=>({nome:String(r[0]).trim(),quantita:parseFloat(r[1])||0,unita:String(r[2]||'conf').trim()}));
+  const mag=await db('magazzino?select=nome,quantita,unita,volume_confezione,unita_confezione');
   document.getElementById('tb-x').innerHTML=xlRw.map(r=>{
     const fd=mag.find(m=>m.nome.toLowerCase()===r.nome.toLowerCase());
     let s,b;
-    if(!fd){s='Non trovato';b='br';}else if(fd.quantita<r.quantita){s=`⚠️ Solo ${fd.quantita}`;b='ba';}else{s='✅ OK';b='bg';}
-    return `<tr><td><strong>${r.nome}</strong></td><td>${r.quantita}</td><td>${r.unita}</td><td><span class="badge ${b}">${s}</span></td></tr>`;
+    if(!fd){s='Non trovato';b='br';}else if(fd.quantita<r.quantita){s=`⚠️ Solo ${fd.quantita} conf.`;b='ba';}else{s='✅ OK';b='bg';}
+    const confInfo=fd?.volume_confezione?` (${fd.volume_confezione}${fd.unita_confezione})`:'';
+    return `<tr><td><strong>${r.nome}</strong>${confInfo?`<div style="font-size:.72rem;color:var(--ink-light)">Per conf.: ${fd.volume_confezione}${fd.unita_confezione}</div>`:''}</td><td>${r.quantita}</td><td>conf.</td><td><span class="badge ${b}">${s}</span></td></tr>`;
   }).join('');
   document.getElementById('xlo').style.display='block';document.getElementById('xph').style.display='none';
 }
@@ -978,17 +1037,93 @@ async function confDist(){
     const ex=await db(`magazzino?nome=ilike.${encodeURIComponent(r.nome)}&limit=1`);
     if(ex.length){
       await db('magazzino?id=eq.'+ex[0].id,{method:'PATCH',body:JSON.stringify({quantita:Math.max(0,ex[0].quantita-r.quantita)})});
-      await db('movimenti_magazzino',{method:'POST',body:JSON.stringify({prodotto_nome:r.nome,tipo:'uscita',quantita:r.quantita,unita:r.unita,distribuzione_id:dist?.id||null})});
+      await db('movimenti_magazzino',{method:'POST',body:JSON.stringify({prodotto_nome:r.nome,tipo:'uscita',quantita:r.quantita,unita:'conf',distribuzione_id:dist?.id||null})});
     }
   }
   al2('da','✅ Distribuzione completata!','o');setTimeout(resetXL,2000);btn.disabled=false;
 }
 function resetXL(){xlRw=[];document.getElementById('xlo').style.display='none';document.getElementById('xph').style.display='flex';document.getElementById('xl-inp').value='';}
 
+// ── RICHIESTE TABS ──
+function switchReqTab(t){
+  reqTabAttivo=t;
+  document.getElementById('req-tab-fam').classList.toggle('active',t==='famiglia');
+  document.getElementById('req-tab-all').classList.toggle('active',t==='tutte');
+  document.getElementById('req-per-famiglia').style.display=t==='famiglia'?'block':'none';
+  document.getElementById('req-tutte').style.display=t==='tutte'?'block':'none';
+  if(t==='famiglia')renRichiesteFamiglie();
+  else renRichiesteTutte(tutteRichieste);
+}
+
 // ── RICHIESTE ──
-async function loadRichieste(){tutteRichieste=await db('richieste_famiglie?order=created_at.desc');renRichieste(tutteRichieste);caricaBadgeRichieste();}
-function filtroRichieste(s){renRichieste(s==='tutte'?tutteRichieste:tutteRichieste.filter(r=>r.stato===s));}
-function renRichieste(data){
+async function loadRichieste(){
+  tutteRichieste=await db('richieste_famiglie?order=created_at.desc');
+  if(reqTabAttivo==='famiglia')renRichiesteFamiglie();
+  else renRichiesteTutte(tutteRichieste);
+  caricaBadgeRichieste();
+}
+
+function renRichiesteFamiglie(){
+  const el=document.getElementById('req-fam-list');
+  if(!tutteRichieste.length){el.innerHTML='<div class="empty"><div class="empty-e">💬</div><p>Nessuna richiesta</p></div>';return;}
+  // raggruppa per famiglia
+  const gruppi={};
+  tutteRichieste.forEach(r=>{
+    const k=r.famiglia_codice||'?';
+    if(!gruppi[k])gruppi[k]=[];
+    gruppi[k].push(r);
+  });
+  const lbl={nuova:'🔴 Nuova',letta:'🟡 Letta',soddisfatta:'🟢 Soddisfatta',non_disponibile:'⚫ Non disp.'};
+  const cb={nuova:'br',letta:'ba',soddisfatta:'bg',non_disponibile:'bk'};
+  el.innerHTML=Object.entries(gruppi).map(([cod,richieste])=>{
+    const nuove=richieste.filter(r=>r.stato==='nuova').length;
+    const uid='fam-'+cod.replace(/[^a-z0-9]/gi,'');
+    return `
+      <div class="fam-req-card">
+        <div class="fam-req-header" onclick="toggleFamReq('${uid}')">
+          <div class="fam-req-avatar">${cod.slice(-3)}</div>
+          <div class="fam-req-info">
+            <div class="fam-req-name">${cod}</div>
+            <div class="fam-req-sub">${richieste.length} richiesta${richieste.length>1?'e':''} totali</div>
+          </div>
+          <div class="fam-req-count">
+            ${nuove?`<span class="badge br">${nuove} nuova${nuove>1?'e':''}</span>`:'<span class="badge bg">OK</span>'}
+            <span style="margin-left:8px;color:var(--ink-light);font-size:.8rem" id="chev-${uid}">▼</span>
+          </div>
+        </div>
+        <div class="fam-req-body" id="${uid}">
+          ${richieste.map(r=>`
+            <div class="req-item">
+              <div class="req-item-main">
+                <div class="req-item-prod">🛒 <strong>${r.prodotto}</strong>${r.quantita?' — '+r.quantita+' '+(r.unita||''):''}</div>
+                <div class="req-item-meta">${new Date(r.created_at).toLocaleDateString('it-IT')}${r.note?' · '+r.note:''}</div>
+              </div>
+              <div class="req-item-actions">
+                <span class="badge ${cb[r.stato]||'bk'}" style="font-size:.67rem">${lbl[r.stato]||r.stato}</span>
+                <select style="border:1.5px solid var(--border);border-radius:7px;padding:4px 7px;font-size:.68rem;cursor:pointer;background:var(--white)" onchange="cambiaStatoRichiesta('${r.id}',this.value)">
+                  <option value="nuova" ${r.stato==='nuova'?'selected':''}>🔴 Nuova</option>
+                  <option value="letta" ${r.stato==='letta'?'selected':''}>🟡 Letta</option>
+                  <option value="soddisfatta" ${r.stato==='soddisfatta'?'selected':''}>🟢 Soddisfatta</option>
+                  <option value="non_disponibile" ${r.stato==='non_disponibile'?'selected':''}>⚫ Non disp.</option>
+                </select>
+                <button class="btn btn-d btn-sm" onclick="delRichiesta('${r.id}')">🗑</button>
+              </div>
+            </div>`).join('')}
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function toggleFamReq(uid){
+  const body=document.getElementById(uid);
+  const chev=document.getElementById('chev-'+uid);
+  if(!body)return;
+  const open=body.classList.toggle('open');
+  if(chev)chev.textContent=open?'▲':'▼';
+}
+
+function filtroRichieste(s){renRichiesteTutte(s==='tutte'?tutteRichieste:tutteRichieste.filter(r=>r.stato===s));}
+function renRichiesteTutte(data){
   const el=document.getElementById('richieste-list');
   if(!data.length){el.innerHTML='<div class="empty"><div class="empty-e">💬</div><p>Nessuna richiesta</p></div>';return;}
   const lbl={nuova:'🔴 Nuova',letta:'🟡 Letta',soddisfatta:'🟢 Soddisfatta',non_disponibile:'⚫ Non disp.'};
@@ -1012,23 +1147,22 @@ function renRichieste(data){
       </div>
     </div>`).join('');
 }
-async function cambiaStatoRichiesta(id,stato){await db('richieste_famiglie?id=eq.'+id,{method:'PATCH',body:JSON.stringify({stato})});loadRichieste();}
+async function cambiaStatoRichiesta(id,stato){await db('richieste_famiglie?id=eq.'+id,{method:'PATCH',body:JSON.stringify({stato})});await loadRichieste();}
 async function delRichiesta(id){if(!confirm('Eliminare?'))return;await db('richieste_famiglie?id=eq.'+id,{method:'DELETE'});loadRichieste();}
 
 // ── PROPOSTA AI ──
 async function generaProposta(){
   document.getElementById('btn-proposta').disabled=true;
   document.getElementById('prop-spin').style.display='block';
-  document.getElementById('prop-out').style.display='none';
-  document.getElementById('prop-ph').style.display='none';
+  document.getElementById('prop-out').style.display='none';document.getElementById('prop-ph').style.display='none';
   try{
-    const[famiglie,magazzino,distribuzioni,richieste]=await Promise.all([db('famiglie?attiva=eq.true&order=codice.asc'),db('magazzino?order=nome.asc'),db('distribuzioni?stato=eq.completata&order=created_at.desc&limit=20'),db('richieste_famiglie?stato=in.(nuova,letta)&order=created_at.desc')]);
+    const[famiglie,magazzino,distribuzioni,richieste]=await Promise.all([db('famiglie?attiva=eq.true&order=codice.asc'),db('magazzino?order=alimento.asc,nome.asc'),db('distribuzioni?stato=eq.completata&order=created_at.desc&limit=20'),db('richieste_famiglie?stato=in.(nuova,letta)&order=created_at.desc')]);
     let storicoTesto='';
-    for(const dist of distribuzioni.slice(0,8)){const mov=await db('movimenti_magazzino?distribuzione_id=eq.'+dist.id+'&tipo=eq.uscita');if(mov.length){storicoTesto+=`\nDistrib. ${new Date(dist.data_distribuzione).toLocaleDateString('it-IT')}:\n`+mov.map(m=>`  - ${m.prodotto_nome}: ${m.quantita} ${m.unita}`).join('\n');}}
+    for(const dist of distribuzioni.slice(0,8)){const mov=await db('movimenti_magazzino?distribuzione_id=eq.'+dist.id+'&tipo=eq.uscita');if(mov.length){storicoTesto+=`\nDistrib. ${new Date(dist.data_distribuzione).toLocaleDateString('it-IT')}:\n`+mov.map(m=>`  - ${m.prodotto_nome}: ${m.quantita} conf.`).join('\n');}}
     const famTxt=famiglie.map(f=>`- ${f.codice} (${f.nome_referente}): ${f.num_componenti} componenti, ${f.num_bambini||0} bambini/neonati${f.note?', note: '+f.note:''}`).join('\n');
-    const magTxt=magazzino.filter(p=>p.quantita>0).map(p=>`- ${p.nome}: ${p.quantita} ${p.unita}${p.categoria==='Infanzia/Neonati'?' [NEONATI]':''}`).join('\n');
-    const reqTxt=richieste.length?richieste.map(r=>`- ${r.famiglia_codice}: ${r.prodotto}${r.quantita?' ('+r.quantita+' '+(r.unita||'')+')':`}`}${r.note?' — '+r.note:''}`).join('\n'):'Nessuna';
-    const res=await fetch(PROXY,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:4000,messages:[{role:'user',content:`Sei un assistente per un centro d'ascolto. Genera proposta distribuzione.\n\nFAMIGLIE (${famiglie.length}):\n${famTxt}\n\nMAGAZZINO:\n${magTxt||'Vuoto'}\n\nRICHIESTE:\n${reqTxt}\n\nSTORICO:\n${storicoTesto||'Nessuno'}\n\nREGOLE:\n- Famiglie più grandi ricevono di più\n- Famiglie con bambini/neonati: prioritizza prodotti adatti. Per famiglie con NEONATI (0-2 anni) includi prodotti categoria [NEONATI] se disponibili (latte in polvere, omogeneizzati, pannolini ecc.)\n- Se richiesta soddisfabile, includila con da_richiesta:true\n- Non superare quantità in magazzino\n- Arrotonda a 0.5 o interi\n\nRispondi SOLO JSON:\n{"riepilogo":"...","righe":[{"famiglia_codice":"FAM001","famiglia_nome":"Mario Rossi","prodotto":"Pasta","quantita":2,"unita":"kg","da_richiesta":false}]}`}]})});
+    const magTxt=magazzino.filter(p=>p.quantita>0).map(p=>`- [${p.alimento||p.nome}] ${p.nome}: ${p.quantita} conf.${p.volume_confezione?' da '+p.volume_confezione+(p.unita_confezione||''):''}`).join('\n');
+    const reqTxt=richieste.length?richieste.map(r=>`- ${r.famiglia_codice}: vuole ${r.prodotto}${r.quantita?' ('+r.quantita+' '+(r.unita||'')+')':`}`}`).join('\n'):'Nessuna';
+    const res=await fetch(PROXY,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:4000,messages:[{role:'user',content:`Sei un assistente per un centro d'ascolto. Genera una proposta di distribuzione per CONFEZIONI (non unità di volume/peso).\n\nFAMIGLIE:\n${famTxt}\n\nMAGAZZINO (confezioni disponibili):\n${magTxt||'Vuoto'}\n\nRICHIESTE:\n${reqTxt}\n\nSTORICO:\n${storicoTesto||'Nessuno'}\n\nIMPORTANTE: rispondi sempre in CONFEZIONI (numero intero), non in L/kg. Es: se devi dare 2L di latte e hai bottiglie da 1L, scrivi quantita:2 unita:"bottiglie 1L". Se hai varianti diverse dello stesso alimento, specifica la variante esatta. Per neonati usa prodotti categoria neonati se disponibili.\n\nRispondi SOLO JSON:\n{"riepilogo":"...","righe":[{"famiglia_codice":"FAM001","famiglia_nome":"Mario Rossi","prodotto":"Latte Granarolo 1L","quantita_confezioni":2,"desc_confezione":"bottiglie da 1L","totale_volume":"2L","da_richiesta":false}]}`}]})});
     const data=await res.json();
     const txt=data.content?.find(b=>b.type==='text')?.text||'{}';
     const parsed=JSON.parse(txt.replace(/```json|```/g,'').trim());
@@ -1036,7 +1170,13 @@ async function generaProposta(){
     document.getElementById('prop-info').textContent=parsed.riepilogo||'Proposta generata.';
     document.getElementById('tb-prop').innerHTML=propostaRighe.map(r=>{
       const fam=famiglie.find(f=>f.codice===r.famiglia_codice);
-      return `<tr><td><span class="badge bk" style="font-size:.64rem">${r.famiglia_codice}</span></td><td style="font-size:.77rem;color:var(--ink-light)">${fam?.num_componenti||'—'}</td><td style="font-size:.77rem">${fam?.num_bambini||0}</td><td><strong>${r.prodotto}</strong>${r.da_richiesta?' <span class="badge bp" style="font-size:.61rem">✋</span>':''}</td><td><span class="badge ${r.da_richiesta?'bp':'bg'}">${r.quantita}</span></td><td style="color:var(--ink-light);font-size:.77rem">${r.unita}</td></tr>`;
+      return `<tr>
+        <td><span class="badge bk" style="font-size:.64rem">${r.famiglia_codice}</span> <span style="font-size:.77rem">${r.famiglia_nome||''}</span></td>
+        <td><strong>${r.prodotto}</strong>${r.da_richiesta?' <span class="badge bp" style="font-size:.61rem">✋</span>':''}</td>
+        <td><span class="badge ${r.da_richiesta?'bp':'bg'}">${r.quantita_confezioni} conf.</span></td>
+        <td style="font-size:.77rem;color:var(--ink-light)">${r.totale_volume||r.desc_confezione||''}</td>
+        <td style="font-size:.77rem">${r.da_richiesta?'✋':''}</td>
+      </tr>`;
     }).join('');
     document.getElementById('prop-out').style.display='block';
   }catch(e){alert('Errore: '+e.message);document.getElementById('prop-ph').style.display='flex';}
@@ -1044,15 +1184,18 @@ async function generaProposta(){
 }
 function scaricaPropostaXL(){
   if(!propostaRighe.length)return;
-  const wsData=[['Famiglia','Referente','Componenti','Bambini','Prodotto','Quantità','Unità','Da richiesta']];
-  propostaRighe.forEach(r=>{const fam=famD.find(f=>f.codice===r.famiglia_codice);wsData.push([r.famiglia_codice,r.famiglia_nome,fam?.num_componenti||'',fam?.num_bambini||0,r.prodotto,r.quantita,r.unita,r.da_richiesta?'Sì':'']);});
+  const ws1=[['Famiglia','Referente','Prodotto','N° Confezioni','Descrizione Conf.','Totale','Da richiesta']];
+  propostaRighe.forEach(r=>ws1.push([r.famiglia_codice,r.famiglia_nome,r.prodotto,r.quantita_confezioni,r.desc_confezione||'',r.totale_volume||'',r.da_richiesta?'Sì':'']));
   const wb=XLSX.utils.book_new();
-  const ws=XLSX.utils.aoa_to_sheet(wsData);ws['!cols']=[{wch:10},{wch:20},{wch:12},{wch:10},{wch:22},{wch:10},{wch:8},{wch:12}];
-  XLSX.utils.book_append_sheet(wb,ws,'Proposta Distribuzione');
-  const tot={};propostaRighe.forEach(r=>{const k=r.prodotto+'__'+r.unita;tot[k]=(tot[k]||0)+r.quantita;});
-  const ws2=[['Prodotto','Quantità totale','Unità']];Object.entries(tot).forEach(([k,q])=>{const[pr,un]=k.split('__');ws2.push([pr,q,un]);});
-  const ws2s=XLSX.utils.aoa_to_sheet(ws2);ws2s['!cols']=[{wch:22},{wch:15},{wch:8}];
-  XLSX.utils.book_append_sheet(wb,ws2s,'Totali per upload');
+  const wss=XLSX.utils.aoa_to_sheet(ws1);wss['!cols']=[{wch:10},{wch:20},{wch:22},{wch:12},{wch:16},{wch:10},{wch:12}];
+  XLSX.utils.book_append_sheet(wb,wss,'Proposta Distribuzione');
+  // foglio totali per upload
+  const tot={};
+  propostaRighe.forEach(r=>{const k=r.prodotto;tot[k]=(tot[k]||0)+r.quantita_confezioni;});
+  const ws2=[['Prodotto','N° Confezioni','Unità']];
+  Object.entries(tot).forEach(([pr,q])=>ws2.push([pr,q,'conf']));
+  const wss2=XLSX.utils.aoa_to_sheet(ws2);wss2['!cols']=[{wch:24},{wch:14},{wch:8}];
+  XLSX.utils.book_append_sheet(wb,wss2,'Totali per upload');
   XLSX.writeFile(wb,`proposta-${new Date().toLocaleDateString('it-IT').replace(/\//g,'-')}.xlsx`);
 }
 function resetProposta(){propostaRighe=[];document.getElementById('prop-out').style.display='none';document.getElementById('prop-ph').style.display='flex';}
@@ -1065,24 +1208,18 @@ function selTipo(t){
   document.getElementById('mesi-row').style.display=t==='neonato'?'block':'none';
 }
 function aggiungiMembro(){
-  const nome=document.getElementById('mb-nome').value.trim();
-  const eta=document.getElementById('mb-eta').value;
-  const mesi=document.getElementById('mb-mesi').value;
-  nuoviFamiliari.push({nome:nome||null,tipo:tipoSel,eta:eta?parseInt(eta):null,mesi:mesi?parseInt(mesi):null});
+  nuoviFamiliari.push({nome:document.getElementById('mb-nome').value.trim()||null,tipo:tipoSel,eta:document.getElementById('mb-eta').value?parseInt(document.getElementById('mb-eta').value):null,mesi:document.getElementById('mb-mesi').value?parseInt(document.getElementById('mb-mesi').value):null});
   document.getElementById('mb-nome').value='';document.getElementById('mb-eta').value='';document.getElementById('mb-mesi').value='';
   aggiornaMembriUI();
 }
 function rimuoviMembro(i){nuoviFamiliari.splice(i,1);aggiornaMembriUI();}
 function aggiornaMembriUI(){
   const ico={adulto:'🧑',anziano:'👴',bambino:'👧',neonato:'🍼'};
-  const tot=nuoviFamiliari.length;
-  const bam=nuoviFamiliari.filter(m=>m.tipo==='bambino').length;
-  const neo=nuoviFamiliari.filter(m=>m.tipo==='neonato').length;
-  document.getElementById('cnt-tot').textContent=tot;
-  document.getElementById('cnt-bam').textContent=bam;
-  document.getElementById('cnt-neo').textContent=neo;
+  document.getElementById('cnt-tot').textContent=nuoviFamiliari.length;
+  document.getElementById('cnt-bam').textContent=nuoviFamiliari.filter(m=>m.tipo==='bambino').length;
+  document.getElementById('cnt-neo').textContent=nuoviFamiliari.filter(m=>m.tipo==='neonato').length;
   const list=document.getElementById('membri-list');
-  if(!tot){list.innerHTML='<div class="empty" style="padding:20px"><div class="empty-e">👥</div><p>Nessun membro aggiunto</p></div>';return;}
+  if(!nuoviFamiliari.length){list.innerHTML='<div class="empty" style="padding:20px"><div class="empty-e">👥</div><p>Nessun membro aggiunto</p></div>';return;}
   list.innerHTML=nuoviFamiliari.map((m,i)=>`
     <div class="membro-row">
       <span style="font-size:1.4rem">${ico[m.tipo]||'🧑'}</span>
@@ -1093,11 +1230,7 @@ function aggiornaMembriUI(){
       <button class="btn btn-d btn-sm" onclick="rimuoviMembro(${i})">✕</button>
     </div>`).join('');
 }
-function resetNuovaFamiglia(){
-  nuoviFamiliari=[];
-  ['nf-cod','nf-nome','nf-note','mb-nome','mb-eta','mb-mesi'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-  selTipo('adulto');aggiornaMembriUI();
-}
+function resetNuovaFamiglia(){nuoviFamiliari=[];['nf-cod','nf-nome','nf-note','mb-nome','mb-eta','mb-mesi'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});selTipo('adulto');aggiornaMembriUI();}
 async function salvaFamigliaCompleta(){
   const codice=document.getElementById('nf-cod').value.trim().toUpperCase();
   const nome=document.getElementById('nf-nome').value.trim();
@@ -1105,11 +1238,9 @@ async function salvaFamigliaCompleta(){
   if(!nuoviFamiliari.length){al2('nf-save-alert','Aggiungi almeno un membro','e');return;}
   const num_componenti=nuoviFamiliari.length;
   const num_bambini=nuoviFamiliari.filter(m=>['bambino','neonato'].includes(m.tipo)).length;
-  const note=document.getElementById('nf-note').value||null;
-  // Nota neonati nel campo note
   const haNeonati=nuoviFamiliari.some(m=>m.tipo==='neonato');
-  const noteFinale=[note,haNeonati?'🍼 Presenza neonati':null].filter(Boolean).join(' · ')||null;
-  const[newFam]=await db('famiglie',{method:'POST',body:JSON.stringify({codice,nome_referente:nome,num_componenti,num_bambini,note:noteFinale})});
+  const note=[document.getElementById('nf-note').value||null,haNeonati?'🍼 Presenza neonati':null].filter(Boolean).join(' · ')||null;
+  const[newFam]=await db('famiglie',{method:'POST',body:JSON.stringify({codice,nome_referente:nome,num_componenti,num_bambini,note})});
   if(newFam){await db('utenti',{method:'POST',body:JSON.stringify({username:codice,password:codice,ruolo:'famiglia',famiglia_id:newFam.id})});}
   al2('nf-save-alert',`✅ Famiglia ${codice} salvata! Login: utente e password = ${codice}`,'o');
   setTimeout(()=>{resetNuovaFamiglia();go('famiglie');},2500);
@@ -1162,7 +1293,7 @@ async function loadStor(){
   if(!data.length){tb.innerHTML='<tr><td colspan="4"><div class="empty"><div class="empty-e">📊</div><p>Nessuna distribuzione ancora</p></div></td></tr>';return;}
   tb.innerHTML=(await Promise.all(data.map(async d=>{
     const mov=await db('movimenti_magazzino?distribuzione_id=eq.'+d.id+'&tipo=eq.uscita');
-    const r=mov.slice(0,4).map(m=>`${m.prodotto_nome} (${m.quantita})`).join(', ')+(mov.length>4?' …':'')||'—';
+    const r=mov.slice(0,4).map(m=>`${m.prodotto_nome} (${m.quantita} conf.)`).join(', ')+(mov.length>4?' …':'')||'—';
     return `<tr><td><strong>${new Date(d.data_distribuzione).toLocaleDateString('it-IT')}</strong></td><td style="font-size:.76rem;color:var(--ink-light);max-width:260px">${r}</td><td><span class="badge ${d.stato==='completata'?'bg':'bk'}">${d.stato}</span></td><td style="font-size:.77rem;color:var(--ink-light)">${d.note||'—'}</td></tr>`;
   }))).join('');
 }
@@ -1172,8 +1303,6 @@ function openM(id){document.getElementById(id).classList.add('open');}
 function closeM(id){document.getElementById(id).classList.remove('open');}
 function al2(id,msg,t){const el=document.getElementById(id);if(!el)return;el.innerHTML=`<div class="alert ${t==='o'?'aok':'aerr'}">${msg}</div>`;setTimeout(()=>el.innerHTML='',5000);}
 document.querySelectorAll('.modal-bg').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');}));
-
-// init
 aggiornaMembriUI();
 </script>
 </body>
