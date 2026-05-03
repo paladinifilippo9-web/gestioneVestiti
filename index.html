@@ -816,7 +816,7 @@ function go(n){
   else if(n==='magazzino')document.getElementById('mob-magazzino').classList.add('active');
   else if(n==='richieste')document.getElementById('mob-richieste').classList.add('active');
   else if(n==='aggiungi-famiglia')document.getElementById('mob-addfam').classList.add('active');
-  ({magazzino:loadMag,famiglie:loadFam,dashboard:loadDash,storico:loadStor,richieste:loadRichieste,'aggiungi-famiglia':resetNuovaFamiglia})[n]?.();
+  ({magazzino:()=>switchMagTab('lista'),famiglie:loadFam,dashboard:loadDash,storico:loadStor,richieste:loadRichieste,'aggiungi-famiglia':resetNuovaFamiglia})[n]?.();
 }
 function toggleMobMenu(){document.getElementById('mob-menu').classList.toggle('open');document.getElementById('mob-more-btn').classList.toggle('active');}
 function closeMobMenu(){document.getElementById('mob-menu').classList.remove('open');document.getElementById('mob-more-btn').classList.remove('active');}
@@ -832,7 +832,7 @@ async function loadDash(){
   document.getElementById('st-r').textContent=r.length;
   const crit=m.filter(p=>p.quantita<=3);
   const sc=document.getElementById('d-sc');
-  if(!crit.length){sc.innerHTML='<div class="empty"><div class="empty-e">✅</div><p>Tutto ok</p></div>';}
+  if(!m.length){sc.innerHTML='<div class="empty"><div class="empty-e">📦</div><p>Magazzino vuoto — carica i prodotti</p></div>';}else if(!crit.length){sc.innerHTML='<div style="text-align:center;padding:14px 0"><div style="font-size:1.6rem;margin-bottom:5px">✅</div><div style="font-weight:600;font-size:.88rem;color:var(--green)">Nessuna scorta critica</div><div style="font-size:.76rem;color:var(--ink-light);margin-top:3px">'+m.length+' prodotti in magazzino, tutti ok</div></div>';}
   else sc.innerHTML=crit.slice(0,5).map(p=>`<div class="dash-row"><span class="dash-name">${p.nome}</span><span class="badge ${p.quantita===0?'br':'ba'}">${p.quantita===0?'Esaurito':p.quantita+' pz'}</span></div>`).join('');
   const rec=await db('distribuzioni?order=created_at.desc&limit=4');
   const dd=document.getElementById('d-di');
@@ -948,9 +948,14 @@ async function delProd(id){if(!confirm('Eliminare?'))return;await db('magazzino?
 async function loadXLMag(e){
   const f=e.target.files[0];if(!f)return;
   const buf=await f.arrayBuffer();const wb=XLSX.read(buf);const ws=wb.Sheets[wb.SheetNames[0]];
-  const rows=XLSX.utils.sheet_to_json(ws,{header:1});
-  const start=(typeof rows[0]?.[0]==='string'&&isNaN(rows[0]?.[1]))?1:0;
-  xlMagP=rows.slice(start).filter(r=>r[0]||r[1]).map(r=>({
+  const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
+
+  // Trova la riga dati: la prima dove la colonna 2 (N° confezioni) è un numero > 0
+  // Questo salta titoli, descrizioni, intestazioni e note
+  xlMagP=rows.filter(r=>{
+    const qty=parseFloat(r[2]);
+    return !isNaN(qty) && qty > 0 && (r[0]||r[1]);
+  }).map(r=>({
     alimento:String(r[0]||r[1]||'').trim(),
     nome:String(r[1]||r[0]||'').trim(),
     quantita:parseFloat(r[2])||0,
@@ -958,7 +963,7 @@ async function loadXLMag(e){
     unita_confezione:String(r[4]||'pz').trim(),
     categoria:String(r[5]||'Alimentari').trim(),
     scadenza:r[6]?String(r[6]).trim():null
-  })).filter(r=>r.nome);
+  })).filter(r=>r.nome&&r.quantita>0);
   const magAttuali=await db('magazzino?select=nome,quantita,alimento');
   document.getElementById('xl-mag-count').textContent=xlMagP.length;
   document.getElementById('tb-xl-mag').innerHTML=xlMagP.map(r=>{
