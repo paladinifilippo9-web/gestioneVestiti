@@ -847,6 +847,15 @@ textarea{resize:vertical;min-height:75px;}
   </div>
   <div class="fam-main">
     <div class="fam-welcome"><h2 id="fam-welcome-name">Ciao 👋</h2><p>Qui puoi vedere le tue distribuzioni e inviare preferenze.</p></div>
+
+    <!-- QR FAMIGLIA -->
+    <div style="background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:22px;text-align:center;box-shadow:var(--shadow-sm)">
+      <div style="font-size:.69rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-light);margin-bottom:14px">📷 Il tuo codice QR — mostralo all'operatore durante la distribuzione</div>
+      <div id="fam-qr-box" style="display:inline-block;background:#fff;padding:12px;border-radius:10px;border:1px solid var(--border)"></div>
+      <div style="margin-top:10px;font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:600" id="fam-qr-codice"></div>
+      <div style="font-size:.78rem;color:var(--ink-light);margin-top:3px" id="fam-qr-nome"></div>
+    </div>
+
     <div class="req-box">
       <h3>📝 Invia una preferenza</h3>
       <p>Indica un prodotto che ti servirebbe per la prossima distribuzione.</p>
