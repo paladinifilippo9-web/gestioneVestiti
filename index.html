@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Centro d'Ascolto</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -375,6 +377,7 @@ textarea{resize:vertical;min-height:75px;}
     <div class="nav-item" onclick="go('carica-ai')"><div class="nav-icon">🤖</div>Carica con AI</div>
     <div class="nav-item" onclick="go('distribuzione')"><div class="nav-icon">📋</div>Distribuzione</div>
     <div class="nav-section">Famiglie</div>
+    <div class="nav-item" onclick="go('scan')"><div class="nav-icon">📷</div>Scansiona QR</div>
     <div class="nav-item" onclick="go('richieste')"><div class="nav-icon">💬</div>Richieste<span class="nav-badge" id="badge-richieste" style="display:none">0</span></div>
     <div class="nav-item" onclick="go('famiglie')"><div class="nav-icon">👥</div>Famiglie</div>
     <div class="nav-item" onclick="go('aggiungi-famiglia')"><div class="nav-icon">➕</div>Aggiungi famiglia</div>
@@ -600,6 +603,54 @@ textarea{resize:vertical;min-height:75px;}
     </div>
   </div>
 
+
+  <!-- SCANSIONA QR -->
+  <div class="page" id="page-scan">
+    <div class="page-header"><div><h2>Scansiona QR 📷</h2><p>Scansiona il QR della famiglia per vedere cosa deve ricevere</p></div></div>
+    <div class="two-col">
+      <div>
+        <div class="card" style="margin-bottom:14px"><div class="card-body">
+          <div class="scan-video-wrap" id="scan-video-wrap">
+            <video id="scan-video" autoplay muted playsinline></video>
+            <canvas id="scan-canvas" style="display:none"></canvas>
+            <div class="scan-overlay"><div class="scan-frame"></div></div>
+          </div>
+          <div style="margin-top:14px;display:flex;gap:10px">
+            <button class="btn btn-p wfull" id="btn-start-scan" onclick="startScan()">📷 Avvia fotocamera</button>
+            <button class="btn btn-g" id="btn-stop-scan" onclick="stopScan()" style="display:none">⏹ Stop</button>
+          </div>
+          <p style="font-size:.75rem;color:var(--ink-light);text-align:center;margin-top:10px">Inquadra il QR della famiglia con la fotocamera</p>
+        </div></div>
+        <div class="card"><div class="card-body">
+          <div class="card-title" style="margin-bottom:10px">🔍 Oppure cerca manualmente</div>
+          <div class="srch" style="max-width:100%"><input type="text" placeholder="Codice famiglia (es. FAM001)" id="scan-manual-input" oninput="scanManual(this.value)"></div>
+        </div></div>
+      </div>
+      <div>
+        <div id="scan-result" style="display:none">
+          <div class="scan-result-box">
+            <div style="font-size:.72rem;color:var(--green);text-transform:uppercase;font-weight:700;letter-spacing:.06em;margin-bottom:6px">✅ Famiglia trovata</div>
+            <div class="scan-result-nome" id="scan-nome"></div>
+            <div style="font-size:.82rem;color:var(--ink-mid)" id="scan-codice"></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:12px 0">
+              <div style="background:#fff;border-radius:8px;padding:8px;text-align:center"><div style="font-size:.62rem;color:var(--ink-light);font-weight:600">Componenti</div><div style="font-family:'Playfair Display',serif;font-size:1.6rem" id="scan-comp">—</div></div>
+              <div style="background:#fff;border-radius:8px;padding:8px;text-align:center"><div style="font-size:.62rem;color:var(--purple);font-weight:600">Bambini</div><div style="font-family:'Playfair Display',serif;font-size:1.6rem;color:var(--purple)" id="scan-bam">—</div></div>
+              <div style="background:#fff;border-radius:8px;padding:8px;text-align:center"><div style="font-size:.62rem;color:var(--amber);font-weight:600">Neonati</div><div style="font-family:'Playfair Display',serif;font-size:1.6rem;color:var(--amber)" id="scan-neo">—</div></div>
+            </div>
+            <div class="scan-result-prodotti">
+              <div style="font-size:.69rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--green);margin-bottom:8px">📦 Ultima distribuzione ricevuta</div>
+              <div id="scan-prodotti"></div>
+            </div>
+            <div id="scan-note" style="margin-top:10px;font-size:.8rem;color:var(--amber);background:rgba(201,125,42,.1);border-radius:8px;padding:8px 10px;display:none"></div>
+          </div>
+        </div>
+        <div id="scan-placeholder" class="card" style="min-height:300px;display:flex;align-items:center;justify-content:center">
+          <div class="empty"><div class="empty-e">📷</div><p>Scansiona un QR per vedere i dettagli della famiglia</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- RICHIESTE -->
   <div class="page" id="page-richieste">
     <div class="page-header"><div><h2>Richieste famiglie 💬</h2><p>Preferenze inviate dalle famiglie</p></div></div>
@@ -628,13 +679,13 @@ textarea{resize:vertical;min-height:75px;}
 
   <!-- FAMIGLIE -->
   <div class="page" id="page-famiglie">
-    <div class="page-header"><div><h2>Famiglie</h2><p>Clicca su una famiglia per i dettagli</p></div></div>
+    <div class="page-header"><div><h2>Famiglie</h2><p>Clicca su una famiglia per i dettagli</p></div><button class="btn btn-g" onclick="generaPDF()">🖨 PDF operatore</button></div>
     <div class="toolbar">
       <div class="srch"><input type="text" placeholder="Cerca famiglia..." id="sf" oninput="ffam()"></div>
       <button class="btn btn-p" onclick="go('aggiungi-famiglia')">+ Aggiungi</button>
     </div>
     <div class="card"><div class="table-wrap">
-      <table><thead><tr><th>Codice</th><th>Referente</th><th>👥</th><th>🍼</th><th>Stato</th><th>Note</th><th></th></tr></thead>
+      <table><thead><tr><th>Codice</th><th>Referente</th><th>👥</th><th>🍼</th><th>Stato</th><th>Note</th><th>QR</th><th></th></tr></thead>
       <tbody id="tb-f"></tbody></table>
     </div></div>
   </div>
@@ -688,11 +739,79 @@ textarea{resize:vertical;min-height:75px;}
 
   <!-- STORICO -->
   <div class="page" id="page-storico">
-    <div class="page-header"><div><h2>Storico</h2><p>Tutte le distribuzioni completate</p></div></div>
-    <div class="card"><div class="table-wrap">
-      <table><thead><tr><th>Data</th><th>Prodotti</th><th>Stato</th><th>Note</th></tr></thead>
-      <tbody id="tb-s"></tbody></table>
-    </div></div>
+    <div class="page-header"><div><h2>Storico</h2><p>Distribuzioni e report</p></div></div>
+    <div class="tabs">
+      <div class="tab active" id="stor-tab-lista" onclick="switchStorTab('lista')">📋 Distribuzioni</div>
+      <div class="tab" id="stor-tab-mensile" onclick="switchStorTab('mensile')">📅 Report mensile</div>
+      <div class="tab" id="stor-tab-annuale" onclick="switchStorTab('annuale')">📆 Report annuale</div>
+    </div>
+
+    <!-- LISTA -->
+    <div id="stor-lista">
+      <div class="card"><div class="table-wrap">
+        <table><thead><tr><th>Data</th><th>Prodotti distribuiti</th><th>Stato</th><th>Note</th></tr></thead>
+        <tbody id="tb-s"></tbody></table>
+      </div></div>
+    </div>
+
+    <!-- REPORT MENSILE -->
+    <div id="stor-mensile" style="display:none">
+      <div class="card" style="margin-bottom:16px"><div class="card-body">
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+          <div class="fg" style="margin:0;flex:1;min-width:140px">
+            <label>Mese</label>
+            <select id="report-mese" style="font-size:.875rem">
+              <option value="1">Gennaio</option><option value="2">Febbraio</option><option value="3">Marzo</option>
+              <option value="4">Aprile</option><option value="5">Maggio</option><option value="6">Giugno</option>
+              <option value="7">Luglio</option><option value="8">Agosto</option><option value="9">Settembre</option>
+              <option value="10">Ottobre</option><option value="11">Novembre</option><option value="12">Dicembre</option>
+            </select>
+          </div>
+          <div class="fg" style="margin:0;flex:1;min-width:120px">
+            <label>Anno</label>
+            <input type="number" id="report-anno-m" min="2020" max="2099" style="font-size:.875rem">
+          </div>
+          <div style="padding-top:18px">
+            <button class="btn btn-p" onclick="generaReportMensile()">Genera report</button>
+          </div>
+        </div>
+      </div></div>
+      <div id="report-mensile-out" style="display:none">
+        <div class="grid-2" style="margin-bottom:16px" id="report-mensile-stats"></div>
+        <div class="card"><div class="card-header"><span class="card-title">Prodotti distribuiti nel mese</span><button class="btn btn-g btn-sm" onclick="stampaReport('mensile')">🖨 Stampa</button></div>
+          <div class="table-wrap"><table><thead><tr><th>Prodotto</th><th>Totale confezioni</th><th>N° distribuzioni</th></tr></thead>
+          <tbody id="tb-report-mensile"></tbody></table></div>
+        </div>
+      </div>
+      <div id="report-mensile-empty" style="display:none" class="empty"><div class="empty-e">📅</div><p>Nessuna distribuzione in questo periodo</p></div>
+    </div>
+
+    <!-- REPORT ANNUALE -->
+    <div id="stor-annuale" style="display:none">
+      <div class="card" style="margin-bottom:16px"><div class="card-body">
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+          <div class="fg" style="margin:0;flex:1;min-width:140px">
+            <label>Anno</label>
+            <input type="number" id="report-anno-a" min="2020" max="2099" style="font-size:.875rem">
+          </div>
+          <div style="padding-top:18px">
+            <button class="btn btn-p" onclick="generaReportAnnuale()">Genera report</button>
+          </div>
+        </div>
+      </div></div>
+      <div id="report-annuale-out" style="display:none">
+        <div class="grid-2" style="margin-bottom:16px" id="report-annuale-stats"></div>
+        <div class="card" style="margin-bottom:16px"><div class="card-header"><span class="card-title">Distribuzioni per mese</span></div>
+          <div class="table-wrap"><table><thead><tr><th>Mese</th><th>N° distribuzioni</th><th>Prodotti consegnati</th></tr></thead>
+          <tbody id="tb-report-mesi"></tbody></table></div>
+        </div>
+        <div class="card"><div class="card-header"><span class="card-title">Top prodotti distribuiti nell'anno</span><button class="btn btn-g btn-sm" onclick="stampaReport('annuale')">🖨 Stampa</button></div>
+          <div class="table-wrap"><table><thead><tr><th>Prodotto</th><th>Totale confezioni</th><th>% sul totale</th></tr></thead>
+          <tbody id="tb-report-annuale"></tbody></table></div>
+        </div>
+      </div>
+      <div id="report-annuale-empty" style="display:none" class="empty"><div class="empty-e">📆</div><p>Nessuna distribuzione in questo anno</p></div>
+    </div>
   </div>
 </main>
 </div>
@@ -710,6 +829,7 @@ textarea{resize:vertical;min-height:75px;}
 <div class="mob-menu" id="mob-menu">
   <div class="mob-menu-item" onclick="go('carica-ai');closeMobMenu()"><div class="mob-menu-icon">🤖</div>Carica con AI</div>
   <div class="mob-menu-item" onclick="go('distribuzione');closeMobMenu()"><div class="mob-menu-icon">📋</div>Distribuzione</div>
+  <div class="mob-menu-item" onclick="go('scan');closeMobMenu()"><div class="mob-menu-icon">📷</div>Scansiona QR</div>
   <div class="mob-menu-item" onclick="go('famiglie');closeMobMenu()"><div class="mob-menu-icon">👥</div>Lista famiglie</div>
   <div class="mob-menu-item" onclick="go('storico');closeMobMenu()"><div class="mob-menu-icon">📊</div>Storico</div>
   <div class="mob-menu-item" onclick="logout()"><div class="mob-menu-icon">↩</div>Esci</div>
@@ -746,7 +866,42 @@ textarea{resize:vertical;min-height:75px;}
     <div class="card" style="margin-top:14px"><div class="card-header"><span class="card-title">💬 Le tue richieste</span></div>
       <div id="fam-richieste-list" class="card-body"></div>
     </div>
+
+    <!-- CAMBIO CREDENZIALI -->
+    <div class="card" style="margin-top:14px">
+      <div class="card-header">
+        <span class="card-title">🔒 Cambia password</span>
+      </div>
+      <div class="card-body">
+        <p style="font-size:.8rem;color:var(--ink-light);margin-bottom:14px;line-height:1.5">Per sicurezza ti consigliamo di cambiare la password predefinita (uguale al codice famiglia).</p>
+        <div class="fg"><label>Password attuale</label><input type="password" id="pwd-old" placeholder="••••••••" autocomplete="current-password"></div>
+        <div class="fg"><label>Nuova password</label><input type="password" id="pwd-new" placeholder="Minimo 6 caratteri" autocomplete="new-password"></div>
+        <div class="fg"><label>Conferma nuova password</label><input type="password" id="pwd-confirm" placeholder="Ripeti la nuova password" autocomplete="new-password"></div>
+        <div id="pwd-alert" style="margin-bottom:10px"></div>
+        <button class="fam-btn" style="background:var(--green);color:#fff" onclick="cambiaPassword()">🔒 Aggiorna password</button>
+      </div>
+    </div>
   </div>
+</div>
+
+
+<!-- MODAL QR FAMIGLIA -->
+<div class="modal-bg" id="m-qr">
+  <div class="modal" style="max-width:360px;text-align:center">
+    <div class="modal-hd"><h3 id="qr-modal-title">QR Famiglia</h3><button class="modal-x" onclick="closeM('m-qr')">✕</button></div>
+    <p style="font-size:.82rem;color:var(--ink-mid);margin-bottom:16px">Mostra questo QR all'operatore durante la distribuzione</p>
+    <div class="qr-box" style="margin:0 auto 12px;display:inline-block" id="qr-canvas-wrap"></div>
+    <div class="qr-label" id="qr-label-text"></div>
+    <div style="margin-top:16px;display:flex;gap:10px">
+      <button class="btn btn-p" style="flex:1" onclick="stampaSingoloQR()">🖨 Stampa</button>
+      <button class="btn btn-g" style="flex:1" onclick="closeM('m-qr')">Chiudi</button>
+    </div>
+  </div>
+</div>
+
+<!-- PDF CONTENT (nascosto, usato per stampa) -->
+<div id="pdf-content" style="display:none">
+  <div id="pdf-pages"></div>
 </div>
 
 <!-- MODAL DETTAGLIO FAMIGLIA -->
@@ -814,8 +969,8 @@ async function inviaRichiesta(){
 }
 
 // ── NAV ──
-const pageMap={dashboard:0,magazzino:1,'carica-ai':2,distribuzione:3,richieste:4,famiglie:5,'aggiungi-famiglia':6,storico:7};
-const pageNames={dashboard:'Dashboard',magazzino:'Magazzino','carica-ai':'Carica con AI',distribuzione:'Distribuzione',richieste:'Richieste',famiglie:'Famiglie','aggiungi-famiglia':'Aggiungi famiglia',storico:'Storico'};
+const pageMap={dashboard:0,magazzino:1,'carica-ai':2,distribuzione:3,scan:4,richieste:5,famiglie:6,'aggiungi-famiglia':7,storico:8};
+const pageNames={dashboard:'Dashboard',magazzino:'Magazzino','carica-ai':'Carica con AI',distribuzione:'Distribuzione',scan:'Scansiona QR',richieste:'Richieste',famiglie:'Famiglie','aggiungi-famiglia':'Aggiungi famiglia',storico:'Storico'};
 function go(n){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('active'));
@@ -827,7 +982,7 @@ function go(n){
   else if(n==='magazzino')document.getElementById('mob-magazzino').classList.add('active');
   else if(n==='richieste')document.getElementById('mob-richieste').classList.add('active');
   else if(n==='aggiungi-famiglia')document.getElementById('mob-addfam').classList.add('active');
-  ({magazzino:()=>switchMagTab('lista'),famiglie:loadFam,dashboard:loadDash,storico:loadStor,richieste:loadRichieste,'aggiungi-famiglia':resetNuovaFamiglia,distribuzione:()=>{resetProposta();}})[n]?.();
+  ({magazzino:()=>switchMagTab('lista'),famiglie:loadFam,dashboard:loadDash,storico:loadStor,richieste:loadRichieste,'aggiungi-famiglia':resetNuovaFamiglia,distribuzione:()=>{resetProposta();},scan:initScan})[n]?.();
 }
 function toggleMobMenu(){document.getElementById('mob-menu').classList.toggle('open');document.getElementById('mob-more-btn').classList.toggle('active');}
 function closeMobMenu(){document.getElementById('mob-menu').classList.remove('open');document.getElementById('mob-more-btn').classList.remove('active');}
@@ -1033,9 +1188,30 @@ function resetAI(){b64=null;aiIt=[];document.getElementById('ap').style.display=
 async function loadXL(e){
   const f=e.target.files[0];if(!f)return;
   const buf=await f.arrayBuffer();const wb=XLSX.read(buf);const ws=wb.Sheets[wb.SheetNames[0]];
-  const rows=XLSX.utils.sheet_to_json(ws,{header:1});
-  const s=(typeof rows[0]?.[0]==='string'&&isNaN(rows[0]?.[1]))?1:0;
-  xlRw=rows.slice(s).filter(r=>r[0]).map(r=>({nome:String(r[0]).trim(),quantita:parseFloat(r[1])||0,unita:String(r[2]||'conf').trim()}));
+  const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
+  // Rileva se è il formato proposta (con colonna Famiglia) o formato semplice
+  // Formato proposta: Famiglia | Referente | Componenti | Bambini | Prodotto | Quantità | Unità | Da richiesta
+  const hasFamiglia = rows[0]?.[0]?.toString().toLowerCase().includes('famig') || rows[0]?.[4]?.toString().toLowerCase().includes('prodot');
+  let dataRows = rows.filter(r=>r[0]&&!isNaN(parseFloat(r[hasFamiglia?5:1])));
+
+  if(hasFamiglia){
+    // Formato proposta: colonne 0=FamCod, 1=FamNome, 4=Prodotto, 5=Qty, 6=Unità
+    xlRw = dataRows.map(r=>({
+      famiglia_codice:String(r[0]).trim(),
+      famiglia_nome:String(r[1]).trim(),
+      nome:String(r[4]).trim(),
+      quantita:parseFloat(r[5])||0,
+      unita:String(r[6]||'conf').trim(),
+      famiglia_id:null // lo risolviamo dopo
+    }));
+    // Risolvi famiglia_id dai codici
+    const famiglie=await db('famiglie?select=id,codice');
+    xlRw.forEach(r=>{const f=famiglie.find(f=>f.codice===r.famiglia_codice);r.famiglia_id=f?.id||null;});
+  } else {
+    // Formato semplice: Prodotto | N° confezioni | Unità
+    const s=(typeof rows[0]?.[0]==='string'&&isNaN(rows[0]?.[1]))?1:0;
+    xlRw=rows.slice(s).filter(r=>r[0]&&parseFloat(r[1])>0).map(r=>({nome:String(r[0]).trim(),quantita:parseFloat(r[1])||0,unita:String(r[2]||'conf').trim()}));
+  }
   const mag=await db('magazzino?select=nome,quantita,unita,volume_confezione,unita_confezione');
   document.getElementById('tb-x').innerHTML=xlRw.map(r=>{
     const fd=mag.find(m=>m.nome.toLowerCase()===r.nome.toLowerCase());
@@ -1049,13 +1225,28 @@ async function loadXL(e){
 async function confDist(){
   const btn=document.getElementById('bcd');btn.disabled=true;
   const[dist]=await db('distribuzioni',{method:'POST',body:JSON.stringify({note:document.getElementById('dn').value||null,stato:'completata'})});
+
   for(const r of xlRw){
     const ex=await db(`magazzino?nome=ilike.${encodeURIComponent(r.nome)}&limit=1`);
     if(ex.length){
       await db('magazzino?id=eq.'+ex[0].id,{method:'PATCH',body:JSON.stringify({quantita:Math.max(0,ex[0].quantita-r.quantita)})});
       await db('movimenti_magazzino',{method:'POST',body:JSON.stringify({prodotto_nome:r.nome,tipo:'uscita',quantita:r.quantita,unita:'conf',distribuzione_id:dist?.id||null})});
     }
+
+    // Se la riga ha info famiglia → popola distribuzione_dettagli
+    if(r.famiglia_id){
+      await db('distribuzione_dettagli',{method:'POST',body:JSON.stringify({
+        distribuzione_id:dist?.id||null,
+        famiglia_id:r.famiglia_id,
+        famiglia_codice:r.famiglia_codice||null,
+        famiglia_nome:r.famiglia_nome||null,
+        prodotto_nome:r.nome,
+        quantita:r.quantita,
+        unita:'conf'
+      })});
+    }
   }
+
   // Archivia tutte le richieste attive (nuova/letta) → archiviate
   await db("richieste_famiglie?stato=in.(nuova,letta)",{method:'PATCH',body:JSON.stringify({stato:'archiviate'})});
   al2('da','✅ Distribuzione completata! Le richieste attive sono state archiviate.','o');
@@ -1280,6 +1471,7 @@ function renFam(data){
     <td>${f.num_bambini||0}${f.note?.includes('🍼')?' 🍼':''}</td>
     <td><span class="badge ${f.attiva?'bg':'br'}">${f.attiva?'Attiva':'Inattiva'}</span></td>
     <td style="font-size:.75rem;color:var(--ink-light);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${f.note||'—'}</td>
+    <td><button class="btn btn-g btn-sm" onclick="event.stopPropagation();mostraQRFamiglia('${f.codice}','${f.nome_referente}')" title="Mostra QR">▣</button></td>
     <td><button class="btn btn-d btn-sm" onclick="event.stopPropagation();delFam('${f.id}')">🗑</button></td>
   </tr>`).join('');
 }
@@ -1380,18 +1572,304 @@ async function salvaModificaFamiglia(){
 }
 async function delFam(id){if(!confirm('Eliminare questa famiglia?'))return;await db('famiglie?id=eq.'+id,{method:'DELETE'});loadFam();}
 
-// ── STORICO ──
-async function loadStor(){
+
+// ── STORICO TABS ──
+function switchStorTab(t){
+  ['lista','mensile','annuale'].forEach(k=>{
+    document.getElementById('stor-'+k).style.display=k===t?'block':'none';
+    document.getElementById('stor-tab-'+k).classList.toggle('active',k===t);
+  });
+  if(t==='lista')loadStorLista();
+  // Precompila anno corrente
+  const anno=new Date().getFullYear();
+  if(document.getElementById('report-anno-m'))document.getElementById('report-anno-m').value=anno;
+  if(document.getElementById('report-anno-a'))document.getElementById('report-anno-a').value=anno;
+  // Precompila mese corrente
+  if(document.getElementById('report-mese'))document.getElementById('report-mese').value=new Date().getMonth()+1;
+}
+async function loadStorLista(){
   const data=await db('distribuzioni?order=created_at.desc');
   const tb=document.getElementById('tb-s');
   if(!data.length){tb.innerHTML='<tr><td colspan="4"><div class="empty"><div class="empty-e">📊</div><p>Nessuna distribuzione ancora</p></div></td></tr>';return;}
   tb.innerHTML=(await Promise.all(data.map(async d=>{
     const mov=await db('movimenti_magazzino?distribuzione_id=eq.'+d.id+'&tipo=eq.uscita');
-    const r=mov.slice(0,4).map(m=>`${m.prodotto_nome} (${m.quantita} conf.)`).join(', ')+(mov.length>4?' …':'')||'—';
+    const r=mov.slice(0,4).map(m=>`${m.prodotto_nome} (${m.quantita})`).join(', ')+(mov.length>4?' …':'')||'—';
     return `<tr><td><strong>${new Date(d.data_distribuzione).toLocaleDateString('it-IT')}</strong></td><td style="font-size:.76rem;color:var(--ink-light);max-width:260px">${r}</td><td><span class="badge ${d.stato==='completata'?'bg':'bk'}">${d.stato}</span></td><td style="font-size:.77rem;color:var(--ink-light)">${d.note||'—'}</td></tr>`;
   }))).join('');
 }
 
+// ── REPORT MENSILE ──
+async function generaReportMensile(){
+  const mese=parseInt(document.getElementById('report-mese').value);
+  const anno=parseInt(document.getElementById('report-anno-m').value);
+  if(!anno)return;
+  const nomeMese=['','Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'][mese];
+
+  // Filtra distribuzioni nel mese/anno
+  const tutte=await db('distribuzioni?stato=eq.completata&order=data_distribuzione.asc');
+  const distMese=tutte.filter(d=>{
+    const dt=new Date(d.data_distribuzione);
+    return dt.getMonth()+1===mese && dt.getFullYear()===anno;
+  });
+
+  document.getElementById('report-mensile-out').style.display='none';
+  document.getElementById('report-mensile-empty').style.display='none';
+
+  if(!distMese.length){document.getElementById('report-mensile-empty').style.display='block';return;}
+
+  // Carica movimenti per ogni distribuzione
+  let totProdotti={},totConfezioni=0;
+  for(const d of distMese){
+    const mov=await db('movimenti_magazzino?distribuzione_id=eq.'+d.id+'&tipo=eq.uscita');
+    mov.forEach(m=>{
+      if(!totProdotti[m.prodotto_nome])totProdotti[m.prodotto_nome]={qty:0,count:0};
+      totProdotti[m.prodotto_nome].qty+=m.quantita;
+      totProdotti[m.prodotto_nome].count++;
+      totConfezioni+=m.quantita;
+    });
+  }
+
+  // Stats cards
+  document.getElementById('report-mensile-stats').innerHTML=`
+    <div class="stat-card"><div class="stat-label">${nomeMese} ${anno}</div><div class="stat-value">${distMese.length}</div><div class="stat-sub">distribuzioni effettuate</div></div>
+    <div class="stat-card amb"><div class="stat-label">Confezioni totali</div><div class="stat-value">${totConfezioni}</div><div class="stat-sub">prodotti consegnati</div></div>`;
+
+  // Tabella prodotti
+  const sorted=Object.entries(totProdotti).sort((a,b)=>b[1].qty-a[1].qty);
+  document.getElementById('tb-report-mensile').innerHTML=sorted.map(([nome,d])=>
+    `<tr><td><strong>${nome}</strong></td><td><span class="badge bg">${d.qty} conf.</span></td><td style="color:var(--ink-light)">${d.count}</td></tr>`
+  ).join('');
+
+  document.getElementById('report-mensile-out').style.display='block';
+}
+
+// ── REPORT ANNUALE ──
+async function generaReportAnnuale(){
+  const anno=parseInt(document.getElementById('report-anno-a').value);
+  if(!anno)return;
+
+  const tutte=await db('distribuzioni?stato=eq.completata&order=data_distribuzione.asc');
+  const distAnno=tutte.filter(d=>new Date(d.data_distribuzione).getFullYear()===anno);
+
+  document.getElementById('report-annuale-out').style.display='none';
+  document.getElementById('report-annuale-empty').style.display='none';
+
+  if(!distAnno.length){document.getElementById('report-annuale-empty').style.display='block';return;}
+
+  let totProdotti={},totConfezioni=0,perMese={};
+  const nomeMesi=['','Gen','Feb','Mar','Apr','Mag','Giu','Lug','Ago','Set','Ott','Nov','Dic'];
+
+  for(const d of distAnno){
+    const mese=new Date(d.data_distribuzione).getMonth()+1;
+    if(!perMese[mese])perMese[mese]={count:0,confezioni:0};
+    perMese[mese].count++;
+    const mov=await db('movimenti_magazzino?distribuzione_id=eq.'+d.id+'&tipo=eq.uscita');
+    mov.forEach(m=>{
+      if(!totProdotti[m.prodotto_nome])totProdotti[m.prodotto_nome]=0;
+      totProdotti[m.prodotto_nome]+=m.quantita;
+      totConfezioni+=m.quantita;
+      perMese[mese].confezioni+=m.quantita;
+    });
+  }
+
+  // Stats
+  const famiglie=await db('famiglie?select=id&attiva=eq.true');
+  document.getElementById('report-annuale-stats').innerHTML=`
+    <div class="stat-card"><div class="stat-label">${anno} — Distribuzioni</div><div class="stat-value">${distAnno.length}</div><div class="stat-sub">totali nell'anno</div></div>
+    <div class="stat-card amb"><div class="stat-label">Confezioni consegnate</div><div class="stat-value">${totConfezioni}</div><div class="stat-sub">a ${famiglie.length} famiglie attive</div></div>`;
+
+  // Tabella mesi
+  document.getElementById('tb-report-mesi').innerHTML=Object.entries(perMese)
+    .sort((a,b)=>a[0]-b[0])
+    .map(([m,d])=>`<tr><td><strong>${nomeMesi[parseInt(m)]} ${anno}</strong></td><td><span class="badge bg">${d.count}</span></td><td style="color:var(--ink-light)">${d.confezioni} conf.</td></tr>`)
+    .join('');
+
+  // Top prodotti
+  const sorted=Object.entries(totProdotti).sort((a,b)=>b[1]-a[1]);
+  document.getElementById('tb-report-annuale').innerHTML=sorted.map(([nome,qty])=>{
+    const pct=totConfezioni>0?((qty/totConfezioni)*100).toFixed(1):0;
+    const bar=Math.round(pct/2);
+    return `<tr><td><strong>${nome}</strong><div style="background:var(--green-light);border-radius:4px;height:4px;margin-top:4px;width:100%"><div style="background:var(--green);height:4px;border-radius:4px;width:${bar*2}%"></div></div></td><td><span class="badge bg">${qty}</span></td><td style="color:var(--ink-light)">${pct}%</td></tr>`;
+  }).join('');
+
+  document.getElementById('report-annuale-out').style.display='block';
+}
+
+function stampaReport(tipo){window.print();}
+
+// ── CAMBIO PASSWORD ──
+async function cambiaPassword(){
+  const old_=document.getElementById('pwd-old').value;
+  const new_=document.getElementById('pwd-new').value;
+  const conf=document.getElementById('pwd-confirm').value;
+  const alertEl=document.getElementById('pwd-alert');
+
+  if(!old_||!new_||!conf){
+    alertEl.innerHTML='<div style="background:var(--red-light);color:var(--red);border:1px solid #f5c0c0;border-radius:9px;padding:9px 13px;font-size:.82rem">Compila tutti i campi</div>';return;
+  }
+  if(new_.length<6){
+    alertEl.innerHTML='<div style="background:var(--red-light);color:var(--red);border:1px solid #f5c0c0;border-radius:9px;padding:9px 13px;font-size:.82rem">La nuova password deve essere almeno 6 caratteri</div>';return;
+  }
+  if(new_!==conf){
+    alertEl.innerHTML='<div style="background:var(--red-light);color:var(--red);border:1px solid #f5c0c0;border-radius:9px;padding:9px 13px;font-size:.82rem">Le password non coincidono</div>';return;
+  }
+
+  // Verifica password attuale
+  const check=await db(`utenti?username=eq.${encodeURIComponent(sessione.username)}&password=eq.${encodeURIComponent(old_)}&limit=1`);
+  if(!check.length){
+    alertEl.innerHTML='<div style="background:var(--red-light);color:var(--red);border:1px solid #f5c0c0;border-radius:9px;padding:9px 13px;font-size:.82rem">Password attuale non corretta</div>';return;
+  }
+
+  // Aggiorna password
+  await db(`utenti?username=eq.${encodeURIComponent(sessione.username)}`,{method:'PATCH',body:JSON.stringify({password:new_})});
+
+  alertEl.innerHTML='<div style="background:var(--green-light);color:var(--green);border:1px solid var(--green-border);border-radius:9px;padding:9px 13px;font-size:.82rem">✅ Password aggiornata con successo!</div>';
+  document.getElementById('pwd-old').value='';
+  document.getElementById('pwd-new').value='';
+  document.getElementById('pwd-confirm').value='';
+  setTimeout(()=>alertEl.innerHTML='',4000);
+}
+// ── STORICO ──
+async function loadStor(){
+  switchStorTab('lista');
+}
+
+
+// ── QR CODE ──
+let currentQRCode=null;
+function mostraQRFamiglia(codice,nome){
+  document.getElementById('qr-modal-title').textContent='QR — '+codice;
+  document.getElementById('qr-label-text').textContent=nome+' ('+codice+')';
+  const wrap=document.getElementById('qr-canvas-wrap');
+  wrap.innerHTML='';
+  if(currentQRCode){try{currentQRCode.clear();}catch(e){}}
+  currentQRCode=new QRCode(wrap,{text:codice,width:200,height:200,colorDark:'#161C14',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.H});
+  openM('m-qr');
+}
+function stampaSingoloQR(){
+  const label=document.getElementById('qr-label-text').textContent;
+  const canv=document.getElementById('qr-canvas-wrap').querySelector('canvas');
+  if(!canv)return;
+  const w=window.open('','_blank','width=400,height=500');
+  w.document.write(`<html><head><title>QR ${label}</title><style>body{font-family:Arial,sans-serif;text-align:center;padding:30px;}h2{font-size:1.1rem;margin-bottom:16px;}img{border:1px solid #ddd;border-radius:8px;padding:8px;}</style></head><body><h2>${label}</h2><img src="${canv.toDataURL()}"><br><br><button onclick="window.print()">🖨 Stampa</button></body></html>`);
+  w.document.close();
+}
+
+// ── SCAN QR ──
+let scanStream=null,scanInterval=null;
+function initScan(){stopScan();}
+async function startScan(){
+  try{
+    scanStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});
+    const video=document.getElementById('scan-video');
+    video.srcObject=scanStream;
+    document.getElementById('btn-start-scan').style.display='none';
+    document.getElementById('btn-stop-scan').style.display='block';
+    video.onloadedmetadata=()=>{
+      video.play();
+      scanInterval=setInterval(()=>decodeScanFrame(video),300);
+    };
+  }catch(e){alert('Fotocamera non disponibile: '+e.message);}
+}
+function stopScan(){
+  if(scanStream){scanStream.getTracks().forEach(t=>t.stop());scanStream=null;}
+  if(scanInterval){clearInterval(scanInterval);scanInterval=null;}
+  document.getElementById('btn-start-scan').style.display='block';
+  document.getElementById('btn-stop-scan').style.display='none';
+}
+function decodeScanFrame(video){
+  if(!video.videoWidth)return;
+  const canvas=document.getElementById('scan-canvas');
+  canvas.width=video.videoWidth;canvas.height=video.videoHeight;
+  const ctx=canvas.getContext('2d');
+  ctx.drawImage(video,0,0);
+  const img=ctx.getImageData(0,0,canvas.width,canvas.height);
+  const code=jsQR(img.data,img.width,img.height);
+  if(code&&code.data){
+    stopScan();
+    cercaFamigliaPerScan(code.data.trim());
+  }
+}
+async function scanManual(val){
+  if(val.length>=3)cercaFamigliaPerScan(val.trim().toUpperCase());
+}
+async function cercaFamigliaPerScan(codice){
+  const fams=await db(`famiglie?codice=ilike.${encodeURIComponent(codice)}&limit=1`);
+  if(!fams.length){document.getElementById('scan-result').style.display='none';document.getElementById('scan-placeholder').innerHTML='<div class="empty"><div class="empty-e">❓</div><p>Famiglia non trovata: <strong>'+codice+'</strong></p></div>';document.getElementById('scan-placeholder').style.display='flex';return;}
+  const fam=fams[0];
+  document.getElementById('scan-nome').textContent=fam.nome_referente;
+  document.getElementById('scan-codice').textContent=fam.codice;
+  document.getElementById('scan-comp').textContent=fam.num_componenti;
+  document.getElementById('scan-bam').textContent=fam.num_bambini||0;
+  document.getElementById('scan-neo').textContent=fam.note?.includes('🍼')?'🍼':'0';
+  const noteEl=document.getElementById('scan-note');
+  if(fam.note){noteEl.style.display='block';noteEl.textContent='📝 '+fam.note;}else{noteEl.style.display='none';}
+  // Carica ultima distribuzione
+  const det=await db(`distribuzione_dettagli?famiglia_id=eq.${fam.id}&order=created_at.desc&limit=30`);
+  const prodEl=document.getElementById('scan-prodotti');
+  if(!det.length){prodEl.innerHTML='<div style="color:var(--ink-light);font-size:.82rem;padding:8px 0">Nessuna distribuzione registrata</div>';}
+  else{
+    // Prendi solo l'ultima distribuzione
+    const ids=[...new Set(det.map(d=>d.distribuzione_id).filter(Boolean))];
+    const ultimi=ids.length?det.filter(d=>d.distribuzione_id===ids[0]):det.slice(0,10);
+    prodEl.innerHTML=ultimi.map(p=>`<div class="scan-prod-row"><span style="font-weight:500">${p.prodotto_nome}</span><span class="badge bg">${p.quantita} ${p.unita}</span></div>`).join('');
+  }
+  document.getElementById('scan-placeholder').style.display='none';
+  document.getElementById('scan-result').style.display='block';
+}
+
+// ── PDF OPERATORE ──
+async function generaPDF(){
+  if(!famD.length){await loadFam();}
+  const dist=await db('distribuzioni?stato=eq.completata&order=created_at.desc&limit=1');
+  const distInfo=dist[0];
+  const dataDistrib=distInfo?new Date(distInfo.data_distribuzione).toLocaleDateString('it-IT'):'—';
+  // Carica dettagli per tutte le famiglie attive
+  const famiglie=famD.filter(f=>f.attiva);
+  const pages=[];
+  for(const fam of famiglie){
+    let prodotti=[];
+    if(distInfo){
+      prodotti=await db(`distribuzione_dettagli?famiglia_id=eq.${fam.id}&distribuzione_id=eq.${distInfo.id}`);
+    }
+    // genera QR come data URL
+    const qrDiv=document.createElement('div');
+    qrDiv.style.cssText='position:fixed;left:-9999px;top:-9999px;background:#fff;padding:8px';
+    document.body.appendChild(qrDiv);
+    const qr=new QRCode(qrDiv,{text:fam.codice,width:100,height:100,colorDark:'#161C14',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.H});
+    await new Promise(r=>setTimeout(r,200));
+    const canv=qrDiv.querySelector('canvas');
+    const qrDataUrl=canv?canv.toDataURL():'';
+    document.body.removeChild(qrDiv);
+
+    pages.push({fam,prodotti,qrDataUrl,dataDistrib});
+  }
+
+  const html2=pages.map(({fam,prodotti,qrDataUrl,dataDistrib})=>`
+    <div class="pdf-page">
+      <div class="pdf-header">
+        <div class="pdf-header-info">
+          <h2>${fam.nome_referente}</h2>
+          <p>Codice: <strong>${fam.codice}</strong> &nbsp;·&nbsp; Componenti: <strong>${fam.num_componenti}</strong> &nbsp;·&nbsp; Bambini: <strong>${fam.num_bambini||0}</strong>${fam.note?.includes('🍼')?' &nbsp;·&nbsp; 🍼 Neonati':''}</p>
+          ${fam.note&&!fam.note.includes('🍼')?`<p style="margin-top:4px;color:#c97d2a;font-size:.78rem">📝 ${fam.note}</p>`:''}
+          <p style="margin-top:6px;font-size:.75rem;color:#8a9488">Distribuzione del: <strong>${dataDistrib}</strong></p>
+        </div>
+        ${qrDataUrl?`<div style="text-align:center"><img src="${qrDataUrl}" style="width:90px;height:90px;border:1px solid #ddd;border-radius:6px;padding:4px"><div style="font-size:.65rem;color:#8a9488;margin-top:3px">${fam.codice}</div></div>`:''}
+      </div>
+      ${prodotti.length?`
+        <table class="pdf-prod-table">
+          <thead><tr><th>Prodotto</th><th>Confezioni</th><th>Unità</th><th>✓ Consegnato</th></tr></thead>
+          <tbody>${prodotti.map(p=>`<tr><td>${p.prodotto_nome}</td><td>${p.quantita}</td><td>${p.unita}</td><td style="text-align:center;font-size:1.2rem">☐</td></tr>`).join('')}</tbody>
+        </table>`:`<p style="color:#8a9488;font-size:.82rem;margin-top:10px;font-style:italic">Nessun prodotto registrato per questa distribuzione. Usa la proposta AI per generare la distribuzione per famiglia.</p>`}
+      <div class="pdf-footer"><span>Centro d'Ascolto — Scheda distribuzione</span><span>Firma operatore: ________________</span></div>
+    </div>`).join('');
+
+  const pdfEl=document.getElementById('pdf-pages');
+  pdfEl.innerHTML=html2;
+  document.getElementById('pdf-content').style.display='block';
+  window.print();
+  setTimeout(()=>document.getElementById('pdf-content').style.display='none',1000);
+}
 // ── HELPERS ──
 function openM(id){document.getElementById(id).classList.add('open');}
 function closeM(id){document.getElementById(id).classList.remove('open');}
