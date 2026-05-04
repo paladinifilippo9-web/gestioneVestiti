@@ -564,7 +564,8 @@ textarea{resize:vertical;min-height:75px;}
     </div>
 
     <!-- SEZIONE 2: CARICA EXCEL -->
-    <div>
+    <div style="border-top:2px solid var(--border);padding-top:28px;margin-top:8px;position:relative">
+      <div style="position:absolute;top:-13px;left:50%;transform:translateX(-50%);background:var(--sand);padding:0 14px;font-size:.72rem;font-weight:700;color:var(--ink-light);text-transform:uppercase;letter-spacing:.1em;white-space:nowrap">oppure carica manualmente</div>
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
         <div style="font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:600">📊 Carica Excel distribuzione</div>
         <div style="height:1px;flex:1;background:var(--border)"></div>
@@ -619,6 +620,7 @@ textarea{resize:vertical;min-height:75px;}
         <button class="btn btn-g btn-sm" onclick="filtroRichieste('nuova')">🔴 Nuove</button>
         <button class="btn btn-g btn-sm" onclick="filtroRichieste('letta')">🟡 Lette</button>
         <button class="btn btn-g btn-sm" onclick="filtroRichieste('soddisfatta')">🟢 Soddisfatte</button>
+        <button class="btn btn-g btn-sm" onclick="filtroRichieste('archiviate')" style="opacity:.6">📁 Archiviate</button>
       </div>
       <div id="richieste-list"></div>
     </div>
@@ -760,7 +762,7 @@ const SB='https://nfwzorbnlrudtpbnlmpt.supabase.co';
 const KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5md3pvcmJubHJ1ZHRwYm5sbXB0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4MTU2NjgsImV4cCI6MjA5MjM5MTY2OH0.S59qMU1vfQtSYVIe8P0lfz6hp4bXKnhJRCPKXqliAlo';
 const PROXY='https://nfwzorbnlrudtpbnlmpt.supabase.co/functions/v1/ai-proxy';
 
-let magD=[],famD=[],aiIt=[],xlRw=[],xlMagP=[],b64=null,propostaRighe=[],tutteRichieste=[];
+let magD=[],famD=[],aiIt=[],xlRw=[],xlMagP=[],b64=null,propostaRighe=[],tutteRichieste=[],tutteRichiesteArchivio=[];
 let sessione=null,nuoviFamiliari=[],tipoSel='adulto',reqTabAttivo='famiglia';
 
 async function db(p,o={}){
@@ -798,7 +800,7 @@ async function mostraVistaFamiglia(){
 async function caricaRichiesteFamiglia(){
   const rr=await db(`richieste_famiglie?famiglia_id=eq.${sessione.famiglia_id}&order=created_at.desc`);
   const el=document.getElementById('fam-richieste-list');
-  const lbl={nuova:'🔴 Nuova',letta:'🟡 Letta',soddisfatta:'🟢 Soddisfatta',non_disponibile:'⚫ Non disp.'};
+  const lbl={nuova:'🔴 Nuova',letta:'🟡 Letta',soddisfatta:'🟢 Soddisfatta',non_disponibile:'⚫ Non disp.',archiviate:'📁 Archiviata'};
   if(!rr.length){el.innerHTML='<div class="empty"><div class="empty-e">💬</div><p>Nessuna richiesta ancora</p></div>';return;}
   el.innerHTML=rr.map(r=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border)"><div><div style="font-weight:600;font-size:.84rem">${r.prodotto}${r.quantita?' — '+r.quantita+' '+(r.unita||''):''}</div><div style="font-size:.71rem;color:var(--ink-light)">${new Date(r.created_at).toLocaleDateString('it-IT')}${r.note?' · '+r.note:''}</div></div><span class="badge bk">${lbl[r.stato]||r.stato}</span></div>`).join('');
 }
@@ -1054,7 +1056,10 @@ async function confDist(){
       await db('movimenti_magazzino',{method:'POST',body:JSON.stringify({prodotto_nome:r.nome,tipo:'uscita',quantita:r.quantita,unita:'conf',distribuzione_id:dist?.id||null})});
     }
   }
-  al2('da','✅ Distribuzione completata!','o');setTimeout(resetXL,2000);btn.disabled=false;
+  // Archivia tutte le richieste attive (nuova/letta) → archiviate
+  await db("richieste_famiglie?stato=in.(nuova,letta)",{method:'PATCH',body:JSON.stringify({stato:'archiviate'})});
+  al2('da','✅ Distribuzione completata! Le richieste attive sono state archiviate.','o');
+  setTimeout(resetXL,2000);btn.disabled=false;
 }
 function resetXL(){xlRw=[];document.getElementById('xlo').style.display='none';document.getElementById('xph').style.display='flex';document.getElementById('xl-inp').value='';}
 
@@ -1071,7 +1076,8 @@ function switchReqTab(t){
 
 // ── RICHIESTE ──
 async function loadRichieste(){
-  tutteRichieste=await db('richieste_famiglie?order=created_at.desc');
+  tutteRichieste=await db('richieste_famiglie?stato=neq.archiviate&order=created_at.desc');
+  tutteRichiesteArchivio=await db('richieste_famiglie?stato=eq.archiviate&order=created_at.desc&limit=50');
   if(reqTabAttivo==='famiglia')renRichiesteFamiglie();
   else renRichiesteTutte(tutteRichieste);
   caricaBadgeRichieste();
@@ -1087,8 +1093,8 @@ function renRichiesteFamiglie(){
     if(!gruppi[k])gruppi[k]=[];
     gruppi[k].push(r);
   });
-  const lbl={nuova:'🔴 Nuova',letta:'🟡 Letta',soddisfatta:'🟢 Soddisfatta',non_disponibile:'⚫ Non disp.'};
-  const cb={nuova:'br',letta:'ba',soddisfatta:'bg',non_disponibile:'bk'};
+  const lbl={nuova:'🔴 Nuova',letta:'🟡 Letta',soddisfatta:'🟢 Soddisfatta',non_disponibile:'⚫ Non disp.',archiviate:'📁 Archiviata'};
+  const cb={nuova:'br',letta:'ba',soddisfatta:'bg',non_disponibile:'bk',archiviate:'bk'};
   el.innerHTML=Object.entries(gruppi).map(([cod,richieste])=>{
     const nuove=richieste.filter(r=>r.stato==='nuova').length;
     const uid='fam-'+cod.replace(/[^a-z0-9]/gi,'');
@@ -1119,6 +1125,7 @@ function renRichiesteFamiglie(){
                   <option value="letta" ${r.stato==='letta'?'selected':''}>🟡 Letta</option>
                   <option value="soddisfatta" ${r.stato==='soddisfatta'?'selected':''}>🟢 Soddisfatta</option>
                   <option value="non_disponibile" ${r.stato==='non_disponibile'?'selected':''}>⚫ Non disp.</option>
+                  <option value="archiviate" ${r.stato==='archiviate'?'selected':''}>📁 Archiviata</option>
                 </select>
                 <button class="btn btn-d btn-sm" onclick="delRichiesta('${r.id}')">🗑</button>
               </div>
@@ -1136,12 +1143,12 @@ function toggleFamReq(uid){
   if(chev)chev.textContent=open?'▲':'▼';
 }
 
-function filtroRichieste(s){renRichiesteTutte(s==='tutte'?tutteRichieste:tutteRichieste.filter(r=>r.stato===s));}
+function filtroRichieste(s){if(s==='archiviate')renRichiesteTutte(tutteRichiesteArchivio);else renRichiesteTutte(s==='tutte'?tutteRichieste:tutteRichieste.filter(r=>r.stato===s));}
 function renRichiesteTutte(data){
   const el=document.getElementById('richieste-list');
   if(!data.length){el.innerHTML='<div class="empty"><div class="empty-e">💬</div><p>Nessuna richiesta</p></div>';return;}
-  const lbl={nuova:'🔴 Nuova',letta:'🟡 Letta',soddisfatta:'🟢 Soddisfatta',non_disponibile:'⚫ Non disp.'};
-  const cb={nuova:'br',letta:'ba',soddisfatta:'bg',non_disponibile:'bk'};
+  const lbl={nuova:'🔴 Nuova',letta:'🟡 Letta',soddisfatta:'🟢 Soddisfatta',non_disponibile:'⚫ Non disp.',archiviate:'📁 Archiviata'};
+  const cb={nuova:'br',letta:'ba',soddisfatta:'bg',non_disponibile:'bk',archiviate:'bk'};
   el.innerHTML=data.map(r=>`
     <div class="richiesta-card">
       <div class="richiesta-fam">${(r.famiglia_codice||'?').slice(-3)}</div>
@@ -1156,6 +1163,7 @@ function renRichiesteTutte(data){
           <option value="letta" ${r.stato==='letta'?'selected':''}>🟡 Letta</option>
           <option value="soddisfatta" ${r.stato==='soddisfatta'?'selected':''}>🟢 Soddisfatta</option>
           <option value="non_disponibile" ${r.stato==='non_disponibile'?'selected':''}>⚫ Non disp.</option>
+          <option value="archiviate" ${r.stato==='archiviate'?'selected':''}>📁 Archiviata</option>
         </select>
         <button class="btn btn-d btn-sm" onclick="delRichiesta('${r.id}')">🗑</button>
       </div>
@@ -1276,7 +1284,9 @@ function renFam(data){
   </tr>`).join('');
 }
 function ffam(){const q=document.getElementById('sf').value.toLowerCase();renFam(famD.filter(f=>f.nome_referente.toLowerCase().includes(q)||f.codice.toLowerCase().includes(q)));}
+let detailFamId=null;
 async function apriDettaglioFamiglia(id){
+  detailFamId=id;
   const fam=famD.find(f=>f.id===id);if(!fam)return;
   document.getElementById('detail-title').textContent=fam.codice+' — '+fam.nome_referente;
   document.getElementById('detail-body').innerHTML='<div style="text-align:center;padding:20px"><div class="spin"></div></div>';
@@ -1286,17 +1296,87 @@ async function apriDettaglioFamiglia(id){
   if(det.length){const ids=[...new Set(det.map(d=>d.distribuzione_id).filter(Boolean))];if(ids.length){const[ud]=await db(`distribuzioni?id=eq.${ids[0]}`);ultimaData=ud?new Date(ud.data_distribuzione).toLocaleDateString('it-IT'):null;ultimiProd=det.filter(d=>d.distribuzione_id===ids[0]);}}
   const haNeonati=fam.note?.includes('🍼');
   document.getElementById('detail-body').innerHTML=`
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px">
-      <div style="background:var(--sand);border-radius:10px;padding:12px;text-align:center"><div style="font-size:.62rem;color:var(--ink-light);text-transform:uppercase;font-weight:600">Componenti</div><div style="font-family:'Playfair Display',serif;font-size:2.2rem;margin:3px 0">${fam.num_componenti}</div></div>
-      <div style="background:var(--purple-light);border:1px solid var(--purple-border);border-radius:10px;padding:12px;text-align:center"><div style="font-size:.62rem;color:var(--purple);text-transform:uppercase;font-weight:600">Bambini</div><div style="font-family:'Playfair Display',serif;font-size:2.2rem;color:var(--purple);margin:3px 0">${fam.num_bambini||0}</div></div>
-      <div style="background:var(--amber-light);border:1px solid #f5d9a8;border-radius:10px;padding:12px;text-align:center"><div style="font-size:.62rem;color:var(--amber);text-transform:uppercase;font-weight:600">Neonati</div><div style="font-family:'Playfair Display',serif;font-size:2.2rem;color:var(--amber);margin:3px 0">${haNeonati?'🍼':'—'}</div></div>
+    <!-- TABS dentro il modal -->
+    <div style="display:flex;gap:4px;background:var(--sand-dark);padding:4px;border-radius:10px;width:fit-content;margin-bottom:18px">
+      <div id="dtab-info" style="padding:7px 16px;border-radius:7px;cursor:pointer;font-size:.81rem;font-weight:500;background:var(--white);color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.06)" onclick="switchDetailTab('info')">📋 Info</div>
+      <div id="dtab-modifica" style="padding:7px 16px;border-radius:7px;cursor:pointer;font-size:.81rem;font-weight:500;color:var(--ink-mid)" onclick="switchDetailTab('modifica')">✏️ Modifica</div>
     </div>
-    ${fam.note?`<div style="background:var(--amber-light);border:1px solid #f5d9a8;border-radius:9px;padding:11px 13px;font-size:.82rem;color:var(--amber);margin-bottom:15px">📝 ${fam.note}</div>`:''}
-    <div style="font-size:.67rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-light);margin-bottom:8px">📦 Ultima distribuzione ${ultimaData?'('+ultimaData+')':'— nessuna'}</div>
-    ${ultimiProd.length?`<div style="background:var(--green-light);border:1px solid var(--green-border);border-radius:10px;padding:12px;margin-bottom:15px">${ultimiProd.map(p=>`<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(26,102,65,.1)"><span style="font-weight:500">${p.prodotto_nome}</span><span class="badge bg">${p.quantita} ${p.unita}</span></div>`).join('')}</div>`:'<div style="color:var(--ink-light);font-size:.82rem;margin-bottom:15px">Nessuna distribuzione registrata.</div>'}
-    <div style="font-size:.67rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-light);margin-bottom:8px">💬 Richieste recenti</div>
-    ${richieste.length?richieste.map(r=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border)"><span style="font-size:.83rem"><strong>${r.prodotto}</strong>${r.quantita?' — '+r.quantita+' '+(r.unita||''):''}</span><span class="badge ${r.stato==='soddisfatta'?'bg':r.stato==='nuova'?'br':'ba'}">${r.stato}</span></div>`).join(''):'<div style="color:var(--ink-light);font-size:.82rem">Nessuna richiesta</div>'}
+
+    <!-- INFO -->
+    <div id="dpanel-info">
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px">
+        <div style="background:var(--sand);border-radius:10px;padding:12px;text-align:center"><div style="font-size:.62rem;color:var(--ink-light);text-transform:uppercase;font-weight:600">Componenti</div><div style="font-family:'Playfair Display',serif;font-size:2.2rem;margin:3px 0">${fam.num_componenti}</div></div>
+        <div style="background:var(--purple-light);border:1px solid var(--purple-border);border-radius:10px;padding:12px;text-align:center"><div style="font-size:.62rem;color:var(--purple);text-transform:uppercase;font-weight:600">Bambini</div><div style="font-family:'Playfair Display',serif;font-size:2.2rem;color:var(--purple);margin:3px 0">${fam.num_bambini||0}</div></div>
+        <div style="background:var(--amber-light);border:1px solid #f5d9a8;border-radius:10px;padding:12px;text-align:center"><div style="font-size:.62rem;color:var(--amber);text-transform:uppercase;font-weight:600">Neonati</div><div style="font-family:'Playfair Display',serif;font-size:2.2rem;color:var(--amber);margin:3px 0">${haNeonati?'🍼':'—'}</div></div>
+      </div>
+      ${fam.note?`<div style="background:var(--amber-light);border:1px solid #f5d9a8;border-radius:9px;padding:11px 13px;font-size:.82rem;color:var(--amber);margin-bottom:15px">📝 ${fam.note}</div>`:''}
+      <div style="font-size:.67rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-light);margin-bottom:8px">📦 Ultima distribuzione ${ultimaData?'('+ultimaData+')':'— nessuna'}</div>
+      ${ultimiProd.length?`<div style="background:var(--green-light);border:1px solid var(--green-border);border-radius:10px;padding:12px;margin-bottom:15px">${ultimiProd.map(p=>`<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(26,102,65,.1)"><span style="font-weight:500">${p.prodotto_nome}</span><span class="badge bg">${p.quantita} ${p.unita}</span></div>`).join('')}</div>`:'<div style="color:var(--ink-light);font-size:.82rem;margin-bottom:15px">Nessuna distribuzione registrata.</div>'}
+      <div style="font-size:.67rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-light);margin-bottom:8px">💬 Richieste recenti</div>
+      ${richieste.length?richieste.map(r=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border)"><span style="font-size:.83rem"><strong>${r.prodotto}</strong>${r.quantita?' — '+r.quantita+' '+(r.unita||''):''}</span><span class="badge ${r.stato==='soddisfatta'?'bg':r.stato==='nuova'?'br':'ba'}">${r.stato}</span></div>`).join(''):'<div style="color:var(--ink-light);font-size:.82rem">Nessuna richiesta</div>'}
+    </div>
+
+    <!-- MODIFICA -->
+    <div id="dpanel-modifica" style="display:none">
+      <div style="margin-bottom:13px">
+        <label style="display:block;font-size:.75rem;font-weight:600;margin-bottom:5px;color:var(--ink-mid)">Nome referente</label>
+        <input id="edit-nome" value="${fam.nome_referente}" style="width:100%;padding:10px 13px;border:1.5px solid var(--border);border-radius:9px;font-family:Plus Jakarta Sans,sans-serif;font-size:.9rem">
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:13px">
+        <div>
+          <label style="display:block;font-size:.75rem;font-weight:600;margin-bottom:5px;color:var(--ink-mid)">Componenti totali</label>
+          <input id="edit-comp" type="number" min="1" value="${fam.num_componenti}" style="width:100%;padding:10px 13px;border:1.5px solid var(--border);border-radius:9px;font-family:Plus Jakarta Sans,sans-serif;font-size:.9rem">
+        </div>
+        <div>
+          <label style="display:block;font-size:.75rem;font-weight:600;margin-bottom:5px;color:var(--ink-mid)">Di cui bambini/neonati</label>
+          <input id="edit-bam" type="number" min="0" value="${fam.num_bambini||0}" style="width:100%;padding:10px 13px;border:1.5px solid var(--border);border-radius:9px;font-family:Plus Jakarta Sans,sans-serif;font-size:.9rem">
+        </div>
+      </div>
+      <div style="margin-bottom:13px">
+        <label style="display:block;font-size:.75rem;font-weight:600;margin-bottom:5px;color:var(--ink-mid)">Note / esigenze</label>
+        <textarea id="edit-note" style="width:100%;padding:10px 13px;border:1.5px solid var(--border);border-radius:9px;font-family:Plus Jakarta Sans,sans-serif;font-size:.9rem;min-height:70px;resize:vertical">${fam.note||''}</textarea>
+      </div>
+      <div style="margin-bottom:16px">
+        <label style="display:block;font-size:.75rem;font-weight:600;margin-bottom:8px;color:var(--ink-mid)">Stato famiglia</label>
+        <div style="display:flex;gap:8px">
+          <div id="stato-attiva" onclick="selStato(true)" style="flex:1;padding:10px;border-radius:9px;text-align:center;cursor:pointer;border:2px solid ${fam.attiva?'var(--green)':'var(--border)'};background:${fam.attiva?'var(--green-light)':'var(--white)'};font-weight:600;font-size:.84rem;color:${fam.attiva?'var(--green)':'var(--ink-mid)'}">✅ Attiva</div>
+          <div id="stato-inattiva" onclick="selStato(false)" style="flex:1;padding:10px;border-radius:9px;text-align:center;cursor:pointer;border:2px solid ${!fam.attiva?'var(--red)':'var(--border)'};background:${!fam.attiva?'var(--red-light)':'var(--white)'};font-weight:600;font-size:.84rem;color:${!fam.attiva?'var(--red)':'var(--ink-mid)'}">⏸ Inattiva</div>
+        </div>
+      </div>
+      <div id="edit-alert" style="margin-bottom:10px"></div>
+      <button onclick="salvaModificaFamiglia()" style="width:100%;padding:12px;background:var(--green);color:#fff;border:none;border-radius:9px;font-family:Plus Jakarta Sans,sans-serif;font-weight:700;font-size:.9rem;cursor:pointer">💾 Salva modifiche</button>
+    </div>
   `;
+  // salva stato corrente per il toggle
+  window._editStatoAttiva = fam.attiva;
+}
+
+function switchDetailTab(t){
+  document.getElementById('dpanel-info').style.display=t==='info'?'block':'none';
+  document.getElementById('dpanel-modifica').style.display=t==='modifica'?'block':'none';
+  const base='padding:7px 16px;border-radius:7px;cursor:pointer;font-size:.81rem;font-weight:500;';
+  document.getElementById('dtab-info').style.cssText=base+(t==='info'?'background:var(--white);color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.06)':'color:var(--ink-mid)');
+  document.getElementById('dtab-modifica').style.cssText=base+(t==='modifica'?'background:var(--white);color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.06)':'color:var(--ink-mid)');
+}
+function selStato(attiva){
+  window._editStatoAttiva=attiva;
+  document.getElementById('stato-attiva').style.cssText=`flex:1;padding:10px;border-radius:9px;text-align:center;cursor:pointer;border:2px solid ${attiva?'var(--green)':'var(--border)'};background:${attiva?'var(--green-light)':'var(--white)'};font-weight:600;font-size:.84rem;color:${attiva?'var(--green)':'var(--ink-mid)'}`;
+  document.getElementById('stato-inattiva').style.cssText=`flex:1;padding:10px;border-radius:9px;text-align:center;cursor:pointer;border:2px solid ${!attiva?'var(--red)':'var(--border)'};background:${!attiva?'var(--red-light)':'var(--white)'};font-weight:600;font-size:.84rem;color:${!attiva?'var(--red)':'var(--ink-mid)'}`;
+}
+async function salvaModificaFamiglia(){
+  if(!detailFamId)return;
+  const nome=document.getElementById('edit-nome').value.trim();
+  const comp=parseInt(document.getElementById('edit-comp').value);
+  const bam=parseInt(document.getElementById('edit-bam').value)||0;
+  if(!nome||!comp){const el=document.getElementById('edit-alert');el.innerHTML='<div style="background:var(--red-light);color:var(--red);border:1px solid #f5c0c0;border-radius:9px;padding:9px 13px;font-size:.82rem">Compila nome e componenti</div>';return;}
+  const note=document.getElementById('edit-note').value.trim()||null;
+  await db('famiglie?id=eq.'+detailFamId,{method:'PATCH',body:JSON.stringify({nome_referente:nome,num_componenti:comp,num_bambini:bam,attiva:window._editStatoAttiva,note})});
+  const el=document.getElementById('edit-alert');
+  el.innerHTML='<div style="background:var(--green-light);color:var(--green);border:1px solid var(--green-border);border-radius:9px;padding:9px 13px;font-size:.82rem">✅ Modifiche salvate!</div>';
+  // aggiorna famD localmente
+  const idx=famD.findIndex(f=>f.id===detailFamId);
+  if(idx>=0){famD[idx]={...famD[idx],nome_referente:nome,num_componenti:comp,num_bambini:bam,attiva:window._editStatoAttiva,note};}
+  setTimeout(()=>{closeM('m-fam-detail');loadFam();},1200);
 }
 async function delFam(id){if(!confirm('Eliminare questa famiglia?'))return;await db('famiglie?id=eq.'+id,{method:'DELETE'});loadFam();}
 
