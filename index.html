@@ -374,7 +374,6 @@ textarea{resize:vertical;min-height:75px;}
     <div class="nav-section">Operazioni</div>
     <div class="nav-item" onclick="go('carica-ai')"><div class="nav-icon">🤖</div>Carica con AI</div>
     <div class="nav-item" onclick="go('distribuzione')"><div class="nav-icon">📋</div>Distribuzione</div>
-    <div class="nav-item" onclick="go('proposta-ai')"><div class="nav-icon">✨</div>Proposta AI</div>
     <div class="nav-section">Famiglie</div>
     <div class="nav-item" onclick="go('richieste')"><div class="nav-icon">💬</div>Richieste<span class="nav-badge" id="badge-richieste" style="display:none">0</span></div>
     <div class="nav-item" onclick="go('famiglie')"><div class="nav-icon">👥</div>Famiglie</div>
@@ -519,71 +518,82 @@ textarea{resize:vertical;min-height:75px;}
 
   <!-- DISTRIBUZIONE -->
   <div class="page" id="page-distribuzione">
-    <div class="page-header"><div><h2>Distribuzione</h2><p>Carica Excel → magazzino aggiornato in automatico</p></div></div>
-    <div class="two-col">
-      <div class="card"><div class="card-body">
-        <div class="upload-zone" onclick="document.getElementById('xl-inp').click()">
-          <div class="upload-icon">📊</div>
-          <h4><strong>Clicca</strong> per caricare Excel</h4>
-          <p>Colonne: Prodotto | N° confezioni | Unità</p>
-        </div>
-        <input type="file" id="xl-inp" accept=".xlsx,.xls,.csv" style="display:none" onchange="loadXL(event)">
-        <div class="fg" style="margin-top:14px"><label>Note (opzionale)</label><textarea id="dn" placeholder="Es. Distribuzione 03/05/2026"></textarea></div>
-      </div></div>
-      <div>
-        <div id="xlo" style="display:none"><div class="card">
-          <div class="card-header"><span class="card-title">Anteprima</span></div>
-          <div class="table-wrap" style="max-height:280px;overflow-y:auto">
-            <table><thead><tr><th>Prodotto</th><th>Confezioni</th><th>Unità</th><th>Stato</th></tr></thead><tbody id="tb-x"></tbody></table>
+    <div class="page-header"><div><h2>Distribuzione</h2><p>Carica Excel o genera una proposta automatica con AI</p></div></div>
+
+    <!-- SEZIONE 1: PROPOSTA AI -->
+    <div style="margin-bottom:28px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+        <div style="font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:600">✨ Genera proposta con AI</div>
+        <div style="height:1px;flex:1;background:var(--border)"></div>
+      </div>
+      <div class="two-col">
+        <div class="card"><div class="card-body">
+          <p style="font-size:.82rem;color:var(--ink-mid);margin-bottom:14px;line-height:1.6">L'AI legge lo storico, controlla il magazzino, considera le richieste delle famiglie e genera un file Excel pronto — in confezioni reali (es. 2 bottiglie da 1L, non 2L).</p>
+          <div class="step-list">
+            <div class="step"><div class="step-num">1</div><div class="step-text"><strong>Storico + magazzino</strong>Proporziona in base a distribuzioni passate e scorte disponibili.</div></div>
+            <div class="step"><div class="step-num">2</div><div class="step-text"><strong>Famiglie + richieste</strong>Più componenti = più prodotti. Le richieste vengono soddisfatte se possibile.</div></div>
+            <div class="step"><div class="step-num">3</div><div class="step-text"><strong>Excel pronto</strong>Scarichi, rivedi e carichi qui sotto per confermare.</div></div>
           </div>
-          <div style="padding:13px 16px;display:flex;gap:9px;border-top:1px solid var(--border)">
-            <button class="btn btn-p" style="flex:1" id="bcd" onclick="confDist()">✅ Conferma</button>
-            <button class="btn btn-g" onclick="resetXL()">Annulla</button>
-          </div>
-          <div id="da" style="padding:0 16px 12px"></div>
+          <button class="btn btn-purple wfull" id="btn-proposta" onclick="generaProposta()">✨ Genera proposta</button>
         </div></div>
-        <div id="xph" class="card" style="min-height:180px;display:flex;align-items:center;justify-content:center">
-          <div class="empty"><div class="empty-e">📋</div><p>Carica l'Excel</p></div>
+        <div>
+          <div id="prop-spin" style="display:none;text-align:center;padding:36px">
+            <div class="spin spin-p" style="width:32px;height:32px;margin:0 auto 12px"></div>
+            <p style="font-weight:600;margin-bottom:4px">Analisi in corso...</p>
+            <p style="font-size:.77rem;color:var(--ink-light)">Storico + richieste + confezioni magazzino</p>
+          </div>
+          <div id="prop-out" style="display:none">
+            <div class="proposta-box">
+              <div class="proposta-title">✨ Proposta generata</div>
+              <div class="proposta-info" id="prop-info"></div>
+              <div class="table-wrap" style="max-height:260px;overflow-y:auto;border-radius:9px;border:1px solid var(--purple-border);margin-bottom:13px">
+                <table><thead><tr><th>Famiglia</th><th>Prodotto</th><th>Conf.</th><th>Totale</th><th></th></tr></thead>
+                <tbody id="tb-prop"></tbody></table>
+              </div>
+              <div class="row-gap">
+                <button class="btn btn-purple" style="flex:1" onclick="scaricaPropostaXL()">⬇️ Scarica Excel</button>
+                <button class="btn btn-g" onclick="resetProposta()">Rigenera</button>
+              </div>
+            </div>
+          </div>
+          <div id="prop-ph" class="card" style="min-height:200px;display:flex;align-items:center;justify-content:center">
+            <div class="empty"><div class="empty-e">✨</div><p>Clicca "Genera proposta" per iniziare</p></div>
+          </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- PROPOSTA AI -->
-  <div class="page" id="page-proposta-ai">
-    <div class="page-header"><div><h2>Proposta distribuzione ✨</h2><p>AI analizza storico, magazzino e richieste — risponde in confezioni reali</p></div></div>
-    <div class="two-col">
-      <div class="card"><div class="card-body">
-        <div class="step-list">
-          <div class="step"><div class="step-num">1</div><div class="step-text"><strong>Legge lo storico</strong>Analizza le ultime distribuzioni per capire le proporzioni tipiche.</div></div>
-          <div class="step"><div class="step-num">2</div><div class="step-text"><strong>Considera le famiglie</strong>Componenti, bambini, neonati e richieste attive.</div></div>
-          <div class="step"><div class="step-num">3</div><div class="step-text"><strong>Distribuisce per confezioni</strong>Es. "2 bottiglie da 1L + 1 da 0.5L" invece di "2.5L".</div></div>
-          <div class="step"><div class="step-num">4</div><div class="step-text"><strong>Genera l'Excel</strong>Pronto da rivedere e caricare nella sezione Distribuzione.</div></div>
-        </div>
-        <button class="btn btn-purple wfull" id="btn-proposta" onclick="generaProposta()">✨ Genera proposta con AI</button>
-      </div></div>
-      <div>
-        <div id="prop-spin" style="display:none;text-align:center;padding:36px">
-          <div class="spin spin-p" style="width:32px;height:32px;margin:0 auto 12px"></div>
-          <p style="font-weight:600;margin-bottom:4px">Analisi in corso...</p>
-          <p style="font-size:.77rem;color:var(--ink-light)">Storico + richieste + confezioni magazzino</p>
-        </div>
-        <div id="prop-out" style="display:none">
-          <div class="proposta-box">
-            <div class="proposta-title">✨ Proposta generata</div>
-            <div class="proposta-info" id="prop-info"></div>
-            <div class="table-wrap" style="max-height:300px;overflow-y:auto;border-radius:9px;border:1px solid var(--purple-border);margin-bottom:13px">
-              <table><thead><tr><th>Famiglia</th><th>Prodotto</th><th>Confezioni</th><th>Totale</th><th>Rich.</th></tr></thead>
-              <tbody id="tb-prop"></tbody></table>
-            </div>
-            <div class="row-gap">
-              <button class="btn btn-purple" style="flex:1" onclick="scaricaPropostaXL()">⬇️ Scarica Excel</button>
-              <button class="btn btn-g" onclick="resetProposta()">Rigenera</button>
-            </div>
+    <!-- SEZIONE 2: CARICA EXCEL -->
+    <div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+        <div style="font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:600">📊 Carica Excel distribuzione</div>
+        <div style="height:1px;flex:1;background:var(--border)"></div>
+      </div>
+      <div class="two-col">
+        <div class="card"><div class="card-body">
+          <div class="upload-zone" onclick="document.getElementById('xl-inp').click()">
+            <div class="upload-icon">📊</div>
+            <h4><strong>Clicca</strong> per caricare Excel</h4>
+            <p>Colonne: Prodotto | N° confezioni | Unità</p>
           </div>
-        </div>
-        <div id="prop-ph" class="card" style="min-height:260px;display:flex;align-items:center;justify-content:center">
-          <div class="empty"><div class="empty-e">✨</div><p>Clicca "Genera proposta"</p></div>
+          <input type="file" id="xl-inp" accept=".xlsx,.xls,.csv" style="display:none" onchange="loadXL(event)">
+          <div class="fg" style="margin-top:14px"><label>Note (opzionale)</label><textarea id="dn" placeholder="Es. Distribuzione 03/05/2026"></textarea></div>
+        </div></div>
+        <div>
+          <div id="xlo" style="display:none"><div class="card">
+            <div class="card-header"><span class="card-title">Anteprima — verifica prima di confermare</span></div>
+            <div class="table-wrap" style="max-height:260px;overflow-y:auto">
+              <table><thead><tr><th>Prodotto</th><th>Confezioni</th><th>Unità</th><th>Stato</th></tr></thead><tbody id="tb-x"></tbody></table>
+            </div>
+            <div style="padding:13px 16px;display:flex;gap:9px;border-top:1px solid var(--border)">
+              <button class="btn btn-p" style="flex:1" id="bcd" onclick="confDist()">✅ Conferma distribuzione</button>
+              <button class="btn btn-g" onclick="resetXL()">Annulla</button>
+            </div>
+            <div id="da" style="padding:0 16px 12px"></div>
+          </div></div>
+          <div id="xph" class="card" style="min-height:160px;display:flex;align-items:center;justify-content:center">
+            <div class="empty"><div class="empty-e">📋</div><p>Carica l'Excel per vedere l'anteprima</p></div>
+          </div>
         </div>
       </div>
     </div>
@@ -698,7 +708,6 @@ textarea{resize:vertical;min-height:75px;}
 <div class="mob-menu" id="mob-menu">
   <div class="mob-menu-item" onclick="go('carica-ai');closeMobMenu()"><div class="mob-menu-icon">🤖</div>Carica con AI</div>
   <div class="mob-menu-item" onclick="go('distribuzione');closeMobMenu()"><div class="mob-menu-icon">📋</div>Distribuzione</div>
-  <div class="mob-menu-item" onclick="go('proposta-ai');closeMobMenu()"><div class="mob-menu-icon">✨</div>Proposta AI</div>
   <div class="mob-menu-item" onclick="go('famiglie');closeMobMenu()"><div class="mob-menu-icon">👥</div>Lista famiglie</div>
   <div class="mob-menu-item" onclick="go('storico');closeMobMenu()"><div class="mob-menu-icon">📊</div>Storico</div>
   <div class="mob-menu-item" onclick="logout()"><div class="mob-menu-icon">↩</div>Esci</div>
@@ -803,8 +812,8 @@ async function inviaRichiesta(){
 }
 
 // ── NAV ──
-const pageMap={dashboard:0,magazzino:1,'carica-ai':2,distribuzione:3,'proposta-ai':4,richieste:5,famiglie:6,'aggiungi-famiglia':7,storico:8};
-const pageNames={dashboard:'Dashboard',magazzino:'Magazzino','carica-ai':'Carica con AI',distribuzione:'Distribuzione','proposta-ai':'Proposta AI',richieste:'Richieste',famiglie:'Famiglie','aggiungi-famiglia':'Aggiungi famiglia',storico:'Storico'};
+const pageMap={dashboard:0,magazzino:1,'carica-ai':2,distribuzione:3,richieste:4,famiglie:5,'aggiungi-famiglia':6,storico:7};
+const pageNames={dashboard:'Dashboard',magazzino:'Magazzino','carica-ai':'Carica con AI',distribuzione:'Distribuzione',richieste:'Richieste',famiglie:'Famiglie','aggiungi-famiglia':'Aggiungi famiglia',storico:'Storico'};
 function go(n){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('active'));
@@ -816,7 +825,7 @@ function go(n){
   else if(n==='magazzino')document.getElementById('mob-magazzino').classList.add('active');
   else if(n==='richieste')document.getElementById('mob-richieste').classList.add('active');
   else if(n==='aggiungi-famiglia')document.getElementById('mob-addfam').classList.add('active');
-  ({magazzino:()=>switchMagTab('lista'),famiglie:loadFam,dashboard:loadDash,storico:loadStor,richieste:loadRichieste,'aggiungi-famiglia':resetNuovaFamiglia})[n]?.();
+  ({magazzino:()=>switchMagTab('lista'),famiglie:loadFam,dashboard:loadDash,storico:loadStor,richieste:loadRichieste,'aggiungi-famiglia':resetNuovaFamiglia,distribuzione:()=>{resetProposta();}})[n]?.();
 }
 function toggleMobMenu(){document.getElementById('mob-menu').classList.toggle('open');document.getElementById('mob-more-btn').classList.toggle('active');}
 function closeMobMenu(){document.getElementById('mob-menu').classList.remove('open');document.getElementById('mob-more-btn').classList.remove('active');}
