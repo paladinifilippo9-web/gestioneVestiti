@@ -955,7 +955,16 @@ async function mostraVistaFamiglia(){
   document.getElementById('famiglia-screen').style.display='block';
   document.getElementById('fam-title').textContent='Centro d\'Ascolto — '+(sessione.famiglia_codice||'');
   document.getElementById('fam-welcome-name').textContent='Ciao, '+(sessione.famiglia_nome||'')+' 👋';
-  const det=await db(`distribuzione_dettagli?famiglia_id=eq.${sessione.famiglia_id}&order=created_at.desc`);
+  // Genera QR code famiglia
+  document.getElementById('fam-qr-codice').textContent=sessione.famiglia_codice||'';
+  document.getElementById('fam-qr-nome').textContent=sessione.famiglia_nome||'';
+  const qrWrap=document.getElementById('fam-qr-box');
+  qrWrap.innerHTML='';
+  try{
+    new QRCode(qrWrap,{text:sessione.famiglia_codice||'QR',width:180,height:180,colorDark:'#161C14',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.H});
+  }catch(e){qrWrap.innerHTML='<p style="color:var(--ink-light);font-size:.8rem">QR non disponibile</p>';}
+
+    const det=await db(`distribuzione_dettagli?famiglia_id=eq.${sessione.famiglia_id}&order=created_at.desc`);
   const tb=document.getElementById('tb-fam-storico');
   if(!det.length){tb.innerHTML='<tr><td colspan="4"><div class="empty"><div class="empty-e">📦</div><p>Nessuna distribuzione ancora</p></div></td></tr>';}
   else tb.innerHTML=det.map(d=>`<tr><td style="font-size:.78rem;color:var(--ink-light)">${new Date(d.created_at).toLocaleDateString('it-IT')}</td><td><strong>${d.prodotto_nome}</strong></td><td><span class="badge bp">${d.quantita}</span></td><td style="color:var(--ink-light)">${d.unita}</td></tr>`).join('');
